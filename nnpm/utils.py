@@ -6,7 +6,7 @@ def load_data(logfile=None):
     import numpy as np
     import csv
     from datetime import datetime
-    from keras.preprocessing.sequence import pad_sequences
+    from tensorflow.keras.preprocessing.sequence import pad_sequences
 
     vocabulary = set()
 

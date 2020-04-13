@@ -20,6 +20,7 @@ def convert_xes_to_csv(file, output_folder):
     csv_exporter.export(log, csv_path)
     return csv_file, csv_path
 
+
 def augment_xes_end_activity_to_csv(file, output_folder):
     csv_file, csv_path = convert_xes_to_csv(file, output_folder)
 
@@ -29,13 +30,15 @@ def augment_xes_end_activity_to_csv(file, output_folder):
     last_rows = group.last()
     last_rows[XES_Fields.ACTIVITY_COLUMN] = "[EOC]"
 
-    final_dataframe = pd.concat([dataframe, last_rows]).sort_values([XES_Fields.CASE_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
-    #final_dataframe.fillna(None)
+    final_dataframe = pd.concat([dataframe, last_rows]).sort_values(
+        [XES_Fields.CASE_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
+    # final_dataframe.fillna(None)
     final_dataframe = final_dataframe.fillna("")
     print(final_dataframe.head(5))
     final_dataframe.to_csv(csv_path, sep=",", index=False)
 
     return csv_file, csv_path
+
 
 def convert_csv_to_xes(file, output_folder):
     print("Processing: ", file)
@@ -58,8 +61,10 @@ def delete_tmp():
 
 
 class Timestamp_Formats:
-    TIMESTAMP_FORMAT_YMDHMS = "%Y-%m-%d %H:%M:%S"
-    TIMESTAMP_FORMAT_DAYS = "d"
+    TIMESTAMP_FORMAT_YMDHMS_DASH = "%Y-%m-%d %H:%M:%S"
+    TIMESTAMP_FORMAT_DAYS = "d"  # Used by: pasquadibisceglie
+    TIMESTAMP_FORMAT_YMDHMS_SLASH = "%Y/%m/%d %H:%M:%S.%f"  # Used by: mauro
+
 
 class XES_Fields:
     CASE_COLUMN = "case:concept:name"
@@ -83,7 +88,7 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
 
     timestamp_column = XES_Fields.TIMESTAMP_COLUMN
     dataset[timestamp_column] = pd.to_datetime(dataset[timestamp_column], utc=True)
-    if not timestamp_column == Timestamp_Formats.TIMESTAMP_FORMAT_DAYS:
+    if timestamp_format == Timestamp_Formats.TIMESTAMP_FORMAT_DAYS:
         # If the timestamp format is in days (pasquadibisceglie), get the timestamp, remove the localization,
         # get the number of seconds since 1/1/1970 and get the number of days (with decimals) from there
         dataset[timestamp_column] = (dataset[timestamp_column].dt.tz_localize(None) - datetime.datetime(1970, 1,

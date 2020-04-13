@@ -4,6 +4,12 @@ Use anaconda to install some dependencies and activate the environment:
 
     conda create -n "tf_2.0_ppm" python=3.6 tensorflow=2.1.0
     conda activate tf_2.0_ppm
+    
+If you want to use a GPU (recommended) install this instead:;
+
+    conda create -n "tf_2.0_ppm" python=3.6 tensorflow-gpu=2.1.0
+    conda activate tf_2.0_ppm
+
 
 Install additional dependencies:
 

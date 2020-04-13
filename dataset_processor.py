@@ -36,14 +36,32 @@ if arguments.net == "pasquadibisceglie":
             timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_DAYS,
             output_columns=output_columns
         )
+        os.makedirs("ImagePPMiner/dataset")
         # Move from tmp to the corresponding folder
         os.replace(csv_path, os.path.join("ImagePPMiner/dataset", csv_file))
 
 elif arguments.net == "mauro":
     for xes in dataset_list:
         #csv_file, csv_path = augment_xes_end_activity_to_csv(xes, "./tmp")
-        csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
-        convert_csv_to_xes(csv_path, "./tmp")
+        csv_file, csv_path = augment_xes_end_activity_to_csv(xes, "./tmp")
+        if not os.path.exists("nnpm/data"):
+            os.makedirs("nnpm/data")
+
+        output_columns = {
+            XES_Fields.CASE_COLUMN : "CaseID",
+            XES_Fields.ACTIVITY_COLUMN : "Activity",
+            XES_Fields.TIMESTAMP_COLUMN : "Timestamp"
+        }
+        select_columns(
+            csv_path,
+            input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
+            category_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN],
+            timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_SLASH,
+            output_columns=output_columns
+        )
+        os.replace(csv_path, os.path.join("nnpm/data", csv_file))
+
+
 
 else:
     print("Unrecognized approach")
