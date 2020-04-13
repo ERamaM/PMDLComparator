@@ -240,71 +240,77 @@ final_brier_scores = []
 final_accuracy_scores = []
 final_mae_scores = []
 final_mse_scores = []
-for f in range(3):
-    print("Fold", f)
-    outfile.write("\nFold: %d" % f)
-    # split into train and test set
-    p = np.random.RandomState(seed=seed + f).permutation(X_a.shape[0])
-    elems_per_fold = int(round(X_a.shape[0] / 3))
 
-    X_a_train = X_a[p[:2 * elems_per_fold]]
-    X_t_train = X_t[p[:2 * elems_per_fold]]
-    X_a_test = X_a[p[2 * elems_per_fold:]]
-    X_t_test = X_t[p[2 * elems_per_fold:]]
-    y_a_train = y_a[p[:2 * elems_per_fold]]
-    y_a_test = y_a[p[2 * elems_per_fold:]]
-    y_t_train = y_t[p[:2 * elems_per_fold]]
-    y_t_test = y_t[p[2 * elems_per_fold:]]
+# split into train and test set
+#p = np.random.RandomState(seed=seed).permutation(X_a.shape[0])
+random_state = np.random.RandomState(seed=42)
+elems_per_fold = int(round(X_a.shape[0] * 0.8))
 
-    # model selection
-    print('Starting model selection...')
-    best_score = np.inf
-    best_model = None
-    best_time = 0
-    best_numparameters = 0
+X_a_train = X_a[:elems_per_fold]
+X_t_train = X_t[:elems_per_fold]
+X_a_test = X_a[elems_per_fold:]
+X_t_test = X_t[elems_per_fold:]
+y_a_train = y_a[:elems_per_fold]
+y_a_test = y_a[elems_per_fold:]
+y_t_train = y_t[:elems_per_fold]
+y_t_test = y_t[elems_per_fold:]
 
-    trials = Trials()
-    best = fmin(fit_and_score, space, algo=tpe.suggest, max_evals=n_iter, trials=trials,
-                rstate=np.random.RandomState(seed + f))
-    best_params = hyperopt.space_eval(space, best)
+# model selection
+print('Starting model selection...')
+best_score = np.inf
+best_model = None
+best_time = 0
+best_numparameters = 0
 
-    outfile.write("\nHyperopt trials")
-    outfile.write("\ntid,loss,learning_rate,n_modules,batch_size,time,n_epochs,n_params,perf_time")
-    for trial in trials.trials:
-        outfile.write("\n%d,%f,%f,%d,%d,%s,%d,%d,%f" % (trial['tid'],
-                                                        trial['result']['loss'],
-                                                        trial['misc']['vals']['learning_rate'][0],
-                                                        int(trial['misc']['vals']['n_modules'][0] + 1),
-                                                        trial['misc']['vals']['batch_size'][0] + 7,
-                                                        (trial['refresh_time'] - trial['book_time']).total_seconds(),
-                                                        trial['result']['n_epochs'],
-                                                        trial['result']['n_params'],
-                                                        trial['result']['time']))
+trials = Trials()
+best = fmin(fit_and_score, space, algo=tpe.suggest, max_evals=n_iter, trials=trials,
+            rstate=random_state)
+best_params = hyperopt.space_eval(space, best)
 
-    outfile.write("\n\nBest parameters:")
-    print(best_params, file=outfile)
-    outfile.write("\nModel parameters: %d" % best_numparameters)
-    outfile.write('\nBest Time taken: %f' % best_time)
+outfile.write("\nHyperopt trials")
+outfile.write("\ntid,loss,learning_rate,n_modules,batch_size,time,n_epochs,n_params,perf_time")
+for trial in trials.trials:
+    outfile.write("\n%d,%f,%f,%d,%d,%s,%d,%d,%f" % (trial['tid'],
+                                                    trial['result']['loss'],
+                                                    trial['misc']['vals']['learning_rate'][0],
+                                                    int(trial['misc']['vals']['n_modules'][0] + 1),
+                                                    trial['misc']['vals']['batch_size'][0] + 7,
+                                                    (trial['refresh_time'] - trial['book_time']).total_seconds(),
+                                                    trial['result']['n_epochs'],
+                                                    trial['result']['n_params'],
+                                                    trial['result']['time']))
 
-    # evaluate
-    print('Evaluating final model...')
-    preds_a = best_model.predict([X_a_test, X_t_test])
-    brier_score = np.mean(
-        list(map(lambda x: brier_score_loss(y_a_test[x], preds_a[x]), [i[0] for i in enumerate(y_a_test)])))
+outfile.write("\n\nBest parameters:")
+print(best_params, file=outfile)
+outfile.write("\nModel parameters: %d" % best_numparameters)
+outfile.write('\nBest Time taken: %f' % best_time)
 
-    y_a_test = np.argmax(y_a_test, axis=1)
-    preds_a = np.argmax(preds_a, axis=1)
+# evaluate
+print('Evaluating final model...')
+preds_a = best_model.predict([X_a_test, X_t_test])
+"""
+brier_score = np.mean(
+    list(map(lambda x: brier_score_loss(y_a_test[x], preds_a[x]), [i[0] for i in enumerate(y_a_test)])))
+"""
+def calculate_brier_score(y_pred, y_true):
+    # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+    return np.mean(np.sum((y_true - y_pred)**2, axis=1))
 
-    outfile.write("\nBrier score: %f" % brier_score)
-    final_brier_scores.append(brier_score)
+brier_score = calculate_brier_score(preds_a, y_a_test)
 
-    accuracy = accuracy_score(y_a_test, preds_a)
-    outfile.write("\nAccuracy: %f" % accuracy)
-    final_accuracy_scores.append(accuracy)
+y_a_test = np.argmax(y_a_test, axis=1)
+preds_a = np.argmax(preds_a, axis=1)
 
-    outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
+outfile.write("\nBrier score: %f" % brier_score)
+final_brier_scores.append(brier_score)
 
-    outfile.flush()
+accuracy = accuracy_score(y_a_test, preds_a)
+outfile.write("\nAccuracy: %f" % accuracy)
+final_accuracy_scores.append(accuracy)
+
+outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
+
+outfile.flush()
 
 print("\n\nFinal Brier score: ", final_brier_scores, file=outfile)
 print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
