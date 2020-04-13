@@ -23,7 +23,7 @@ create_tmp()
 
 if arguments.net == "pasquadibisceglie":
     for xes in dataset_list:
-        csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+        csv_file, csv_path = augment_xes_end_activity_to_csv(xes, "./tmp")
         output_columns = {
             XES_Fields.CASE_COLUMN : "CaseID",
             XES_Fields.ACTIVITY_COLUMN : "Activity",
@@ -41,7 +41,9 @@ if arguments.net == "pasquadibisceglie":
 
 elif arguments.net == "mauro":
     for xes in dataset_list:
-        augment_xes_end_activity_to_csv(xes, "./tmp")
+        #csv_file, csv_path = augment_xes_end_activity_to_csv(xes, "./tmp")
+        csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+        convert_csv_to_xes(csv_path, "./tmp")
 
 else:
     print("Unrecognized approach")

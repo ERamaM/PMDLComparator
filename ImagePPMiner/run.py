@@ -15,14 +15,25 @@ from tensorflow.keras.layers import BatchNormalization
 seed = 123
 np.random.seed(seed)
 from tensorflow.compat.v1 import set_random_seed
+
 set_random_seed(seed)
 
 import argparse
 from pathlib import Path
+
 parser = argparse.ArgumentParser(description="Run the neural net")
 parser.add_argument("--dataset", help="Raw dataset to prepare", required=True)
 arguments = parser.parse_args()
 dataset_name = Path(arguments.dataset).stem.split(".")[0].lower()
+
+# Create the model and output folders
+import os
+
+if not os.path.exists("results"):
+    os.mkdir("results")
+if not os.path.exists("models"):
+    os.mkdir("models")
+
 
 def get_label(act):
     i = 0
@@ -38,6 +49,7 @@ def get_label(act):
         i = i + 1
     return list_label
 
+
 def dataset_summary(dataset):
     df = pd.read_csv(dataset, sep=",")
     print("Activity Distribution\n", df['Activity'].value_counts())
@@ -52,6 +64,7 @@ def dataset_summary(dataset):
     print("Mean lenght trace", np.mean(cont_trace))
     print("Min lenght trace", min(cont_trace))
     return df, max_trace, n_caseid, n_activity
+
 
 def get_image(act_val, time_val, max_trace, n_activity):
     i = 0
@@ -133,15 +146,16 @@ def get_image(act_val, time_val, max_trace, n_activity):
         i = i + 1
     return list_image
 
-#import dataset
+
+# import dataset
 df, max_trace, n_caseid, n_activity = dataset_summary(arguments.dataset)
 
-#group by activity and timestamp by caseid
+# group by activity and timestamp by caseid
 act = df.groupby('CaseID').agg({'Activity': lambda x: list(x)})
 temp = df.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 
-#split dataset in 80/20
-size = int(n_caseid*0.8)
+# split dataset in 80/20
+size = int(n_caseid * 0.8)
 
 train_act = act[:size]
 train_temp = temp[:size]
@@ -149,7 +163,7 @@ train_temp = temp[:size]
 test_act = act[size:]
 test_temp = temp[size:]
 
-#generate training and test set
+# generate training and test set
 X_train = get_image(train_act, train_temp, max_trace, n_activity)
 X_test = get_image(test_act, test_temp, max_trace, n_activity)
 
@@ -178,7 +192,7 @@ l_test = np.asarray(l_test)
 train_Y_one_hot = to_categorical(l_train, num_classes)
 test_Y_one_hot = to_categorical(l_test, num_classes)
 
-#define neural network architecture
+# define neural network architecture
 model = Sequential()
 reg = 0.0001
 input_shape = (max_trace, n_activity, 2)
@@ -196,8 +210,7 @@ model.add(MaxPooling2D(pool_size=(2, 2)))
 # Respecting the paper, the BPI2012W_Complete removes this layer
 # Seems that if we do not remove it it causes an exception of layer of dimension -1
 # Only add the layer for helpdesk (the error happens in more logs).
-print("Dataset name: ", dataset_name)
-#if not dataset_name == "bpi_challenge_2012_w_complete":
+# if not dataset_name == "bpi_challenge_2012_w_complete":
 if dataset_name == "helpdesk":
     model.add(Conv2D(128, (8, 8), padding='same', kernel_regularizer=regularizers.l2(reg), ))
     model.add(BatchNormalization())
@@ -214,7 +227,10 @@ model.compile(loss={'act_output': 'categorical_crossentropy'}, optimizer=opt, me
 early_stopping = EarlyStopping(monitor='val_loss', patience=6)
 history = model.fit(X_train, {'act_output': train_Y_one_hot}, validation_split=0.2, verbose=1,
                     callbacks=[early_stopping], batch_size=128, epochs=500)
-model.save("BPI12_W_complete.h5")
+model.save("models/" + dataset_name + ".h5")
+
+results_file = open("results/" + dataset_name + ".txt", mode="w")
+raw_results_file = open("results/raw_" + dataset_name + ".txt", mode="w")
 
 # Print confusion matrix for training data
 y_pred_train = model.predict(X_train)
@@ -224,11 +240,25 @@ print(classification_report(l_train, max_y_pred_train, digits=3))
 
 score = model.evaluate(X_test, test_Y_one_hot, verbose=1, batch_size=1)
 
-print('\nAccuracy on test data: ', score[1])
-print('\nLoss on test data: ', score[0])
+results_file.write('\nAccuracy on test data: ' + str(score[1]))
+results_file.write('\nLoss on test data: ' + str(score[0]) + "\n")
 
 y_pred_test = model.predict(X_test)
 # Take the class with the highest probability from the test predictions
 max_y_pred_test = np.argmax(y_pred_test, axis=1)
 max_y_test = np.argmax(test_Y_one_hot, axis=1)
-print(classification_report(max_y_test, max_y_pred_test, digits=3))
+results_file.write(classification_report(max_y_test, max_y_pred_test, digits=3))
+from sklearn.metrics import brier_score_loss, matthews_corrcoef
+
+results_file.write('\nMatthews corrcoef: ' + str(matthews_corrcoef(max_y_test, max_y_pred_test)))
+
+
+def calculate_brier_score(y_pred, y_true):
+    # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+    return np.mean(np.sum((y_true - y_pred)**2, axis=1))
+
+
+results_file.write("\nBrier score: " + str(calculate_brier_score(y_pred_test, test_Y_one_hot)))
+
+for y, y_pred in zip(max_y_test, max_y_pred_test):
+    raw_results_file.write(str(y) + "," + str(y_pred) + "\n")

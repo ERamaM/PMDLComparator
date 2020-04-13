@@ -3,6 +3,7 @@ import shutil
 from pm4py.objects.log.importer.xes import factory as xes_import_factory
 from pm4py.objects.log.importer.csv import factory as csv_import_factory
 from pm4py.objects.log.exporter.csv import factory as csv_exporter
+from pm4py.objects.log.exporter.xes import factory as xes_exporter
 import os
 import pandas as pd
 from pathlib import Path
@@ -29,10 +30,22 @@ def augment_xes_end_activity_to_csv(file, output_folder):
     last_rows[XES_Fields.ACTIVITY_COLUMN] = "[EOC]"
 
     final_dataframe = pd.concat([dataframe, last_rows]).sort_values([XES_Fields.CASE_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
-    print(final_dataframe.head(20))
+    #final_dataframe.fillna(None)
+    final_dataframe = final_dataframe.fillna("")
+    print(final_dataframe.head(5))
     final_dataframe.to_csv(csv_path, sep=",", index=False)
 
     return csv_file, csv_path
+
+def convert_csv_to_xes(file, output_folder):
+    print("Processing: ", file)
+    csv_path = file
+    xes_file = Path(file).stem.split(".")[0] + ".xes"
+    xes_path = os.path.join(output_folder, xes_file)
+    log = csv_import_factory.apply(csv_path, parameters={"timestamp_sort": True})
+    xes_exporter.export_log(log, xes_path)
+    return xes_file, xes_path
+
 
 def create_tmp():
     if not os.path.exists("tmp"):
