@@ -59,3 +59,6 @@ The best model is inside the "models" folder.
 
 # Mauro (nnpm)
 
+Run the experiments with the following command
+
+    python deeppm_act.py data/Helpdesk.csv BOTH results/helpdesk_results.log

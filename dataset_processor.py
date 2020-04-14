@@ -62,6 +62,7 @@ elif arguments.net == "mauro":
         )
         csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
         make_dir_if_not_exists("nnpm/data")
+        make_dir_if_not_exists("nnpm/results")
         move_files(csv_path, "nnpm/data", EXTENSIONS.CSV)
 
 
