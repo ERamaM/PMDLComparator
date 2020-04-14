@@ -1,0 +1,12 @@
+
+python calculate_accuracy_on_next_event.py bpi_2012_a.csv
+python calculate_accuracy_on_next_event.py bpi_2012_complete.csv
+python calculate_accuracy_on_next_event.py bpi_2012.csv
+python calculate_accuracy_on_next_event.py bpi_2012_o.csv
+python calculate_accuracy_on_next_event.py bpi_2012_w_complete.csv
+python calculate_accuracy_on_next_event.py bpi_2012_w.csv
+python calculate_accuracy_on_next_event.py bpi_2013_cp.csv
+python calculate_accuracy_on_next_event.py bpi_2013_incidents.csv
+python calculate_accuracy_on_next_event.py bpi_2014.csv
+python calculate_accuracy_on_next_event.py helpdesk.csv
+python calculate_accuracy_on_next_event.py sepsis.csv

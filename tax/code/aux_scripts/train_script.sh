@@ -1,0 +1,15 @@
+python train.py preprocessed/bpi_2012_a.csv
+python train.py preprocessed/bpi_2012_complete.csv
+python train.py preprocessed/bpi_2012.csv
+python train.py preprocessed/bpi_2012_o.csv
+python train.py preprocessed/bpi_2012_w_complete.csv
+python train.py preprocessed/bpi_2012_w.csv
+python train.py preprocessed/bpi_2013_cp.csv
+python train.py preprocessed/bpi_2013_incidents.csv
+python train.py preprocessed/bpi_2013_op.csv
+python train.py preprocessed/bpi_2014.csv
+python train.py preprocessed/env_permit.csv
+python train.py preprocessed/helpdesk.csv
+python train.py preprocessed/junit.csv
+python train.py preprocessed/nasa.csv
+python train.py preprocessed/sepsis.csv
