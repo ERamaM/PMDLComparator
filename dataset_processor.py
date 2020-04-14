@@ -68,7 +68,7 @@ elif arguments.net == "mauro":
 else:
     print("Unrecognized approach")
 
-#delete_tmp()
+delete_tmp()
 
 
 

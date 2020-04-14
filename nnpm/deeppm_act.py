@@ -126,17 +126,17 @@ def get_model(input_length=10, n_filters=3, vocab_size=10, n_classes=9, embeddin
 
     optimizer = Adam(lr=learning_rate)
 
-    if (model_type == 'BOTH'):
+    if model_type == 'BOTH':
         out_a = Dense(n_classes, activation='softmax', name='output_a')(pool)
         out_t = Dense(1, activation='linear', name='output_t')(pool)
         model = Model(inputs=inputs, outputs=[out_a, out_t])
         model.compile(optimizer=optimizer, loss={'output_a': 'categorical_crossentropy', 'output_t': 'mae'})
     else:
-        if (model_type == 'ACT'):
+        if model_type == 'ACT':
             out = Dense(n_classes, activation='softmax')(pool)
             model = Model(inputs=inputs, outputs=out)
             model.compile(optimizer=optimizer, loss='mse', metrics=['acc'])
-        elif (model_type == 'TIME'):
+        elif model_type == 'TIME':
             out = Dense(1, activation='linear')(pool)
             model = Model(inputs=inputs, outputs=out)
             model.compile(optimizer=optimizer, loss='mae')
@@ -235,17 +235,18 @@ extension = ".csv"
 # Load the splits from the folder
 ((X_a_train, X_t_train),
  (y_a_train, y_t_train),
- _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "train_" + filename + extension)))
+ _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length)
 
 ((X_a_val, X_t_val),
  (y_a_val, y_t_val),
- _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)))
+ _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)), max_len=max_length)
 
 ((X_a_test, X_t_test),
  (y_a_test, y_t_test),
- _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)))
+ _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)), max_len=max_length)
 
 
+print("Y_t:", y_t_train)
 
 
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)

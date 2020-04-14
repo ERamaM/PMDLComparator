@@ -1,5 +1,5 @@
 
-def load_data(logfile=None):
+def load_data(logfile=None, max_len=None):
 
     import datetime
     import time
@@ -121,6 +121,10 @@ def load_data(logfile=None):
     print("Classes: ", y_unique)
     n_classes = y_unique[0].shape[0]
     # padding
+
+    # If a maximum length is provided, ignore the calculations
+    if max_len is not None:
+        max_length = max_len
     padded_X = pad_sequences(X, maxlen=max_length, padding='pre', dtype='float64')
     padded_X1 = pad_sequences(X1, maxlen=max_length, padding='pre', dtype='float64')
 
