@@ -36,9 +36,10 @@ if arguments.net == "pasquadibisceglie":
             timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_DAYS,
             output_columns=output_columns
         )
-        os.makedirs("ImagePPMiner/dataset")
+        csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
+        make_dir_if_not_exists("ImagePPMiner/dataset")
         # Move from tmp to the corresponding folder
-        os.replace(csv_path, os.path.join("ImagePPMiner/dataset", csv_file))
+        move_files(csv_path, "ImagePPMiner/dataset", EXTENSIONS.CSV)
 
 elif arguments.net == "mauro":
     for xes in dataset_list:
@@ -59,14 +60,15 @@ elif arguments.net == "mauro":
             timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_SLASH,
             output_columns=output_columns
         )
-        os.replace(csv_path, os.path.join("nnpm/data", csv_file))
-
+        csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
+        make_dir_if_not_exists("nnpm/data")
+        move_files(csv_path, "nnpm/data", EXTENSIONS.CSV)
 
 
 else:
     print("Unrecognized approach")
 
-delete_tmp()
+#delete_tmp()
 
 
 

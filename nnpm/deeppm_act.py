@@ -176,15 +176,19 @@ def fit_and_score(params):
     if (params['model_type'] == 'ACT'):
         h = model.fit([X_a_train, X_t_train],
                       y_a_train, epochs=200, verbose=0,
-                      validation_split=0.2, callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
+                      validation_data=([X_a_train, X_t_train], y_a_train),
+                      callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
     elif (params['model_type'] == 'TIME'):
-        h = model.fit([X_a_train, X_t],
+        h = model.fit([X_a_train, X_t_train],
                       y_t_train, epochs=200,
-                      validation_split=0.2, callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
+                      validation_data=([X_a_val, X_t_val], y_t_val),
+                      callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
     else:
         h = model.fit([X_a_train, X_t_train],
-                      {'output_a': y_a_train, 'output_t': y_t_train}, epochs=200, verbose=0,
-                      validation_split=0.2, callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
+                      {'output_a': y_a_train, 'output_t': y_t_train},
+                      validation_data=([X_a_val, X_t_val], {"output_a": y_a_val, "output_t": y_t_val}),
+                      epochs=200, verbose=0,
+                      callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
     #        h = model.fit_generator(generator=train_generator, validation_data=val_generator, use_multiprocessing=True, workers=8, epochs=200, callbacks=[early_stopping], max_queue_size=10000, verbose=0)
 
     scores = [h.history['val_loss'][epoch] for epoch in range(len(h.history['loss']))]
@@ -213,6 +217,13 @@ outfile = open(output_file, 'w')
 
 outfile.write("Starting time: %s\n" % current_time)
 
+from pathlib import Path
+import os
+directory = Path(logfile).parent
+filename = Path(logfile).stem
+extension = ".csv"
+
+# We need the full dataset to get the metrics
 ((X_a, X_t),
  (y_a, y_t),
  vocab_size,
@@ -221,12 +232,32 @@ outfile.write("Starting time: %s\n" % current_time)
  divisor,
  prefix_sizes) = load_data(logfile)
 
+# Load the splits from the folder
+((X_a_train, X_t_train),
+ (y_a_train, y_t_train),
+ _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "train_" + filename + extension)))
+
+((X_a_val, X_t_val),
+ (y_a_val, y_t_val),
+ _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)))
+
+((X_a_test, X_t_test),
+ (y_a_test, y_t_test),
+ _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)))
+
+
+
+
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
 
 # normalizing times
-X_t = X_t / np.max(X_t)
+X_t_train = X_t_train / np.max(X_t)
+X_t_val = X_t_val / np.max(X_t)
+X_t_test = X_t_test / np.max(X_t)
 # categorical output
-y_a = to_categorical(y_a)
+y_a_train = to_categorical(y_a_train, num_classes=n_classes)
+y_a_val = to_categorical(y_a_val, num_classes=n_classes)
+y_a_test = to_categorical(y_a_test, num_classes=n_classes)
 
 n_iter = 20
 
@@ -241,19 +272,7 @@ final_accuracy_scores = []
 final_mae_scores = []
 final_mse_scores = []
 
-# split into train and test set
-#p = np.random.RandomState(seed=seed).permutation(X_a.shape[0])
-random_state = np.random.RandomState(seed=42)
-elems_per_fold = int(round(X_a.shape[0] * 0.8))
-
-X_a_train = X_a[:elems_per_fold]
-X_t_train = X_t[:elems_per_fold]
-X_a_test = X_a[elems_per_fold:]
-X_t_test = X_t[elems_per_fold:]
-y_a_train = y_a[:elems_per_fold]
-y_a_test = y_a[elems_per_fold:]
-y_t_train = y_t[:elems_per_fold]
-y_t_test = y_t[elems_per_fold:]
+p = np.random.RandomState(seed=42)
 
 # model selection
 print('Starting model selection...')
@@ -264,7 +283,7 @@ best_numparameters = 0
 
 trials = Trials()
 best = fmin(fit_and_score, space, algo=tpe.suggest, max_evals=n_iter, trials=trials,
-            rstate=random_state)
+            rstate=p)
 best_params = hyperopt.space_eval(space, best)
 
 outfile.write("\nHyperopt trials")

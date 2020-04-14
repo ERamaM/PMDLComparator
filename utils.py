@@ -4,6 +4,7 @@ from pm4py.objects.log.importer.xes import factory as xes_import_factory
 from pm4py.objects.log.importer.csv import factory as csv_import_factory
 from pm4py.objects.log.exporter.csv import factory as csv_exporter
 from pm4py.objects.log.exporter.xes import factory as xes_exporter
+from pm4py.objects.conversion.log import factory as conversion_factory
 import os
 import pandas as pd
 from pathlib import Path
@@ -73,6 +74,11 @@ class XES_Fields:
     LIFECYCLE_COLUMN = "lifecycle:transition"
 
 
+class EXTENSIONS:
+    CSV = ".csv"
+    XES_COMPRESSED = ".xes.gz"
+
+
 def select_columns(file, input_columns, category_columns, timestamp_format, output_columns):
     """
     Select columns from CSV converted from XES
@@ -106,3 +112,71 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
     )
 
     dataset.to_csv(file, sep=",", index=False)
+
+
+def split_train_val_test(file, output_directory, case_column):
+    """
+    Split the TRACES of the log in a 64/16/20 fashion (first 80/20 and then again 80/20).
+    We assume the input is a csv file.
+    :param file:
+    :param output_directory:
+    :return:
+    """
+    pandas_init = pd.read_csv(file)
+    pd.set_option('display.expand_frame_repr', False)
+    # print(str(pandas_init.head(50)))
+
+    # Disable the sorting. Otherwise it would mess with the order of the timestamps
+    groups = [pandas_df for _, pandas_df in pandas_init.groupby(case_column, sort=False)]
+
+    train_size = round(len(groups) * 0.64)
+    val_size = round(len(groups) * 0.8)
+
+    train_groups = groups[:train_size]
+    val_groups = groups[train_size:val_size]
+    test_groups = groups[val_size:]
+
+    # Disable the sorting. Otherwise it would mess with the order of the timestamps
+    train = pd.concat(train_groups, sort=False).reset_index(drop=True)
+    val = pd.concat(val_groups, sort=False).reset_index(drop=True)
+    test = pd.concat(test_groups, sort=False).reset_index(drop=True)
+
+    train_path = os.path.join(output_directory, "train_" + Path(file).stem + ".csv")
+    val_path = os.path.join(output_directory, "val_" + Path(file).stem + ".csv")
+    test_path = os.path.join(output_directory, "test_" + Path(file).stem + ".csv")
+    train.to_csv(train_path, index=False)
+    val.to_csv(val_path, index=False)
+    test.to_csv(test_path, index=False)
+
+    return file, train_path, val_path, test_path
+
+
+def move_files(file, output_directory, extension):
+    """
+    Move the set of files to the output directory.
+    This function also moves the train/val/test files automatically.
+    :param file: Path of the base file to move
+    :param output_directory:
+    :return:
+    """
+
+    name = Path(file).stem + extension
+    input_directory = Path(file).parent
+    input_train = os.path.join(input_directory, "train_" + name)
+    input_val = os.path.join(input_directory, "val_" + name )
+    input_test = os.path.join(input_directory, "test_" + name)
+
+    def _move_if_not_exists(input, output_dir):
+        print("Moving: ", input)
+        if os.path.exists(input):
+            os.replace(input, os.path.join(output_directory, Path(input).stem + extension))
+
+    _move_if_not_exists(input_train, output_directory)
+    _move_if_not_exists(input_val, output_directory)
+    _move_if_not_exists(input_test, output_directory)
+    _move_if_not_exists(file, output_directory)
+
+
+def make_dir_if_not_exists(directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)

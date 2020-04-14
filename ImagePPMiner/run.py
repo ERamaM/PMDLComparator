@@ -167,20 +167,31 @@ df, max_trace, n_caseid, n_activity = dataset_summary(arguments.dataset)
 act = df.groupby('CaseID').agg({'Activity': lambda x: list(x)})
 temp = df.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 
-# split dataset in 80/20
-size = int(n_caseid * 0.8)
+# Load the splits
+# Perform the same operations as above
+dataset_directory = Path(arguments.dataset).parent
+dataset_filename = Path(arguments.dataset).stem
+df_train, _, _, _ = dataset_summary(os.path.join(dataset_directory, "train_" + dataset_filename + ".csv"))
+df_val, _, _, _ = dataset_summary(os.path.join(dataset_directory, "val_" + dataset_filename + ".csv"))
+df_test, _, _, _ = dataset_summary(os.path.join(dataset_directory, "test_" + dataset_filename + ".csv"))
 
-train_act = act[:size]
-train_temp = temp[:size]
+train_act = df_train.groupby('CaseID').agg({'Activity': lambda x: list(x)})
+train_temp = df_train.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 
-test_act = act[size:]
-test_temp = temp[size:]
+val_act = df_val.groupby('CaseID').agg({'Activity': lambda x: list(x)})
+val_temp = df_val.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
+
+test_act = df_test.groupby('CaseID').agg({'Activity': lambda x: list(x)})
+test_temp = df_test.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
+
 
 # generate training and test set
 X_train = get_image(train_act, train_temp, max_trace, n_activity)
+X_val = get_image(val_act, val_temp, max_trace, n_activity)
 X_test = get_image(test_act, test_temp, max_trace, n_activity)
 
 l_train = get_label(train_act)
+l_val = get_label(val_act)
 l_test = get_label(test_act)
 # Get the labels for the whole training set
 # It may happen that some labels are present in the test set but no in
@@ -192,6 +203,7 @@ le = preprocessing.LabelEncoder()
 # only the splits
 le.fit(l_total)
 l_train = le.transform(l_train)
+l_val = le.transform(l_val)
 l_test = le.transform(l_test)
 num_classes = le.classes_.size
 print(list(le.classes_))
@@ -199,10 +211,14 @@ print(list(le.classes_))
 X_train = np.asarray(X_train)
 l_train = np.asarray(l_train)
 
+X_val = np.asarray(X_val)
+l_val = np.asarray(l_val)
+
 X_test = np.asarray(X_test)
 l_test = np.asarray(l_test)
 
 train_Y_one_hot = to_categorical(l_train, num_classes)
+val_Y_one_hot = to_categorical(l_val, num_classes)
 test_Y_one_hot = to_categorical(l_test, num_classes)
 
 # define neural network architecture
@@ -238,7 +254,7 @@ print(model.summary())
 opt = Nadam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=1e-08, schedule_decay=0.004, clipvalue=3)
 model.compile(loss={'act_output': 'categorical_crossentropy'}, optimizer=opt, metrics=['accuracy'])
 early_stopping = EarlyStopping(monitor='val_loss', patience=6)
-history = model.fit(X_train, {'act_output': train_Y_one_hot}, validation_split=0.2, verbose=1,
+history = model.fit(X_train, {'act_output': train_Y_one_hot}, validation_data=(X_val, val_Y_one_hot), verbose=1,
                     callbacks=[early_stopping], batch_size=128, epochs=500)
 model.save("models/" + dataset_name + ".h5")
 
