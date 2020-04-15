@@ -1,5 +1,7 @@
 from dateutil.tz import tzutc
 import shutil
+
+from numpy import timedelta64, float64
 from pm4py.objects.log.importer.xes import factory as xes_import_factory
 from pm4py.objects.log.importer.csv import factory as csv_import_factory
 from pm4py.objects.log.exporter.csv import factory as csv_exporter
@@ -163,7 +165,7 @@ def move_files(file, output_directory, extension):
     name = Path(file).stem + extension
     input_directory = Path(file).parent
     input_train = os.path.join(input_directory, "train_" + name)
-    input_val = os.path.join(input_directory, "val_" + name )
+    input_val = os.path.join(input_directory, "val_" + name)
     input_test = os.path.join(input_directory, "test_" + name)
 
     def _move_if_not_exists(input, output_dir):
@@ -180,3 +182,54 @@ def move_files(file, output_directory, extension):
 def make_dir_if_not_exists(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
+
+
+def gather_statistics(log, abbreviate_times=True):
+    pd.set_option('display.expand_frame_repr', False)
+    csv_file, csv_path = convert_xes_to_csv(log, "./tmp")
+    log_df = pd.read_csv(csv_path)
+    log_df[XES_Fields.TIMESTAMP_COLUMN] = pd.to_datetime(log_df[XES_Fields.TIMESTAMP_COLUMN], utc=True)
+    log_name = Path(log).stem
+
+    group_by_case = log_df.groupby(XES_Fields.CASE_COLUMN)
+
+    # WTF: it does not match with https://arxiv.org/pdf/1805.02896.pdf
+    # It matches https://kodu.ut.ee/~dumas/pubs/bpm2019lstm.pdf
+    n_cases = len(group_by_case)
+    n_activities = len(log_df.groupby(XES_Fields.ACTIVITY_COLUMN))
+    n_events = len(log_df)
+    avg_case_length = group_by_case[XES_Fields.ACTIVITY_COLUMN].count().mean()
+    max_case_length = group_by_case[XES_Fields.ACTIVITY_COLUMN].count().max()
+    avg_event_duration = group_by_case[XES_Fields.TIMESTAMP_COLUMN].diff().mean()
+    max_event_duration = group_by_case[XES_Fields.TIMESTAMP_COLUMN].diff().max()
+    first_and_last_timestamps_per_case = group_by_case[XES_Fields.TIMESTAMP_COLUMN].agg(
+        ["first", "last"])
+    avg_case_duration = (
+                first_and_last_timestamps_per_case["last"] - first_and_last_timestamps_per_case["first"]).mean()
+    max_case_duration = (first_and_last_timestamps_per_case["last"] - first_and_last_timestamps_per_case["first"]).max()
+    variants = group_by_case[XES_Fields.ACTIVITY_COLUMN].agg("->".join).nunique()
+    print("N_cases: ", n_cases)
+    print("N_activities: ", n_activities)
+    print("N_events: ", n_events)
+    print("Avg case length: ", avg_case_length)
+    print("Max case length: ", max_case_length)
+    print("Avg event duration: ", avg_event_duration)
+    print("Max event duration: ", max_event_duration)
+    print("Avg case duration: ", avg_case_duration)
+    print("Max case duration: ", max_case_duration)
+    print("Variants: ", variants)
+    final_df = pd.DataFrame(
+        [[log_name, n_cases, n_activities, n_events, avg_case_length, max_case_length, avg_event_duration,
+          max_event_duration, avg_case_duration, max_case_duration, variants]],
+        columns=["Log name", "Number of cases", "Number of activities", "Number of events", "Average case length",
+                 "Maximum case length", "Average event duration", "Maximum event duration", "Average case duration",
+                 "Maximum case duration", "Distinct variants"]
+    )
+    if abbreviate_times:
+        for column in final_df.columns:
+            if final_df[column].dtype == "timedelta64[ns]":
+                final_df[column] = round(final_df[column].dt.total_seconds() / 86400, 2)
+            if final_df[column].dtype == float64:
+                final_df[column] = round(final_df[column], 2)
+
+    return final_df
