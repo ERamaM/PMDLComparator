@@ -10,16 +10,15 @@ Author: Niek Tax
 '''
 
 from __future__ import print_function, division
-from keras.models import Sequential, Model
-from keras.layers.core import Dense
-from keras.layers.recurrent import LSTM, GRU, SimpleRNN
-from keras.layers import Input
-from keras.utils.data_utils import get_file
-from keras.optimizers import Nadam
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from keras.layers.normalization import BatchNormalization
+from tensorflow.keras.models import Sequential, Model
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM, GRU, SimpleRNN
+from tensorflow.keras.layers import Input
+from tensorflow.keras.utils import get_file
+from tensorflow.keras.optimizers import Nadam
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.layers import BatchNormalization
 from collections import Counter
-import unicodecsv
 import numpy as np
 import random
 import sys
@@ -27,18 +26,21 @@ import os
 import copy
 import csv
 import time
-from itertools import izip
 from datetime import datetime
 from math import log
 
-from keras.backend import set_session
 import tensorflow as tf
-
-config = tf.compat.v1.ConfigProto()
-config.gpu_options.allow_growth = True  # dynamically grow the memory used on the GPU
-sess = tf.compat.v1.Session(config=config)
-tf.debugging.set_log_device_placement(True)
-set_session(sess)  # set this TensorFlow session as the default session for Keras
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        # Currently, memory growth needs to be the same across GPUs
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+    except RuntimeError as e:
+        # Memory growth must be set before GPUs have been initialized
+        print(e)
 
 tf.compat.v1.set_random_seed(42)
 # tf.enable_eager_execution()
@@ -48,113 +50,99 @@ np.random.seed(42)
 
 import argparse
 
-parser = argparse.ArgumentParser(description="SeqPred")
-parser.add_argument("eventlog", type=str)
+parser = argparse.ArgumentParser(description="Run the neural net")
+parser.add_argument("--dataset", type=str, required=True)
 args = parser.parse_args()
-eventlog = args.eventlog
+eventlog = args.dataset
 
 
-ascii_offset = 161
-csvfile = open('%s' % eventlog, 'r')
-spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
-next(spamreader, None)  # skip the headers
-lastcase = ''
-line = ''
-firstLine = True
-lines = []
-timeseqs = []
-timeseqs2 = []
-timeseqs3 = []
-timeseqs4 = []
-times = []
-times2 = []
-times3 = []
-times4 = []
-numlines = 0
-casestarttime = None
-lasteventtime = None
-for row in spamreader:
-    t = time.strptime(row[2], "%Y-%m-%d %H:%M:%S")
-    if row[0] != lastcase:
-        casestarttime = t
+def load_file(eventlog):
+    ascii_offset = 161
+    csvfile = open('%s' % eventlog, 'r')
+    spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+    next(spamreader, None)  # skip the headers
+    lastcase = ''
+    line = ''
+    firstLine = True
+    lines = []
+    timeseqs = []
+    timeseqs2 = []
+    timeseqs3 = []
+    timeseqs4 = []
+    times = []
+    times2 = []
+    times3 = []
+    times4 = []
+    numlines = 0
+    casestarttime = None
+    lasteventtime = None
+    for row in spamreader:
+        t = time.strptime(row[2], "%Y-%m-%d %H:%M:%S")
+        if row[0] != lastcase:
+            casestarttime = t
+            lasteventtime = t
+            lastcase = row[0]
+            if not firstLine:
+                lines.append(line)
+                timeseqs.append(times)
+                timeseqs2.append(times2)
+                timeseqs3.append(times3)
+                timeseqs4.append(times4)
+            line = ''
+            times = []
+            times2 = []
+            times3 = []
+            times4 = []
+            numlines += 1
+        line += chr(int(row[1]) + ascii_offset)
+        timesincelastevent = datetime.fromtimestamp(time.mktime(t)) - datetime.fromtimestamp(time.mktime(lasteventtime))
+        timesincecasestart = datetime.fromtimestamp(time.mktime(t)) - datetime.fromtimestamp(time.mktime(casestarttime))
+        midnight = datetime.fromtimestamp(time.mktime(t)).replace(hour=0, minute=0, second=0, microsecond=0)
+        timesincemidnight = datetime.fromtimestamp(time.mktime(t)) - midnight
+        timediff = 86400 * timesincelastevent.days + timesincelastevent.seconds
+        timediff2 = 86400 * timesincecasestart.days + timesincecasestart.seconds
+        timediff3 = timesincemidnight.seconds
+        timediff4 = datetime.fromtimestamp(time.mktime(t)).weekday()
+        times.append(timediff)
+        times2.append(timediff2)
+        times3.append(timediff3)
+        times4.append(timediff4)
         lasteventtime = t
-        lastcase = row[0]
-        if not firstLine:
-            lines.append(line)
-            timeseqs.append(times)
-            timeseqs2.append(times2)
-            timeseqs3.append(times3)
-            timeseqs4.append(times4)
-        line = ''
-        times = []
-        times2 = []
-        times3 = []
-        times4 = []
-        numlines += 1
-    line += chr(int(row[1]) + ascii_offset)
-    timesincelastevent = datetime.fromtimestamp(time.mktime(t)) - datetime.fromtimestamp(time.mktime(lasteventtime))
-    timesincecasestart = datetime.fromtimestamp(time.mktime(t)) - datetime.fromtimestamp(time.mktime(casestarttime))
-    midnight = datetime.fromtimestamp(time.mktime(t)).replace(hour=0, minute=0, second=0, microsecond=0)
-    timesincemidnight = datetime.fromtimestamp(time.mktime(t)) - midnight
-    timediff = 86400 * timesincelastevent.days + timesincelastevent.seconds
-    timediff2 = 86400 * timesincecasestart.days + timesincecasestart.seconds
-    timediff3 = timesincemidnight.seconds
-    timediff4 = datetime.fromtimestamp(time.mktime(t)).weekday()
-    times.append(timediff)
-    times2.append(timediff2)
-    times3.append(timediff3)
-    times4.append(timediff4)
-    lasteventtime = t
-    firstLine = False
-# add last case
-lines.append(line)
-timeseqs.append(times)
-timeseqs2.append(times2)
-timeseqs3.append(times3)
-timeseqs4.append(times4)
-numlines += 1
+        firstLine = False
+    # add last case
+    lines.append(line)
+    timeseqs.append(times)
+    timeseqs2.append(times2)
+    timeseqs3.append(times3)
+    timeseqs4.append(times4)
+    numlines += 1
+    return lines, timeseqs, timeseqs2, timeseqs3, timeseqs4
 
+from pathlib import Path
+import os
+eventlog_name = Path(eventlog).stem
+extension = ".csv"
+folders = Path(eventlog).parent
 
-train = int(round(len(lines) * 0.64))
-val = int(round(len(lines) * 0.8))
+lines, timeseqs, timeseqs2, timeseqs3, timeseqs4 = load_file(eventlog)
+lines_train, timeseqs_train, timeseqs2_train, timeseqs3_train, timeseqs4_train = load_file(os.path.join(folders, "train_" + eventlog_name + extension))
+lines_val, timeseqs_val, timeseqs2_val, timeseqs3_val, timeseqs4_val = load_file(os.path.join(folders, "val_" + eventlog_name + extension))
+lines_test, timeseqs_test, timeseqs2_test, timeseqs3_test, timeseqs4_test = load_file(os.path.join(folders, "test_" + eventlog_name + extension))
 
-print("Len lines: ", len(lines))
-
-# The folds are a list of traces
-fold1 = lines[:train]
-fold1_t = timeseqs[:train]
-fold1_t2 = timeseqs2[:train]
 # The divisors are calculated from only the training set
 # Otherwise we would be filtering information from the test set
 # into the training set
-divisor = np.mean([item for sublist in fold1_t for item in sublist])  # average time between events
+divisor = np.mean([item for sublist in timeseqs for item in sublist])  # average time between events
 print('divisor: {}'.format(divisor))
 divisor2 = np.mean(
-    [item for sublist in fold1_t2 for item in sublist])  # average time between current and first events
+    [item for sublist in timeseqs2 for item in sublist])  # average time between current and first events
 print('divisor2: {}'.format(divisor2))
-
-fold2 = lines[train:val]
-
-fold3 = lines[val:]
-
-train_events = len("".join(fold1))
-val_events = len("".join(fold2))
-test_events = len("".join(fold3))
-
-print("Train events: ", train_events)
-print("Val events", val_events)
-print("Test events: ", test_events)
 
 # Add the termination character AFTER calculating the metrics
 lines = list(map(lambda x: x + '!', lines))
 
 # We need to vectorize the dataset at once because the folds could
 # contain activities that are not in the other folds
-fold1 = lines
-fold1_t = timeseqs
-fold1_t2 = timeseqs2
-fold1_t3 = timeseqs3
-fold1_t4 = timeseqs4
 maxlen = max(map(lambda x: len(x), lines))  # find maximum line size
 chars = map(lambda x: set(x), lines)
 chars = list(set().union(*chars))
@@ -162,6 +150,10 @@ chars.sort()
 target_chars = copy.copy(chars)
 chars.remove('!')
 num_features = len(chars) + 5
+char_indices = dict((c, i) for i, c in enumerate(chars))
+indices_char = dict((i, c) for i, c in enumerate(chars))
+target_char_indices = dict((c, i) for i, c in enumerate(target_chars))
+target_indices_char = dict((i, c) for i, c in enumerate(target_chars))
 
 
 def vectorize_fold(fold1, fold1_t, fold1_t2, fold1_t3, fold1_t4, divisor, divisor2):
@@ -208,19 +200,6 @@ def vectorize_fold(fold1, fold1_t, fold1_t2, fold1_t3, fold1_t4, divisor, diviso
 
     print('nb sequences:', len(sentences))
     print('Vectorization...')
-    # next lines here to get all possible characters for events and annotate them with numbers
-    chars = map(lambda x: set(x), lines)
-    chars = list(set().union(*chars))
-    chars.sort()
-    target_chars = copy.copy(chars)
-    chars.remove('!')
-    maxlen = max(map(lambda x: len(x), lines))  # find maximum line size
-    char_indices = dict((c, i) for i, c in enumerate(chars))
-    indices_char = dict((i, c) for i, c in enumerate(chars))
-    target_char_indices = dict((c, i) for i, c in enumerate(target_chars))
-    target_indices_char = dict((i, c) for i, c in enumerate(target_chars))
-    num_features = len(chars) + 5
-    print('num features: {}'.format(num_features))
     # Matrix containing the training data
     X = np.zeros((len(sentences), maxlen, num_features), dtype=np.float32)
     # Target event prediction data
@@ -253,16 +232,10 @@ def vectorize_fold(fold1, fold1_t, fold1_t2, fold1_t3, fold1_t4, divisor, diviso
         np.set_printoptions(threshold=sys.maxsize)
     return X, target_char_indices, y_a, y_t
 
-X, target_char_indices, y_a, y_t = vectorize_fold(fold1, fold1_t, fold1_t2, fold1_t3, fold1_t4, divisor, divisor2)
-X_train = X[:train_events]
-X_validation = X[train_events: train_events+val_events]
-X_test = X[train_events+val_events:]
-y_train_a = y_a[:train_events]
-y_validation_a = y_a[train_events: train_events+val_events]
-y_test_a = y_a[train_events+val_events:]
-y_train_t = y_t[:train_events]
-y_validation_t = y_t[train_events: train_events+val_events]
-y_test_t = y_t[train_events+val_events:]
+X, target_char_indices, y_a, y_t = vectorize_fold(lines, timeseqs, timeseqs2, timeseqs3, timeseqs4, divisor, divisor2)
+X_train, _, y_a_train, y_t_train = vectorize_fold(lines_train, timeseqs_train, timeseqs2_train, timeseqs3_train, timeseqs4_train, divisor, divisor2)
+X_val, _, y_a_val, y_t_val = vectorize_fold(lines_val, timeseqs_val, timeseqs2_val, timeseqs3_val, timeseqs4_val, divisor, divisor2)
+X_test, _, y_a_test, y_t_test = vectorize_fold(lines_test, timeseqs_test, timeseqs2_test, timeseqs3_test, timeseqs4_test, divisor, divisor2)
 # Split in chunks
 
 
@@ -293,9 +266,10 @@ import os
 
 distutils.dir_util.mkpath("output_files/models/" + eventlog)
 
-model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics=["acc"])
+model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics={"act_output" : "acc", "time_output" : "mae"})
 early_stopping = EarlyStopping(monitor='val_loss', patience=42)
-model_checkpoint = ModelCheckpoint('output_files/models/' + eventlog + '/best_model.h5', monitor='val_loss', verbose=1,
+best_model = "models/" + eventlog_name + ".h5"
+model_checkpoint = ModelCheckpoint(best_model, monitor='val_loss', verbose=1,
                                    save_best_only=True, save_weights_only=False, mode='auto')
 lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verbose=1, mode='auto', min_delta=0.0001,
                                cooldown=0, min_lr=0)
@@ -303,13 +277,19 @@ lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verb
 model.summary()
 # We can't use validation split since that split would do a split of "events" and not a split of "traces"
 # We need to manually set the valiation set
-model.fit(X_train, {'act_output': y_train_a, 'time_output': y_train_t}, validation_data = (X_validation, {"act_output" : y_validation_a, "time_output" : y_validation_t}),verbose=1,
-          callbacks=[early_stopping, model_checkpoint, lr_reducer], batch_size=maxlen, epochs=200)
+model.fit(X_train, {'act_output': y_a_train, 'time_output': y_t_train}, validation_data = (X_val, {"act_output" : y_a_val, "time_output" : y_t_val}),verbose=1,
+          callbacks=[early_stopping, model_checkpoint, lr_reducer], batch_size=maxlen, epochs=2)
 
 
-best_model = "output_files/models/" + eventlog + "/best_model.h5"
 model.load_weights(best_model)
-model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics=["acc"])
-metrics = model.evaluate(X_test, {'act_output': y_test_a, 'time_output': y_test_t}, verbose=1, batch_size=maxlen)
-for metric, name in izip(metrics, model.metrics_names):
-    print(name, ": ", metric)
+model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics={"act_output" : "acc", "time_output" : "mae"})
+metrics = model.evaluate(X_test, {'act_output': y_a_test, 'time_output': y_t_test}, verbose=1, batch_size=maxlen)
+
+with open("results/" + eventlog_name +"_next_event.log", "w") as file:
+    for metric, name in zip(metrics, model.metrics_names):
+        if name == "time_output_mae":
+            # Undo the standarization done in the line y_t[i] = next_t / divisor
+            # Divide the result by 86400 to have the result in days
+            file.write("mae_in_days: " + str(metric * (divisor / 86400)) + "\n")
+        else:
+            file.write(str(name) + ": " + str(metric) + "\n")

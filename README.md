@@ -13,7 +13,7 @@ If you want to use a GPU (recommended) install this instead:;
 
 Install additional dependencies:
 
-    python -m pip install pm4py==1.2.12 hyperopt==0.2.3
+    python -m pip install pm4py==1.2.12 hyperopt==0.2.3 jellyfish==0.7.2 distance==0.1.3
     
 # Prepare the datasets
 
@@ -61,4 +61,6 @@ The best model is inside the "models" folder.
 
 Run the experiments with the following command
 
-    python deeppm_act.py data/Helpdesk.csv BOTH results/helpdesk_results.log
+    python deeppm_act.py data/Helpdesk.csv ACT results/helpdesk_results.log
+    
+Do NOT run the experiments with "BOTH" instead of ACT since the neural network is not programmed for that.
