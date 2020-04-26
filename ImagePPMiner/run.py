@@ -27,6 +27,7 @@ arguments = parser.parse_args()
 dataset_name = Path(arguments.dataset).stem.split(".")[0].lower()
 
 import tensorflow as tf
+
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
     try:
@@ -184,7 +185,6 @@ val_temp = df_val.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 test_act = df_test.groupby('CaseID').agg({'Activity': lambda x: list(x)})
 test_temp = df_test.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 
-
 # generate training and test set
 X_train = get_image(train_act, train_temp, max_trace, n_activity)
 X_val = get_image(val_act, val_temp, max_trace, n_activity)
@@ -239,7 +239,6 @@ model.add(MaxPooling2D(pool_size=(2, 2)))
 # Respecting the paper, the BPI2012W_Complete removes this layer
 # Seems that if we do not remove it it causes an exception of layer of dimension -1
 # Only add the layer for helpdesk (the error happens in more logs).
-# if not dataset_name == "bpi_challenge_2012_w_complete":
 if dataset_name == "helpdesk":
     model.add(Conv2D(128, (8, 8), padding='same', kernel_regularizer=regularizers.l2(reg), ))
     model.add(BatchNormalization())
@@ -254,8 +253,28 @@ print(model.summary())
 opt = Nadam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=1e-08, schedule_decay=0.004, clipvalue=3)
 model.compile(loss={'act_output': 'categorical_crossentropy'}, optimizer=opt, metrics=['accuracy'])
 early_stopping = EarlyStopping(monitor='val_loss', patience=6)
-history = model.fit(X_train, {'act_output': train_Y_one_hot}, validation_data=(X_val, val_Y_one_hot), verbose=1,
-                    callbacks=[early_stopping], batch_size=128, epochs=500)
+
+import math
+BATCH_SIZE = 128
+
+class DataGenerator(tf.keras.utils.Sequence):
+    def __init__(self, X, y):
+        self.X = X
+        self.y = y
+
+    def __len__(self):
+        return math.ceil(len(self.X) / BATCH_SIZE)
+
+    def __getitem__(self, idx):
+        X = self.X[idx * BATCH_SIZE:(idx + 1) * BATCH_SIZE]
+        y = self.y[idx * BATCH_SIZE:(idx + 1) * BATCH_SIZE]
+        return X, y
+
+
+# history = model.fit(X_train, {'act_output': train_Y_one_hot}, validation_data=(X_val, val_Y_one_hot), verbose=1,
+#                    callbacks=[early_stopping], batch_size=128, epochs=500)
+history = model.fit_generator(DataGenerator(X_train, train_Y_one_hot), validation_data=(X_val, val_Y_one_hot),
+                              verbose=1, epochs=500)
 model.save("models/" + dataset_name + ".h5")
 
 results_file = open("results/" + dataset_name + ".txt", mode="w")
@@ -278,13 +297,16 @@ max_y_pred_test = np.argmax(y_pred_test, axis=1)
 max_y_test = np.argmax(test_Y_one_hot, axis=1)
 results_file.write(classification_report(max_y_test, max_y_pred_test, digits=3))
 from sklearn.metrics import brier_score_loss, matthews_corrcoef
+
+
 def calculate_brier_score(y_pred, y_true):
     # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
-    return np.mean(np.sum((y_true - y_pred)**2, axis=1))
+    return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
 
 
 results_file.write("\nBrier score: " + str(calculate_brier_score(y_pred_test, test_Y_one_hot)))
 from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
+
 mcc = matthews_corrcoef(max_y_test, max_y_pred_test)
 precision = precision_score(max_y_test, max_y_pred_test, average="weighted")
 recall = recall_score(max_y_test, max_y_pred_test, average="weighted")
