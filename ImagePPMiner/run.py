@@ -174,7 +174,6 @@ dataset_directory = Path(arguments.dataset).parent
 dataset_filename = Path(arguments.dataset).stem
 df_train, _, _, _ = dataset_summary(os.path.join(dataset_directory, "train_" + dataset_filename + ".csv"))
 df_val, _, _, _ = dataset_summary(os.path.join(dataset_directory, "val_" + dataset_filename + ".csv"))
-df_test, _, _, _ = dataset_summary(os.path.join(dataset_directory, "test_" + dataset_filename + ".csv"))
 
 train_act = df_train.groupby('CaseID').agg({'Activity': lambda x: list(x)})
 train_temp = df_train.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
@@ -182,17 +181,13 @@ train_temp = df_train.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 val_act = df_val.groupby('CaseID').agg({'Activity': lambda x: list(x)})
 val_temp = df_val.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 
-test_act = df_test.groupby('CaseID').agg({'Activity': lambda x: list(x)})
-test_temp = df_test.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 
 # generate training and test set
 X_train = get_image(train_act, train_temp, max_trace, n_activity)
 X_val = get_image(val_act, val_temp, max_trace, n_activity)
-X_test = get_image(test_act, test_temp, max_trace, n_activity)
 
 l_train = get_label(train_act)
 l_val = get_label(val_act)
-l_test = get_label(test_act)
 # Get the labels for the whole training set
 # It may happen that some labels are present in the test set but no in
 # the training (Helpdesk)
@@ -204,7 +199,6 @@ le = preprocessing.LabelEncoder()
 le.fit(l_total)
 l_train = le.transform(l_train)
 l_val = le.transform(l_val)
-l_test = le.transform(l_test)
 num_classes = le.classes_.size
 print(list(le.classes_))
 
@@ -214,12 +208,10 @@ l_train = np.asarray(l_train)
 X_val = np.asarray(X_val)
 l_val = np.asarray(l_val)
 
-X_test = np.asarray(X_test)
-l_test = np.asarray(l_test)
 
 train_Y_one_hot = to_categorical(l_train, num_classes)
 val_Y_one_hot = to_categorical(l_val, num_classes)
-test_Y_one_hot = to_categorical(l_test, num_classes)
+
 
 # define neural network architecture
 model = Sequential()
@@ -286,6 +278,16 @@ y_pred_train = model.predict(X_train)
 max_y_pred_train = np.argmax(y_pred_train, axis=1)
 print(classification_report(l_train, max_y_pred_train, digits=3))
 
+# Load the test part
+df_test, _, _, _ = dataset_summary(os.path.join(dataset_directory, "test_" + dataset_filename + ".csv"))
+test_act = df_test.groupby('CaseID').agg({'Activity': lambda x: list(x)})
+test_temp = df_test.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
+X_test = get_image(test_act, test_temp, max_trace, n_activity)
+l_test = get_label(test_act)
+l_test = le.transform(l_test)
+X_test = np.asarray(X_test)
+l_test = np.asarray(l_test)
+test_Y_one_hot = to_categorical(l_test, num_classes)
 score = model.evaluate(X_test, test_Y_one_hot, verbose=1, batch_size=1)
 
 results_file.write('\nAccuracy on test data: ' + str(score[1]))
