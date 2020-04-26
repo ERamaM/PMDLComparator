@@ -335,4 +335,14 @@ outfile.flush()
 print("\n\nFinal Brier score: ", final_brier_scores, file=outfile)
 print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
 
+from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
+mcc = matthews_corrcoef(y_a_test, preds_a)
+precision = precision_score(y_a_test, preds_a, average="weighted")
+recall = recall_score(y_a_test, preds_a, average="weighted")
+f1 = f1_score(y_a_test, preds_a, average="weighted")
+outfile.write("\nMCC: " + str(mcc))
+outfile.write("\nMicro Precision: " + str(precision))
+outfile.write("\nMicro Recall: " + str(recall))
+outfile.write("\nMicro F1: " + str(f1))
+
 outfile.close()

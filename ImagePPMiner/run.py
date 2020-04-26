@@ -278,16 +278,21 @@ max_y_pred_test = np.argmax(y_pred_test, axis=1)
 max_y_test = np.argmax(test_Y_one_hot, axis=1)
 results_file.write(classification_report(max_y_test, max_y_pred_test, digits=3))
 from sklearn.metrics import brier_score_loss, matthews_corrcoef
-
-results_file.write('\nMatthews corrcoef: ' + str(matthews_corrcoef(max_y_test, max_y_pred_test)))
-
-
 def calculate_brier_score(y_pred, y_true):
     # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
     return np.mean(np.sum((y_true - y_pred)**2, axis=1))
 
 
 results_file.write("\nBrier score: " + str(calculate_brier_score(y_pred_test, test_Y_one_hot)))
+from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
+mcc = matthews_corrcoef(max_y_test, max_y_pred_test)
+precision = precision_score(max_y_test, max_y_pred_test, average="weighted")
+recall = recall_score(max_y_test, max_y_pred_test, average="weighted")
+f1 = f1_score(max_y_test, max_y_pred_test, average="weighted")
+results_file.write("\nMCC: " + str(mcc))
+results_file.write("\nMicro Precision: " + str(precision))
+results_file.write("\nMicro Recall: " + str(recall))
+results_file.write("\nMicro F1: " + str(f1))
 
 for y, y_pred in zip(max_y_test, max_y_pred_test):
     raw_results_file.write(str(y) + "," + str(y_pred) + "\n")

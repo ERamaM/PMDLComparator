@@ -132,10 +132,10 @@ lines_test, timeseqs_test, timeseqs2_test, timeseqs3_test, timeseqs4_test = load
 # The divisors are calculated from only the training set
 # Otherwise we would be filtering information from the test set
 # into the training set
-divisor = np.mean([item for sublist in timeseqs for item in sublist])  # average time between events
+divisor = np.mean([item for sublist in timeseqs_train for item in sublist])  # average time between events
 print('divisor: {}'.format(divisor))
 divisor2 = np.mean(
-    [item for sublist in timeseqs2 for item in sublist])  # average time between current and first events
+    [item for sublist in timeseqs2_train for item in sublist])  # average time between current and first events
 print('divisor2: {}'.format(divisor2))
 
 # Add the termination character AFTER calculating the metrics
@@ -284,6 +284,12 @@ model.fit(X_train, {'act_output': y_a_train, 'time_output': y_t_train}, validati
 model.load_weights(best_model)
 model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics={"act_output" : "acc", "time_output" : "mae"})
 metrics = model.evaluate(X_test, {'act_output': y_a_test, 'time_output': y_t_test}, verbose=1, batch_size=maxlen)
+
+y_a_pred_probs = model.predict([X_test])[0]
+y_a_pred = np.argmax(y_a_pred_probs, axis=1)
+y_true = np.argmax(y_a_test, axis=1)
+from sklearn.metrics import matthews_corrcoef
+print("MCC", matthews_corrcoef(y_true, y_a_pred))
 
 with open("results/" + eventlog_name +"_next_event.log", "w") as file:
     for metric, name in zip(metrics, model.metrics_names):
