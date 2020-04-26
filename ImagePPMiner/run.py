@@ -290,9 +290,9 @@ precision = precision_score(max_y_test, max_y_pred_test, average="weighted")
 recall = recall_score(max_y_test, max_y_pred_test, average="weighted")
 f1 = f1_score(max_y_test, max_y_pred_test, average="weighted")
 results_file.write("\nMCC: " + str(mcc))
-results_file.write("\nMicro Precision: " + str(precision))
-results_file.write("\nMicro Recall: " + str(recall))
-results_file.write("\nMicro F1: " + str(f1))
+results_file.write("\nWeighted Precision: " + str(precision))
+results_file.write("\nWeighted Recall: " + str(recall))
+results_file.write("\nWeighted F1: " + str(f1))
 
 for y, y_pred in zip(max_y_test, max_y_pred_test):
     raw_results_file.write(str(y) + "," + str(y_pred) + "\n")
