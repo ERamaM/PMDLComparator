@@ -278,7 +278,7 @@ model.summary()
 # We can't use validation split since that split would do a split of "events" and not a split of "traces"
 # We need to manually set the valiation set
 model.fit(X_train, {'act_output': y_a_train, 'time_output': y_t_train}, validation_data = (X_val, {"act_output" : y_a_val, "time_output" : y_t_val}),verbose=1,
-          callbacks=[early_stopping, model_checkpoint, lr_reducer], batch_size=maxlen, epochs=2)
+          callbacks=[early_stopping, model_checkpoint, lr_reducer], batch_size=maxlen, epochs=200)
 
 
 model.load_weights(best_model)
