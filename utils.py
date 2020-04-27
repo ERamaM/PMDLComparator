@@ -12,10 +12,10 @@ import pandas as pd
 from pathlib import Path
 import glob
 import datetime
+import shutil
 
 
 def convert_xes_to_csv(file, output_folder):
-    print("Processing: ", file)
     xes_path = file
     csv_file = Path(file).stem.split(".")[0] + ".csv"
     csv_path = os.path.join(output_folder, csv_file)
@@ -43,13 +43,19 @@ def augment_xes_end_activity_to_csv(file, output_folder):
     return csv_file, csv_path
 
 
-def convert_csv_to_xes(file, output_folder):
-    print("Processing: ", file)
+def convert_csv_to_xes(file, output_folder, extension):
     csv_path = file
-    xes_file = Path(file).stem.split(".")[0] + ".xes"
+    xes_file = Path(file).stem.split(".")[0] + EXTENSIONS.XES
     xes_path = os.path.join(output_folder, xes_file)
     log = csv_import_factory.apply(csv_path, parameters={"timestamp_sort": True})
-    xes_exporter.export_log(log, xes_path)
+    if extension == EXTENSIONS.XES_COMPRESSED:
+        xes_exporter.export_log(log, xes_path, parameters={"compress" : True})
+    else:
+        xes_exporter.export_log(log, xes_path)
+
+    if extension == EXTENSIONS.XES_COMPRESSED:
+        xes_file += ".gz"
+        xes_path += ".gz"
     return xes_file, xes_path
 
 
@@ -78,6 +84,7 @@ class XES_Fields:
 
 class EXTENSIONS:
     CSV = ".csv"
+    XES = ".xes"
     XES_COMPRESSED = ".xes.gz"
 
 
@@ -152,6 +159,12 @@ def split_train_val_test(file, output_directory, case_column):
 
     return file, train_path, val_path, test_path
 
+def copy_file(file, output_directory, extension):
+    base_file = os.path.basename(file)
+    dox_index = base_file.index(".")
+    file_name = base_file[:dox_index]
+    print("Copy file: ", file)
+    shutil.copyfile(file, os.path.join(output_directory, file_name + extension))
 
 def move_files(file, output_directory, extension):
     """
@@ -162,16 +175,19 @@ def move_files(file, output_directory, extension):
     :return:
     """
 
-    name = Path(file).stem + extension
+    #name = Path(file).stem + extension
+    basename = os.path.basename(file)
+    dot_index = basename.index(".")
+    name = basename[:dot_index] + extension
     input_directory = Path(file).parent
     input_train = os.path.join(input_directory, "train_" + name)
     input_val = os.path.join(input_directory, "val_" + name)
     input_test = os.path.join(input_directory, "test_" + name)
 
     def _move_if_not_exists(input, output_dir):
-        print("Moving: ", input)
+        stem = os.path.basename(input)
         if os.path.exists(input):
-            os.replace(input, os.path.join(output_directory, Path(input).stem + extension))
+            os.replace(input, os.path.join(output_directory, stem))
 
     _move_if_not_exists(input_train, output_directory)
     _move_if_not_exists(input_val, output_directory)

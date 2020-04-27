@@ -88,6 +88,19 @@ if arguments.net:
             make_dir_if_not_exists("tax/code/results")
             make_dir_if_not_exists("tax/code/models")
             move_files(csv_path, "tax/data", EXTENSIONS.CSV)
+    elif arguments.net == "evermann":
+        for xes in dataset_list:
+            print("Process: ", xes)
+            make_dir_if_not_exists("evermann/data")
+            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
+            xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            train_file, train_path = convert_csv_to_xes(train_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            move_files(xes_path, "evermann/data", EXTENSIONS.XES_COMPRESSED)
+
+            #copy_file(xes, "evermann/data", EXTENSIONS.XES_COMPRESSED)
     else:
         print("Unrecognized approach")
 
