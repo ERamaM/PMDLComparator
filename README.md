@@ -15,6 +15,12 @@ Install additional dependencies:
 
     python -m pip install pm4py==1.2.12 hyperopt==0.2.3 jellyfish==0.7.2 distance==0.1.3
     
+If you want to use the task spooler, install, in debian based systems:
+
+    apt install task-spool
+    
+For every approach, a bash script named "generate_queue.sh" is provided that adds a series of jobs to train the neural networks in the datasets.
+    
 # Prepare the datasets
 
 There are two modes to prepare the datasets for training and testing: 
@@ -64,3 +70,9 @@ Run the experiments with the following command
     python deeppm_act.py data/Helpdesk.csv ACT results/helpdesk_results.log
     
 Do NOT run the experiments with "BOTH" instead of ACT since the neural network is not programmed for that.
+
+# Tax
+
+Run the training procedure and next event prediction with the following command (inside the "code" folder)
+
+    python train.py --dataset ../data/Helpdesk.csv
