@@ -47,7 +47,7 @@ def convert_csv_to_xes(file, output_folder, extension):
     csv_path = file
     xes_file = Path(file).stem.split(".")[0] + EXTENSIONS.XES
     xes_path = os.path.join(output_folder, xes_file)
-    log = csv_import_factory.apply(csv_path, parameters={"timestamp_sort": True})
+    log = csv_import_factory.apply(csv_path, parameters={"timestamp_sort": True, "timest_columns" : XES_Fields.TIMESTAMP_COLUMN})
     if extension == EXTENSIONS.XES_COMPRESSED:
         xes_exporter.export_log(log, xes_path, parameters={"compress" : True})
     else:
