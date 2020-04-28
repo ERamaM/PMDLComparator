@@ -30,16 +30,10 @@ file_name = Path(file).stem
 
 model_file_name = file_name + ".h5"
 
-log = xes_import_factory.apply(file,
-                               parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"}
-                               )
-
-vectorized_log = []
 idx = {}
 
 do_damerau = False
 seq_length = 20
-current_idx = 0
 BATCH_SIZE = 20
 BUFFER_SIZE = 10000
 embedding_dim = 32
@@ -52,43 +46,28 @@ lr = 1.0
 
 # Convert the log to ids
 # This conversion creates a list of lists of events, that is, a list of traces.
-for trace in log:
-    trace_ids = []
-    for event in trace:
-        if event["concept:name"] not in idx:
-            idx[event["concept:name"]] = current_idx
+def vectorize_log(log):
+    current_idx = 0
+    vectorized_log = []
+    for trace in log:
+        trace_ids = []
+        for event in trace:
+            if event["concept:name"] not in idx:
+                idx[event["concept:name"]] = current_idx
+                current_idx += 1
+            trace_ids.append(idx[event["concept:name"]])
+        if "[EOC]" not in idx:
+            idx["[EOC]"] = current_idx
             current_idx += 1
-        trace_ids.append(idx[event["concept:name"]])
-    if "[EOC]" not in idx:
-        idx["[EOC]"] = current_idx
-        current_idx += 1
-    trace_ids.append(idx["[EOC]"])
-    vectorized_log.append(trace_ids)
-
+        trace_ids.append(idx["[EOC]"])
+        vectorized_log.append(trace_ids)
+    return vectorized_log, current_idx
 
 # Get x and y (x shuffled one)
 def split_input_target(chunk):
     input_text = chunk[:-1]
     target_text = chunk[1:]
     return input_text, target_text
-
-
-def split(X):
-    """
-    Divide el conjunto de datos SIEMPRE de la misma forma
-    :param X:
-    :param y:
-    :return: Devuelve: x_train, y_train, x_validation, y_validation, x_test, y_test
-    """
-    length = len(X)
-    train_length = round(length * 0.64)
-    val_length = round(length * 0.8)
-    X_train = X[0:train_length]
-    X_val = X[train_length:val_length]
-    X_test = X[val_length:]
-
-    return X_train, X_val, X_test
-
 
 def to_dataset(vectorized_log):
     vectorized_log = np.array(list(itertools.chain(*vectorized_log)))
@@ -100,14 +79,19 @@ def to_dataset(vectorized_log):
     dataset = sequences.map(split_input_target)
 
     dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_remainder=True)
-    """
-    for i in dataset.take(5):
-        print(i)
-        """
     return dataset
 
-# Note that this split does not split in events but in traces
-X_train, X_validation, X_test = split(vectorized_log)
+parent = Path(file).parent
+filename = os.path.basename(file)
+log = xes_import_factory.apply(file, parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
+train_log = xes_import_factory.apply(os.path.join(parent, "train_" + filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
+val_log = xes_import_factory.apply(os.path.join(parent, "val_" + filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
+test_log = xes_import_factory.apply(os.path.join(parent, "test_" + filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
+vectorized_log, current_idx = vectorize_log(log)
+X_train, _ = vectorize_log(train_log)
+X_validation, _ = vectorize_log(val_log)
+X_test, _ = vectorize_log(test_log)
+
 
 print("Full log events: ", sum([len(x) for x in vectorized_log]))
 print("Train events: ", sum([len(x) for x in X_train]))
@@ -131,7 +115,7 @@ def build_model(vocab_size, embedding_dim, rnn_units, batch_size):
                              stateful=True,
                              recurrent_initializer='glorot_uniform',
                              dropout=dropout),
-        tf.keras.layers.Dense(vocab_size, kernel_initializer="random_uniform", bias_initializer="random_uniform"),
+        tf.keras.layers.Dense(vocab_size),
     ])
     return model
 
@@ -149,16 +133,14 @@ def loss(labels, logits):
     return tf.keras.losses.sparse_categorical_crossentropy(labels, logits, from_logits=True)
 
 
-# optimizer = tf.keras.optimizers.SGD(lr=lr, decay=lrDecay, clipnorm=maxGradNorm, momentum=0.9, nesterov=True)
-optimizer = tf.keras.optimizers.Adam(0.001)
+optimizer = tf.keras.optimizers.SGD(lr=lr, decay=lrDecay, clipnorm=maxGradNorm, momentum=0.9, nesterov=True)
+# optimizer = tf.keras.optimizers.Adam(0.001)
 
 # Directory where the checkpoints will be saved
-checkpoint_dir = './training_checkpoints'
-# Name of the checkpoint files
-checkpoint_prefix = os.path.join(checkpoint_dir, "ckpt_{epoch}")
+model_directory = "models"
 
 checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
-    model_file_name,
+    os.path.join(model_directory, model_file_name),
     monitor="val_loss",
     save_weights_only=True, save_best_only=True, verbose=1)
 
@@ -170,14 +152,57 @@ model.compile(
 history = model.fit(train_dataset, epochs=100, callbacks=[checkpoint_callback], validation_data=val_dataset)
 
 # Test accuracy
-print("Results for: ", file_name)
-model.load_weights(model_file_name)
-model.evaluate(test_dataset)
-
-# Test damerau levenshtein
 model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
 model.load_weights(model_file_name)
 model.build(tf.TensorShape([1, None]))
+y_pred = []
+y_true = []
+last_case_id = idx["[EOC]"]
+for trace in X_test:
+    for i, event in enumerate(trace):
+        model.reset_states()
+        inp = trace[:i+1]
+        next_event = trace[i+1]
+
+        """
+        print("-------------")
+        print("Real trace: ", trace)
+        print("Prefix: ", inp)
+        print("Next event: ", next_event)
+        print("-------------")
+        """
+
+        full_preds = model(tf.expand_dims(inp, 0))
+        probs = tf.nn.softmax(tf.squeeze(full_preds, 0).numpy()[-1])
+        y_pred.append(probs)
+        y_true.append(np.eye(vocab_size)[next_event])
+        if next_event == last_case_id:
+            break
+
+def calculate_brier_score(y_pred, y_true):
+    # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+    return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
+from sklearn.metrics import accuracy_score, matthews_corrcoef, f1_score, precision_score, recall_score
+y_pred_a = np.argmax(y_pred, axis=1)
+y_true_a = np.argmax(y_true, axis=1)
+result_file = file_name + ".log"
+result_directory = "results"
+with open(os.path.join(result_directory, result_file), "w") as file:
+    file.write("\nAccuracy: " + str(accuracy_score(y_true_a, y_pred_a)))
+    file.write("\nMCC: " + str(matthews_corrcoef(y_true_a, y_pred_a)))
+    file.write("\nBrier score: " + str(calculate_brier_score(np.array(y_true), np.array(y_pred))))
+    file.write("\nWeighted recall: " + str(recall_score(y_true_a, y_pred_a, average="weighted")))
+    file.write("\nWeighted precision: " + str(precision_score(y_true_a, y_pred_a, average="weighted")))
+    file.write("\nWeighted f1: " + str(f1_score(y_true_a, y_pred_a, average="weighted")))
+
+
+
+# model.evaluate(test_dataset)
+
+# Test damerau levenshtein
+# model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
+# model.load_weights(model_file_name)
+# model.build(tf.TensorShape([1, None]))
 
 def generate_text(model, start_trace):
     # Evaluation step (generating text using the learned model)

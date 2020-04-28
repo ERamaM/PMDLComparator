@@ -92,6 +92,8 @@ if arguments.net:
         for xes in dataset_list:
             print("Process: ", xes)
             make_dir_if_not_exists("evermann/data")
+            make_dir_if_not_exists("evermann/models")
+            make_dir_if_not_exists("evermann/results")
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
             xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
