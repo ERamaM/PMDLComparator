@@ -153,7 +153,7 @@ history = model.fit(train_dataset, epochs=100, callbacks=[checkpoint_callback], 
 
 # Test accuracy
 model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
-model.load_weights(model_file_name)
+model.load_weights(os.path.join(model_directory, model_file_name))
 model.build(tf.TensorShape([1, None]))
 y_pred = []
 y_true = []
