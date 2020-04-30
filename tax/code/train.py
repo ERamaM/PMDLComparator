@@ -288,7 +288,7 @@ metrics = model.evaluate(X_test, {'act_output': y_a_test, 'time_output': y_t_tes
 y_a_pred_probs = model.predict([X_test])[0]
 y_a_pred = np.argmax(y_a_pred_probs, axis=1)
 y_true = np.argmax(y_a_test, axis=1)
-from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
+from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score, accuracy_score
 
 def calculate_brier_score(y_pred, y_true):
     # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
@@ -302,11 +302,13 @@ with open("results/" + eventlog_name +"_next_event.log", "w") as file:
         else:
             file.write(str(name) + ": " + str(metric) + "\n")
 
+    acc = accuracy_score(y_true, y_a_pred)
     mcc = matthews_corrcoef(y_true, y_a_pred)
     precision = precision_score(y_true, y_a_pred, average="weighted")
     recall = recall_score(y_true, y_a_pred, average="weighted")
     f1 = f1_score(y_true, y_a_pred, average="weighted")
     brier_score = calculate_brier_score(y_a_pred_probs, y_a_test)
+    file.write("\nACC Sklearn: " + str(acc))
     file.write("\nMCC: " + str(mcc))
     file.write("\nBrier score: " + str(brier_score))
     file.write("\nWeighted Precision: " + str(precision))
