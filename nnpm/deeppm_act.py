@@ -157,25 +157,8 @@ def fit_and_score(params):
                       learning_rate=params['learning_rate'], embedding_size=params['embedding_size'],
                       n_modules=params['n_modules'])
     early_stopping = EarlyStopping(monitor='val_loss', patience=20)
-    """
-    num_train = int(X_a_train.shape[0]*0.8)
 
-    X_a_train1 = X_a_train[:num_train]
-    X_a_val1 = X_a_train[num_train:]
-    X_t_train1 = X_t_train[:num_train]
-    X_t_val1 = X_t_train[num_train:]
-
-    y_a_train1 = y_a_train[:num_train]
-    y_a_val1 = y_a_train[num_train:]
-    y_t_train1 = y_t_train[:num_train]
-    y_t_val1 = y_t_train[num_train:]
-
-    # Generators
-    train_generator = DataGenerator([X_a_train1,X_t_train1], [y_a_train1,y_t_train1], batch_size=2**params['batch_size'])
-    val_generator = DataGenerator([X_a_val1,X_t_val1], [y_a_val1,y_t_val1], batch_size=2**params['batch_size'])
-    """
-
-    if (params['model_type'] == 'ACT'):
+    if params['model_type'] == 'ACT':
         h = model.fit([X_a_train, X_t_train],
                       y_a_train, epochs=200, verbose=2,
                       validation_data=([X_a_val, X_t_val], y_a_val),
@@ -212,9 +195,22 @@ def fit_and_score(params):
             'time': end_time - start_time}
 
 
-logfile = sys.argv[1]
-model_type = sys.argv[2]
-output_file = sys.argv[3]
+import argparse, os
+from pathlib import Path
+parser = argparse.ArgumentParser(description="Run the neural net")
+parser.add_argument("--dataset", help="Raw dataset to prepare", required=True)
+parser.add_argument("--train", help="Start training the neural network", action="store_true")
+parser.add_argument("--test", help="Start testing next event of the neural network", action="store_true")
+arguments = parser.parse_args()
+
+if not (arguments.train or arguments.test):
+    print("--train or --test (or both) are required")
+    sys.exit(-3)
+
+logfile = arguments.dataset
+log_filename = Path(logfile).stem
+model_type = "ACT"
+output_file = os.path.join("results", log_filename + ".txt")
 
 current_time = time.strftime("%d.%m.%y-%H.%M", time.localtime())
 outfile = open(output_file, 'w')
@@ -238,23 +234,21 @@ extension = ".csv"
  prefix_sizes, vocabulary, y_dict) = load_data(logfile)
 
 # Load the splits from the folder
-# ((X_a_train, X_t_train),
-# (y_a_train, y_t_train),
-_, _, _, _, _, _, _, _, prefix_sizes_train, _, _ = load_data(
+((X_a_train, X_t_train),
+ (y_a_train, y_t_train),
+ _, _, _, _, prefix_sizes_train, _, _) = load_data(
     os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length,
     parsed_vocabulary=vocabulary, y_dict=y_dict)
 
-# ((X_a_val, X_t_val),
-# (y_a_val, y_t_val),
-_, _, _, _, _, _, _, _, prefix_sizes_val, _, _ = load_data(
-    os.path.join(os.path.join(directory, "val_" + filename + extension)),
-    max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
+((X_a_val, X_t_val),
+ (y_a_val, y_t_val),
+ _, _, _, _, prefix_sizes_val, _, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)),
+                                                 max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
 
-# ((X_a_test, X_t_test),
-# (y_a_test, y_t_test),
-_, _, _, _, _, _, _, _, prefix_sizes_test, _, _ = load_data(
-    os.path.join(os.path.join(directory, "test_" + filename + extension)),
-    max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
+((X_a_test, X_t_test),
+ (y_a_test, y_t_test),
+ _, _, _, _, prefix_sizes_test, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)),
+                                                  max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
 
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
 
@@ -263,7 +257,7 @@ emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
 train_len = len(prefix_sizes_train)
 val_len = train_len + len(prefix_sizes_val)
 print("Train len: ", train_len)
-print("Val len: ", val_len - train_len)
+print("Val len: ", val_len)
 print("Test len: ", len(X_a) - val_len)
 X_a_train = X_a[:train_len]
 X_a_val = X_a[train_len:val_len]
@@ -287,7 +281,7 @@ y_a_train = to_categorical(y_a_train, num_classes=n_classes)
 y_a_val = to_categorical(y_a_val, num_classes=n_classes)
 y_a_test = to_categorical(y_a_test, num_classes=n_classes)
 
-n_iter = 20
+n_iter = 1
 
 space = {'input_length': max_length, 'vocab_size': vocab_size, 'n_classes': n_classes, 'model_type': model_type,
          'embedding_size': emb_size,
@@ -309,73 +303,89 @@ best_model = None
 best_time = 0
 best_numparameters = 0
 
+import json
 trials = Trials()
-best = fmin(fit_and_score, space, algo=tpe.suggest, max_evals=n_iter, trials=trials,
-            rstate=p)
-best_params = hyperopt.space_eval(space, best)
+if arguments.train:
+    best = fmin(fit_and_score, space, algo=tpe.suggest, max_evals=n_iter, trials=trials,
+                rstate=p)
+    best_params = hyperopt.space_eval(space, best)
+    best_model.save(os.path.join("results", log_filename + "_model.h5"))
+    outfile.write("\nHyperopt trials")
+    outfile.write("\ntid,loss,learning_rate,n_modules,batch_size,time,n_epochs,n_params,perf_time")
+    for trial in trials.trials:
+        outfile.write("\n%d,%f,%f,%d,%d,%s,%d,%d,%f" % (trial['tid'],
+                                                        trial['result']['loss'],
+                                                        trial['misc']['vals']['learning_rate'][0],
+                                                        int(trial['misc']['vals']['n_modules'][0] + 1),
+                                                        trial['misc']['vals']['batch_size'][0] + 7,
+                                                        (trial['refresh_time'] - trial['book_time']).total_seconds(),
+                                                        trial['result']['n_epochs'],
+                                                        trial['result']['n_params'],
+                                                        trial['result']['time']))
+    outfile.write("\n\nBest parameters:")
+    print(best_params, file=outfile)
+    outfile.write("\nModel parameters: %d" % best_numparameters)
+    outfile.write('\nBest Time taken: %f' % best_time)
 
-outfile.write("\nHyperopt trials")
-outfile.write("\ntid,loss,learning_rate,n_modules,batch_size,time,n_epochs,n_params,perf_time")
-for trial in trials.trials:
-    outfile.write("\n%d,%f,%f,%d,%d,%s,%d,%d,%f" % (trial['tid'],
-                                                    trial['result']['loss'],
-                                                    trial['misc']['vals']['learning_rate'][0],
-                                                    int(trial['misc']['vals']['n_modules'][0] + 1),
-                                                    trial['misc']['vals']['batch_size'][0] + 7,
-                                                    (trial['refresh_time'] - trial['book_time']).total_seconds(),
-                                                    trial['result']['n_epochs'],
-                                                    trial['result']['n_params'],
-                                                    trial['result']['time']))
+    json_str = json.dumps(best_params)
+    with open(os.path.join("results", log_filename + "_parameters.json"), "w") as f:
+        f.write(json_str)
 
-outfile.write("\n\nBest parameters:")
-print(best_params, file=outfile)
-outfile.write("\nModel parameters: %d" % best_numparameters)
-outfile.write('\nBest Time taken: %f' % best_time)
+if arguments.test:
+    json_params = {}
+    with open(os.path.join("results", log_filename + "_parameters.json"), "r") as f:
+        json_params = json.load(f)
 
-# evaluate
-print('Evaluating final model...')
-preds_a = best_model.predict([X_a_test, X_t_test])
-print("Tensorflow evaluation: ")
-best_model.evaluate([X_a_test, X_t_test], y_a_test)
-"""
-brier_score = np.mean(
-    list(map(lambda x: brier_score_loss(y_a_test[x], preds_a[x]), [i[0] for i in enumerate(y_a_test)])))
-"""
+    best_model = get_model(input_length=json_params['input_length'], vocab_size=json_params['vocab_size'],
+                      n_classes=json_params['n_classes'], model_type=json_params['model_type'],
+                      learning_rate=json_params['learning_rate'], embedding_size=json_params['embedding_size'],
+                      n_modules=json_params['n_modules'])
+    best_model.load_weights(os.path.join("results", log_filename + "_model.h5"))
+
+    # evaluate
+    print('Evaluating final model...')
+    preds_a = best_model.predict([X_a_test, X_t_test])
+    print("Tensorflow evaluation: ")
+    best_model.evaluate([X_a_test, X_t_test], y_a_test)
+    """
+    brier_score = np.mean(
+        list(map(lambda x: brier_score_loss(y_a_test[x], preds_a[x]), [i[0] for i in enumerate(y_a_test)])))
+    """
 
 
-def calculate_brier_score(y_pred, y_true):
-    # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
-    return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
+    def calculate_brier_score(y_pred, y_true):
+        # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+        return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
 
 
-brier_score = calculate_brier_score(preds_a, y_a_test)
+    brier_score = calculate_brier_score(preds_a, y_a_test)
 
-y_a_test = np.argmax(y_a_test, axis=1)
-preds_a = np.argmax(preds_a, axis=1)
+    y_a_test = np.argmax(y_a_test, axis=1)
+    preds_a = np.argmax(preds_a, axis=1)
 
-outfile.write("\nBrier score: %f" % brier_score)
-final_brier_scores.append(brier_score)
+    outfile.write("\nBrier score: %f" % brier_score)
+    final_brier_scores.append(brier_score)
 
-accuracy = accuracy_score(y_a_test, preds_a)
-outfile.write("\nAccuracy: %f" % accuracy)
-final_accuracy_scores.append(accuracy)
+    accuracy = accuracy_score(y_a_test, preds_a)
+    outfile.write("\nAccuracy: %f" % accuracy)
+    final_accuracy_scores.append(accuracy)
 
-outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
+    outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
 
-outfile.flush()
+    outfile.flush()
 
-print("\n\nFinal Brier score: ", final_brier_scores, file=outfile)
-print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
+    print("\n\nFinal Brier score: ", final_brier_scores, file=outfile)
+    print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
 
-from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
+    from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
 
-mcc = matthews_corrcoef(y_a_test, preds_a)
-precision = precision_score(y_a_test, preds_a, average="weighted")
-recall = recall_score(y_a_test, preds_a, average="weighted")
-f1 = f1_score(y_a_test, preds_a, average="weighted")
-outfile.write("\nMCC: " + str(mcc))
-outfile.write("\nWeighted Precision: " + str(precision))
-outfile.write("\nWeighted Recall: " + str(recall))
-outfile.write("\nWeighted F1: " + str(f1))
+    mcc = matthews_corrcoef(y_a_test, preds_a)
+    precision = precision_score(y_a_test, preds_a, average="weighted")
+    recall = recall_score(y_a_test, preds_a, average="weighted")
+    f1 = f1_score(y_a_test, preds_a, average="weighted")
+    outfile.write("\nMCC: " + str(mcc))
+    outfile.write("\nWeighted Precision: " + str(precision))
+    outfile.write("\nWeighted Recall: " + str(recall))
+    outfile.write("\nWeighted F1: " + str(f1))
 
-outfile.close()
+    outfile.close()
