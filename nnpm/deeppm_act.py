@@ -175,7 +175,7 @@ def fit_and_score(params):
 
     if (params['model_type'] == 'ACT'):
         h = model.fit([X_a_train, X_t_train],
-                      y_a_train, epochs=200, verbose=0,
+                      y_a_train, epochs=200, verbose=1,
                       validation_data=([X_a_train, X_t_train], y_a_train),
                       callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
     elif (params['model_type'] == 'TIME'):
@@ -308,6 +308,8 @@ outfile.write('\nBest Time taken: %f' % best_time)
 # evaluate
 print('Evaluating final model...')
 preds_a = best_model.predict([X_a_test, X_t_test])
+print("Tensorflow evaluation: ")
+best_model.evaluate([X_a_test, X_t_test], y_a_test)
 """
 brier_score = np.mean(
     list(map(lambda x: brier_score_loss(y_a_test[x], preds_a[x]), [i[0] for i in enumerate(y_a_test)])))

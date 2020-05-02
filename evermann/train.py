@@ -192,7 +192,7 @@ if args.test:
                 y_pred.append(probs)
                 y_true.append(np.eye(vocab_size)[next_event])
 
-                file.write(str(len(inp)) + ";" + str(next_event) + ";" + str(np.argmax(probs)) + ";" + np.array2string(probs.numpy(), separator=",") + "\n")
+                file.write(str(len(inp)) + ";" + str(next_event) + ";" + str(np.argmax(probs)) + ";" + np.array2string(probs.numpy(), separator=",", max_line_width=99999) + "\n")
                 if next_event == last_case_id:
                     break
 

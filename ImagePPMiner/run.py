@@ -337,7 +337,7 @@ if arguments.test:
         # Get the last accumulated activity and, then, the number of activities of the prefix.
         length = int(np.sum(X, axis=1)[-1][0]) - 1
         #length = np.sum(np.sum(X, axis=-1).astype("bool").astype("int"))
-        raw_results_file.write(str(length) + ";" + str(y) + ";" + str(y_pred) + ";" + str(np.array2string(probs,separator=",")) + "\n")
+        raw_results_file.write(str(length) + ";" + str(y) + ";" + str(y_pred) + ";" + str(np.array2string(probs,separator=",", max_line_width=99999)) + "\n")
 
     results_file.close()
     raw_results_file.close()
