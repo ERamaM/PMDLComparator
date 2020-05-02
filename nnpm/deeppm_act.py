@@ -247,9 +247,6 @@ extension = ".csv"
  (y_a_test, y_t_test),
  _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)), max_len=max_length)
 
-print("Y_t:", y_t_train)
-
-
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
 
 # normalizing times
@@ -261,7 +258,7 @@ y_a_train = to_categorical(y_a_train, num_classes=n_classes)
 y_a_val = to_categorical(y_a_val, num_classes=n_classes)
 y_a_test = to_categorical(y_a_test, num_classes=n_classes)
 
-n_iter = 1
+n_iter = 20
 
 space = {'input_length': max_length, 'vocab_size': vocab_size, 'n_classes': n_classes, 'model_type': model_type,
          'embedding_size': emb_size,
