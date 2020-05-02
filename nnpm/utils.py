@@ -1,5 +1,5 @@
 
-def load_data(logfile=None, max_len=None):
+def load_data(logfile=None, max_len=None, vocabulary=None):
 
     import datetime
     import time
@@ -52,12 +52,12 @@ def load_data(logfile=None, max_len=None):
     lines.append(line)
     timeseqs.append(times)
 
-    vocabulary = {key: idx for idx, key in enumerate(vocabulary)}
+    if vocabulary is None:
+        vocabulary = {key: idx for idx, key in enumerate(vocabulary)}
 
     divisor = np.mean([item for sublist in timeseqs for item in sublist]) #average time between events
     numcases += 1
     print("Num cases: ", numcases)
-    elems_per_fold = int(round(numcases/3))
 
     if len(line) > max_length:
         max_length = len(line)
@@ -128,4 +128,4 @@ def load_data(logfile=None, max_len=None):
     padded_X = pad_sequences(X, maxlen=max_length, padding='pre', dtype='float64')
     padded_X1 = pad_sequences(X1, maxlen=max_length, padding='pre', dtype='float64')
 
-    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes)
+    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary)
