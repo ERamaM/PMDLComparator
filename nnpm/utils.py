@@ -1,5 +1,5 @@
 
-def load_data(logfile=None, max_len=None, vocabulary=None):
+def load_data(logfile=None, max_len=None, parsed_vocabulary=None):
 
     import datetime
     import time
@@ -52,8 +52,10 @@ def load_data(logfile=None, max_len=None, vocabulary=None):
     lines.append(line)
     timeseqs.append(times)
 
-    if vocabulary is None:
+    if parsed_vocabulary is None:
         vocabulary = {key: idx for idx, key in enumerate(vocabulary)}
+    else:
+        vocabulary = parsed_vocabulary
 
     divisor = np.mean([item for sublist in timeseqs for item in sublist]) #average time between events
     numcases += 1
