@@ -1,5 +1,5 @@
 
-def load_data(logfile=None, max_len=None, parsed_vocabulary=None):
+def load_data(logfile=None, max_len=None, parsed_vocabulary=None, y_dict=None):
 
     import datetime
     import time
@@ -112,11 +112,14 @@ def load_data(logfile=None, max_len=None, parsed_vocabulary=None):
 
 
     y_unique = np.unique(y)
-    dict_y = {}
-    i = 0
-    for el in y_unique:
-        dict_y[el] = i
-        i += 1
+    if y_dict is None:
+        dict_y = {}
+        i = 0
+        for el in y_unique:
+            dict_y[el] = i
+            i += 1
+    else:
+        dict_y = y_dict
     for i in range(len(y)):
         y[i] = dict_y[y[i]]
     y_unique = np.unique(y, return_counts=True)
@@ -130,4 +133,4 @@ def load_data(logfile=None, max_len=None, parsed_vocabulary=None):
     padded_X = pad_sequences(X, maxlen=max_length, padding='pre', dtype='float64')
     padded_X1 = pad_sequences(X1, maxlen=max_length, padding='pre', dtype='float64')
 
-    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary)
+    return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, y_dict)
