@@ -237,15 +237,15 @@ prefix_sizes, vocabulary, y_dict) = load_data(logfile)
 # Load the splits from the folder
 ((X_a_train, X_t_train),
  (y_a_train, y_t_train),
- _, _, _, _, prefix_sizes_train, _) = load_data(os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length, vocabulary=vocabulary, y_dict=y_dict)
+ _, _, _, _, prefix_sizes_train, _) = load_data(os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
 
 ((X_a_val, X_t_val),
  (y_a_val, y_t_val),
- _, _, _, _, prefix_sizes_val, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)), max_len=max_length, vocabulary=vocabulary, y_dict=y_dict)
+ _, _, _, _, prefix_sizes_val, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)), max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
 
 ((X_a_test, X_t_test),
  (y_a_test, y_t_test),
- _, _, _, _, prefix_sizes_test, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)), max_len=max_length, vocabulary=vocabulary, y_dict=y_dict)
+ _, _, _, _, prefix_sizes_test, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)), max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
 
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
 
