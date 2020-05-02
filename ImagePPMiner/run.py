@@ -11,6 +11,7 @@ from tensorflow.keras.layers import MaxPooling2D
 from tensorflow.keras.optimizers import Nadam
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.layers import BatchNormalization
+import sys
 
 seed = 123
 np.random.seed(seed)
@@ -23,7 +24,14 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser(description="Run the neural net")
 parser.add_argument("--dataset", help="Raw dataset to prepare", required=True)
+parser.add_argument("--train", help="Start training the neural network", action="store_true")
+parser.add_argument("--test", help="Start testing next event of the neural network", action="store_true")
 arguments = parser.parse_args()
+
+if not (arguments.train or arguments.test):
+    print("--train or --test (or both) are required")
+    sys.exit(-3)
+
 dataset_name = Path(arguments.dataset).stem.split(".")[0].lower()
 
 import tensorflow as tf
@@ -244,7 +252,6 @@ print(model.summary())
 
 opt = Nadam(lr=0.0002, beta_1=0.9, beta_2=0.999, epsilon=1e-08, schedule_decay=0.004, clipvalue=3)
 model.compile(loss={'act_output': 'categorical_crossentropy'}, optimizer=opt, metrics=['accuracy'])
-early_stopping = EarlyStopping(monitor='val_loss', patience=6)
 
 import math
 BATCH_SIZE = 128
@@ -265,61 +272,72 @@ class DataGenerator(tf.keras.utils.Sequence):
 
 # history = model.fit(X_train, {'act_output': train_Y_one_hot}, validation_data=(X_val, val_Y_one_hot), verbose=1,
 #                    callbacks=[early_stopping], batch_size=128, epochs=500)
-history = model.fit_generator(DataGenerator(X_train, train_Y_one_hot), validation_data=(X_val, val_Y_one_hot),
-                              verbose=1, epochs=500)
-model.save("models/" + dataset_name + ".h5")
+if arguments.train:
+    early_stopping = EarlyStopping(monitor='val_loss', patience=6)
+    history = model.fit_generator(DataGenerator(X_train, train_Y_one_hot), validation_data=(X_val, val_Y_one_hot),
+                                verbose=1, epochs=500, callbacks=[early_stopping])
 
-results_file = open("results/" + dataset_name + ".txt", mode="w")
-raw_results_file = open("results/raw_" + dataset_name + ".txt", mode="w")
-
-# Print confusion matrix for training data
-y_pred_train = model.predict(X_train)
-# Take the class with the highest probability from the train predictions
-max_y_pred_train = np.argmax(y_pred_train, axis=1)
-print(classification_report(l_train, max_y_pred_train, digits=3))
+    model.save("models/" + dataset_name + ".h5")
 
 # Load the test part
-df_test, _, _, _ = dataset_summary(os.path.join(dataset_directory, "test_" + dataset_filename + ".csv"))
-test_act = df_test.groupby('CaseID').agg({'Activity': lambda x: list(x)})
-test_temp = df_test.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
-X_test = get_image(test_act, test_temp, max_trace, n_activity)
-l_test = get_label(test_act)
-l_test = le.transform(l_test)
-X_test = np.asarray(X_test)
-l_test = np.asarray(l_test)
-test_Y_one_hot = to_categorical(l_test, num_classes)
-score = model.evaluate(X_test, test_Y_one_hot, verbose=1, batch_size=1)
+if arguments.test:
+    results_file = open("results/" + dataset_name + ".txt", mode="w")
+    raw_results_file = open("results/raw_" + dataset_name + ".txt", mode="w")
 
-results_file.write('\nAccuracy on test data: ' + str(score[1]))
-results_file.write('\nLoss on test data: ' + str(score[0]) + "\n")
+    model.load_weights("models/" + dataset_name + ".h5")
+    # Print confusion matrix for training data
+    y_pred_train = model.predict(X_train)
+    # Take the class with the highest probability from the train predictions
+    max_y_pred_train = np.argmax(y_pred_train, axis=1)
+    print(classification_report(l_train, max_y_pred_train, digits=3))
 
-y_pred_test = model.predict(X_test)
-# Take the class with the highest probability from the test predictions
-max_y_pred_test = np.argmax(y_pred_test, axis=1)
-max_y_test = np.argmax(test_Y_one_hot, axis=1)
-results_file.write(classification_report(max_y_test, max_y_pred_test, digits=3))
-from sklearn.metrics import brier_score_loss, matthews_corrcoef
+    df_test, _, _, _ = dataset_summary(os.path.join(dataset_directory, "test_" + dataset_filename + ".csv"))
+    test_act = df_test.groupby('CaseID').agg({'Activity': lambda x: list(x)})
+    test_temp = df_test.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
+    X_test = get_image(test_act, test_temp, max_trace, n_activity)
+    l_test = get_label(test_act)
+    l_test = le.transform(l_test)
+    X_test = np.asarray(X_test)
+    l_test = np.asarray(l_test)
+    test_Y_one_hot = to_categorical(l_test, num_classes)
+    score = model.evaluate(X_test, test_Y_one_hot, verbose=1, batch_size=1)
+
+    results_file.write('\nLoss on test data: ' + str(score[0]) + "\n")
+
+    y_pred_test = model.predict(X_test)
+    # Take the class with the highest probability from the test predictions
+    max_y_pred_test = np.argmax(y_pred_test, axis=1)
+    max_y_test = np.argmax(test_Y_one_hot, axis=1)
+    results_file.write(classification_report(max_y_test, max_y_pred_test, digits=3))
+    from sklearn.metrics import brier_score_loss, matthews_corrcoef
 
 
-def calculate_brier_score(y_pred, y_true):
+    def calculate_brier_score(y_pred, y_true):
     # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
-    return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
+        return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
 
 
-results_file.write("\nBrier score: " + str(calculate_brier_score(y_pred_test, test_Y_one_hot)))
-from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
+    results_file.write("\nBrier score: " + str(calculate_brier_score(y_pred_test, test_Y_one_hot)))
+    from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score, accuracy_score
 
-mcc = matthews_corrcoef(max_y_test, max_y_pred_test)
-precision = precision_score(max_y_test, max_y_pred_test, average="weighted")
-recall = recall_score(max_y_test, max_y_pred_test, average="weighted")
-f1 = f1_score(max_y_test, max_y_pred_test, average="weighted")
-results_file.write("\nMCC: " + str(mcc))
-results_file.write("\nWeighted Precision: " + str(precision))
-results_file.write("\nWeighted Recall: " + str(recall))
-results_file.write("\nWeighted F1: " + str(f1))
+    mcc = matthews_corrcoef(max_y_test, max_y_pred_test)
+    precision = precision_score(max_y_test, max_y_pred_test, average="weighted")
+    recall = recall_score(max_y_test, max_y_pred_test, average="weighted")
+    f1 = f1_score(max_y_test, max_y_pred_test, average="weighted")
+    accuracy = accuracy_score(max_y_test, max_y_pred_test)
+    results_file.write("\nAccuracy: " + str(accuracy))
+    results_file.write("\nMCC: " + str(mcc))
+    results_file.write("\nWeighted Precision: " + str(precision))
+    results_file.write("\nWeighted Recall: " + str(recall))
+    results_file.write("\nWeighted F1: " + str(f1))
 
-for y, y_pred in zip(max_y_test, max_y_pred_test):
-    raw_results_file.write(str(y) + "," + str(y_pred) + "\n")
+    raw_results_file.write("prefix_length;ground_truth;predicted;prediction_probs\n")
+    for X, y, y_pred, probs in zip(X_test, max_y_test, max_y_pred_test, y_pred_test):
+        # First reduce the images to a sum of the accumulated activities.
+        # Get the last accumulated activity and, then, the number of activities of the prefix.
+        length = int(np.sum(X, axis=1)[-1][0]) - 1
+        #length = np.sum(np.sum(X, axis=-1).astype("bool").astype("int"))
+        raw_results_file.write(str(length) + ";" + str(y) + ";" + str(y_pred) + ";" + str(np.array2string(probs,separator=",")) + "\n")
 
-results_file.close()
-raw_results_file.close()
+    results_file.close()
+    raw_results_file.close()

@@ -2,6 +2,7 @@ import os
 # Disable warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import tensorflow as tf
+import sys
 from pm4py.objects.log.importer.xes import factory as xes_import_factory
 import numpy as np
 import os
@@ -24,7 +25,14 @@ import argparse
 from pathlib import Path
 parser = argparse.ArgumentParser(description="Run the neural net")
 parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument("--train", help="Start the training of the neural network", action="store_true")
+parser.add_argument("--test", help="Start the testing of next event", action="store_true")
 args = parser.parse_args()
+
+if not (args.train or args.test):
+    print("Argument --train or --test (or both) are required")
+    sys.exit(-3)
+
 file = args.dataset
 file_name = Path(file).stem
 
@@ -149,51 +157,59 @@ model.compile(
     metrics=[tf.keras.metrics.sparse_categorical_accuracy]
 )
 
-history = model.fit(train_dataset, epochs=100, callbacks=[checkpoint_callback], validation_data=val_dataset)
+if args.train:
+    history = model.fit(train_dataset, epochs=100, callbacks=[checkpoint_callback], validation_data=val_dataset)
 
-# Test accuracy
-model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
-model.load_weights(os.path.join(model_directory, model_file_name))
-model.build(tf.TensorShape([1, None]))
-y_pred = []
-y_true = []
-last_case_id = idx["[EOC]"]
-for trace in X_test:
-    for i, event in enumerate(trace):
-        model.reset_states()
-        inp = trace[:i+1]
-        next_event = trace[i+1]
+if args.test:
+    print("Start testing...")
+    # Test accuracy
+    model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
+    model.load_weights(os.path.join(model_directory, model_file_name))
+    model.build(tf.TensorShape([1, None]))
+    y_pred = []
+    y_true = []
+    last_case_id = idx["[EOC]"]
+    result_directory = "results"
+    raw_result_file = "raw_" + file_name + ".csv"
+    with open(os.path.join(result_directory, raw_result_file), "w") as file:
+        file.write("prefix_length;ground_truth;predicted;prediction_probs\n")
+        for trace in X_test:
+            for i, event in enumerate(trace):
+                model.reset_states()
+                inp = trace[:i+1]
+                next_event = trace[i+1]
 
-        """
-        print("-------------")
-        print("Real trace: ", trace)
-        print("Prefix: ", inp)
-        print("Next event: ", next_event)
-        print("-------------")
-        """
+                """
+                print("-------------")
+                print("Real trace: ", trace)
+                print("Prefix: ", inp)
+                print("Next event: ", next_event)
+                print("-------------")
+                """
 
-        full_preds = model(tf.expand_dims(inp, 0))
-        probs = tf.nn.softmax(tf.squeeze(full_preds, 0).numpy()[-1])
-        y_pred.append(probs)
-        y_true.append(np.eye(vocab_size)[next_event])
-        if next_event == last_case_id:
-            break
+                full_preds = model(tf.expand_dims(inp, 0))
+                probs = tf.nn.softmax(tf.squeeze(full_preds, 0).numpy()[-1])
+                y_pred.append(probs)
+                y_true.append(np.eye(vocab_size)[next_event])
 
-def calculate_brier_score(y_pred, y_true):
-    # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
-    return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
-from sklearn.metrics import accuracy_score, matthews_corrcoef, f1_score, precision_score, recall_score
-y_pred_a = np.argmax(y_pred, axis=1)
-y_true_a = np.argmax(y_true, axis=1)
-result_file = file_name + ".log"
-result_directory = "results"
-with open(os.path.join(result_directory, result_file), "w") as file:
-    file.write("\nAccuracy: " + str(accuracy_score(y_true_a, y_pred_a)))
-    file.write("\nMCC: " + str(matthews_corrcoef(y_true_a, y_pred_a)))
-    file.write("\nBrier score: " + str(calculate_brier_score(np.array(y_true), np.array(y_pred))))
-    file.write("\nWeighted recall: " + str(recall_score(y_true_a, y_pred_a, average="weighted")))
-    file.write("\nWeighted precision: " + str(precision_score(y_true_a, y_pred_a, average="weighted")))
-    file.write("\nWeighted f1: " + str(f1_score(y_true_a, y_pred_a, average="weighted")))
+                file.write(str(len(inp)) + ";" + str(next_event) + ";" + str(np.argmax(probs)) + ";" + np.array2string(probs.numpy(), separator=",") + "\n")
+                if next_event == last_case_id:
+                    break
+
+    def calculate_brier_score(y_pred, y_true):
+        # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+        return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
+    from sklearn.metrics import accuracy_score, matthews_corrcoef, f1_score, precision_score, recall_score
+    y_pred_a = np.argmax(y_pred, axis=1)
+    y_true_a = np.argmax(y_true, axis=1)
+    result_file = file_name + ".txt"
+    with open(os.path.join(result_directory, result_file), "w") as file:
+        file.write("\nAccuracy: " + str(accuracy_score(y_true_a, y_pred_a)))
+        file.write("\nMCC: " + str(matthews_corrcoef(y_true_a, y_pred_a)))
+        file.write("\nBrier score: " + str(calculate_brier_score(np.array(y_true), np.array(y_pred))))
+        file.write("\nWeighted recall: " + str(recall_score(y_true_a, y_pred_a, average="weighted")))
+        file.write("\nWeighted precision: " + str(precision_score(y_true_a, y_pred_a, average="weighted")))
+        file.write("\nWeighted f1: " + str(f1_score(y_true_a, y_pred_a, average="weighted")))
 
 
 
