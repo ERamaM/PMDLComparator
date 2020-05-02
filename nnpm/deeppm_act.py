@@ -176,7 +176,7 @@ def fit_and_score(params):
     if (params['model_type'] == 'ACT'):
         h = model.fit([X_a_train, X_t_train],
                       y_a_train, epochs=200, verbose=1,
-                      validation_data=([X_a_train, X_t_train], y_a_train),
+                      validation_data=([X_a_val, X_t_val], y_a_val),
                       callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
     elif (params['model_type'] == 'TIME'):
         h = model.fit([X_a_train, X_t_train],
@@ -190,6 +190,8 @@ def fit_and_score(params):
                       epochs=200, verbose=0,
                       callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
     #        h = model.fit_generator(generator=train_generator, validation_data=val_generator, use_multiprocessing=True, workers=8, epochs=200, callbacks=[early_stopping], max_queue_size=10000, verbose=0)
+
+    print("Evaluation inside function: ", model.evaluate([X_a_test, X_t_test], y_a_test))
 
     scores = [h.history['val_loss'][epoch] for epoch in range(len(h.history['loss']))]
     score = min(scores)
@@ -260,7 +262,7 @@ y_a_train = to_categorical(y_a_train, num_classes=n_classes)
 y_a_val = to_categorical(y_a_val, num_classes=n_classes)
 y_a_test = to_categorical(y_a_test, num_classes=n_classes)
 
-n_iter = 20
+n_iter = 1
 
 space = {'input_length': max_length, 'vocab_size': vocab_size, 'n_classes': n_classes, 'model_type': model_type,
          'embedding_size': emb_size,
