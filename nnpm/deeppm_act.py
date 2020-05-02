@@ -237,17 +237,34 @@ extension = ".csv"
 # Load the splits from the folder
 ((X_a_train, X_t_train),
  (y_a_train, y_t_train),
- _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length)
+ _, _, _, _, prefix_sizes_train) = load_data(os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length)
 
 ((X_a_val, X_t_val),
  (y_a_val, y_t_val),
- _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)), max_len=max_length)
+ _, _, _, _, prefix_sizes_val) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)), max_len=max_length)
 
 ((X_a_test, X_t_test),
  (y_a_test, y_t_test),
- _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)), max_len=max_length)
+ _, _, _, _, prefix_sizes_test) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)), max_len=max_length)
 
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
+
+# For some reason loading the datasets in parts is not good
+# We calculate the number of events and then split
+train_len = len(prefix_sizes_train)
+val_len = train_len + len(prefix_sizes_val)
+X_a_train = X_a[:train_len]
+X_a_val = X_a[train_len:val_len]
+X_a_test = X_a[val_len:]
+X_t_train = X_t[:train_len]
+X_t_val = X_t[train_len:val_len]
+X_t_test = X_t[val_len:]
+y_a_train = y_a[:train_len]
+y_a_val = y_a[train_len:val_len]
+y_a_test = y_a[val_len:]
+y_t_train = y_t[:train_len]
+y_t_val = y_t[train_len:val_len]
+y_t_test = y_t[val_len:]
 
 # normalizing times
 X_t_train = X_t_train / np.max(X_t)
@@ -258,7 +275,7 @@ y_a_train = to_categorical(y_a_train, num_classes=n_classes)
 y_a_val = to_categorical(y_a_val, num_classes=n_classes)
 y_a_test = to_categorical(y_a_test, num_classes=n_classes)
 
-n_iter = 20
+n_iter = 1
 
 space = {'input_length': max_length, 'vocab_size': vocab_size, 'n_classes': n_classes, 'model_type': model_type,
          'embedding_size': emb_size,
