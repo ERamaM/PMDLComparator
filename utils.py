@@ -88,7 +88,7 @@ class EXTENSIONS:
     XES_COMPRESSED = ".xes.gz"
 
 
-def select_columns(file, input_columns, category_columns, timestamp_format, output_columns):
+def select_columns(file, input_columns, category_columns, timestamp_format, output_columns, categorize=False):
     """
     Select columns from CSV converted from XES
     :param file: csv file
@@ -111,8 +111,9 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
     else:
         dataset[timestamp_column] = dataset[timestamp_column].dt.strftime(timestamp_format)
 
-    for category_column in category_columns:
-        dataset[category_column] = dataset[category_column].astype("category").cat.codes
+    if categorize:
+        for category_column in category_columns:
+            dataset[category_column] = dataset[category_column].astype("category").cat.codes
 
     dataset.rename(
         output_columns,

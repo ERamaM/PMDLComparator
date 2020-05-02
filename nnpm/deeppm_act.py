@@ -175,7 +175,7 @@ def fit_and_score(params):
 
     if (params['model_type'] == 'ACT'):
         h = model.fit([X_a_train, X_t_train],
-                      y_a_train, epochs=200, verbose=1,
+                      y_a_train, epochs=200, verbose=2,
                       validation_data=([X_a_val, X_t_val], y_a_val),
                       callbacks=[early_stopping], batch_size=2 ** params['batch_size'])
     elif (params['model_type'] == 'TIME'):
@@ -246,7 +246,6 @@ extension = ".csv"
 ((X_a_test, X_t_test),
  (y_a_test, y_t_test),
  _, _, _, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)), max_len=max_length)
-
 
 print("Y_t:", y_t_train)
 

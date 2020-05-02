@@ -36,7 +36,7 @@ if arguments.net:
                 input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
                 category_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN],
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_DAYS,
-                output_columns=output_columns
+                output_columns=output_columns, categorize=True
             )
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
             make_dir_if_not_exists("ImagePPMiner/dataset")
@@ -81,7 +81,7 @@ if arguments.net:
                 input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
                 category_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN],
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
-                output_columns=output_columns
+                output_columns=output_columns, categorize=True
             )
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
             make_dir_if_not_exists("tax/data")
