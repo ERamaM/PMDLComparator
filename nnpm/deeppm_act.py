@@ -29,17 +29,19 @@ import time
 from tensorflow.keras.utils import Sequence
 
 import tensorflow as tf
+
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
-  try:
-    # Currently, memory growth needs to be the same across GPUs
-    for gpu in gpus:
-      tf.config.experimental.set_memory_growth(gpu, True)
-    logical_gpus = tf.config.experimental.list_logical_devices('GPU')
-    print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
-  except RuntimeError as e:
-    # Memory growth must be set before GPUs have been initialized
-    print(e)
+    try:
+        # Currently, memory growth needs to be the same across GPUs
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+    except RuntimeError as e:
+        # Memory growth must be set before GPUs have been initialized
+        print(e)
+
 
 class DataGenerator(Sequence):
     def __init__(self, features, labels, batch_size=32, shuffle=True):
@@ -221,6 +223,7 @@ outfile.write("Starting time: %s\n" % current_time)
 
 from pathlib import Path
 import os
+
 directory = Path(logfile).parent
 filename = Path(logfile).stem
 extension = ".csv"
@@ -232,30 +235,35 @@ extension = ".csv"
  max_length,
  n_classes,
  divisor,
-prefix_sizes, vocabulary, y_dict) = load_data(logfile)
+ prefix_sizes, vocabulary, y_dict) = load_data(logfile)
 
 # Load the splits from the folder
-((X_a_train, X_t_train),
- (y_a_train, y_t_train),
- _, _, _, _, prefix_sizes_train, _) = load_data(os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
+# ((X_a_train, X_t_train),
+# (y_a_train, y_t_train),
+_, _, _, _, _, _, _, _, prefix_sizes_train, _, _ = load_data(
+    os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length,
+    parsed_vocabulary=vocabulary, y_dict=y_dict)
 
-((X_a_val, X_t_val),
- (y_a_val, y_t_val),
- _, _, _, _, prefix_sizes_val, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)), max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
+# ((X_a_val, X_t_val),
+# (y_a_val, y_t_val),
+_, _, _, _, _, _, _, _, prefix_sizes_val, _, _ = load_data(
+    os.path.join(os.path.join(directory, "val_" + filename + extension)),
+    max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
 
-((X_a_test, X_t_test),
- (y_a_test, y_t_test),
- _, _, _, _, prefix_sizes_test, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)), max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
+# ((X_a_test, X_t_test),
+# (y_a_test, y_t_test),
+_, _, _, _, _, _, _, _, prefix_sizes_test, _, _ = load_data(
+    os.path.join(os.path.join(directory, "test_" + filename + extension)),
+    max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
 
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
 
 # For some reason loading the datasets in parts is not good
 # We calculate the number of events and then split
-"""
 train_len = len(prefix_sizes_train)
 val_len = train_len + len(prefix_sizes_val)
 print("Train len: ", train_len)
-print("Val len: ", val_len)
+print("Val len: ", val_len - train_len)
 print("Test len: ", len(X_a) - val_len)
 X_a_train = X_a[:train_len]
 X_a_val = X_a[train_len:val_len]
@@ -269,7 +277,6 @@ y_a_test = y_a[val_len:]
 y_t_train = y_t[:train_len]
 y_t_val = y_t[train_len:val_len]
 y_t_test = y_t[val_len:]
-"""
 
 # normalizing times
 X_t_train = X_t_train / np.max(X_t)
@@ -334,9 +341,12 @@ best_model.evaluate([X_a_test, X_t_test], y_a_test)
 brier_score = np.mean(
     list(map(lambda x: brier_score_loss(y_a_test[x], preds_a[x]), [i[0] for i in enumerate(y_a_test)])))
 """
+
+
 def calculate_brier_score(y_pred, y_true):
     # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
-    return np.mean(np.sum((y_true - y_pred)**2, axis=1))
+    return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
+
 
 brier_score = calculate_brier_score(preds_a, y_a_test)
 
@@ -358,6 +368,7 @@ print("\n\nFinal Brier score: ", final_brier_scores, file=outfile)
 print("Final Accuracy score: ", final_accuracy_scores, file=outfile)
 
 from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
+
 mcc = matthews_corrcoef(y_a_test, preds_a)
 precision = precision_score(y_a_test, preds_a, average="weighted")
 recall = recall_score(y_a_test, preds_a, average="weighted")

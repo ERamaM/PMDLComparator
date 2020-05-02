@@ -102,7 +102,7 @@ def load_data(logfile=None, max_len=None, parsed_vocabulary=None, y_dict=None):
 
     print("Num sequences:", seqs)
 
-    print("Activities: ",vocab )
+    print("Activities: ",vocab)
     vocab_size = len(vocab)
 
     X = np.array(X)
