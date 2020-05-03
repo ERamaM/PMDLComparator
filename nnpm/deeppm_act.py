@@ -309,7 +309,7 @@ if arguments.train:
     best = fmin(fit_and_score, space, algo=tpe.suggest, max_evals=n_iter, trials=trials,
                 rstate=p)
     best_params = hyperopt.space_eval(space, best)
-    best_model.save(os.path.join("results", log_filename + "_model.h5"))
+    best_model.save_weights(os.path.join("results", log_filename + "_model.h5"))
     outfile.write("\nHyperopt trials")
     outfile.write("\ntid,loss,learning_rate,n_modules,batch_size,time,n_epochs,n_params,perf_time")
     for trial in trials.trials:
@@ -335,12 +335,13 @@ if arguments.test:
     json_params = {}
     with open(os.path.join("results", log_filename + "_parameters.json"), "r") as f:
         json_params = json.load(f)
+    # TODO: for some reason we cannot save the model since loading it will
+    # give random predictions.
+    # When testing we have to retrain the model using the best hyperaparams saved
 
-    best_model = get_model(input_length=json_params['input_length'], vocab_size=json_params['vocab_size'],
-                      n_classes=json_params['n_classes'], model_type=json_params['model_type'],
-                      learning_rate=json_params['learning_rate'], embedding_size=json_params['embedding_size'],
-                      n_modules=json_params['n_modules'])
-    best_model.load_weights(os.path.join("results", log_filename + "_model.h5"))
+    fit_and_score(json_params)
+
+    #loaded_model = tf.keras.models.load_model(os.path.join("results", log_filename + "/model"))
 
     # evaluate
     print('Evaluating final model...')
@@ -360,17 +361,24 @@ if arguments.test:
 
     brier_score = calculate_brier_score(preds_a, y_a_test)
 
-    y_a_test = np.argmax(y_a_test, axis=1)
-    preds_a = np.argmax(preds_a, axis=1)
+    y_a_test_max = np.argmax(y_a_test, axis=1)
+    preds_a_max = np.argmax(preds_a, axis=1)
+
+    with open(os.path.join("results", "raw_" + log_filename + ".txt"), "w") as raw_file:
+        raw_file.write("prefix_length;ground_truth;predicted;prediction_probs\n")
+        for X, real, pred, probs in zip(X_a_test, y_a_test_max, preds_a_max, preds_a):
+            raw_file.write(str(np.count_nonzero(X)) + ";" + str(real) + ";" + str(pred) + ";" + np.array2string(probs, separator=",", max_line_width=99999) + "\n")
+
+
 
     outfile.write("\nBrier score: %f" % brier_score)
     final_brier_scores.append(brier_score)
 
-    accuracy = accuracy_score(y_a_test, preds_a)
+    accuracy = accuracy_score(y_a_test_max, preds_a_max)
     outfile.write("\nAccuracy: %f" % accuracy)
     final_accuracy_scores.append(accuracy)
 
-    outfile.write(np.array2string(confusion_matrix(y_a_test, preds_a), separator=", "))
+    outfile.write(np.array2string(confusion_matrix(y_a_test_max, preds_a_max), separator=", "))
 
     outfile.flush()
 
@@ -379,10 +387,10 @@ if arguments.test:
 
     from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score
 
-    mcc = matthews_corrcoef(y_a_test, preds_a)
-    precision = precision_score(y_a_test, preds_a, average="weighted")
-    recall = recall_score(y_a_test, preds_a, average="weighted")
-    f1 = f1_score(y_a_test, preds_a, average="weighted")
+    mcc = matthews_corrcoef(y_a_test_max, preds_a_max)
+    precision = precision_score(y_a_test_max, preds_a_max, average="weighted")
+    recall = recall_score(y_a_test_max, preds_a_max, average="weighted")
+    f1 = f1_score(y_a_test_max, preds_a_max, average="weighted")
     outfile.write("\nMCC: " + str(mcc))
     outfile.write("\nWeighted Precision: " + str(precision))
     outfile.write("\nWeighted Recall: " + str(recall))
