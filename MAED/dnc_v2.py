@@ -1,8 +1,8 @@
 import tensorflow.compat.v1 as tf
 import numpy as np
 from tensorflow.python.ops.rnn_cell import LSTMStateTuple
-from MAED.memory import Memory
-import MAED.utility as utility
+from memory import Memory
+import utility as utility
 import os
 
 

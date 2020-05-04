@@ -1,5 +1,5 @@
 import tensorflow as tf
-from MAED.controller import BaseController
+from controller import BaseController
 
 
 class RecurrentController(BaseController):

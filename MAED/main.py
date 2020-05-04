@@ -6,9 +6,9 @@ import tensorflow as tf
 import numpy as np
 import tqdm
 
-from MAED.dnc_v2 import DNC
-from MAED.preprocessing_utilities import vectorize_log, build_inputs, get_batch
-from MAED.recurrent_controller import StatelessRecurrentController
+from dnc_v2 import DNC
+from preprocessing_utilities import vectorize_log, build_inputs, get_batch
+from recurrent_controller import StatelessRecurrentController
 from sklearn.metrics import accuracy_score
 
 parser = argparse.ArgumentParser(description="Run the neural net")
@@ -101,7 +101,7 @@ with graph.as_default():
             current_idx + 1 + 4, # Sum 1 for the EOC and 4 for the time features
             current_idx+1,
             current_idx+1,
-            256,
+            100,
             64,
             2,
             BATCH_SIZE,
@@ -112,8 +112,8 @@ with graph.as_default():
             decoder_mode=True,
             dual_controller=True,
             write_protect=True,
-            emb_size=64,
-            hidden_controller_dim=256,
+            emb_size=32,
+            hidden_controller_dim=100,
             use_teacher=False,
             attend_dim=0,
             sampled_loss_dim=0,
@@ -130,7 +130,8 @@ with graph.as_default():
             #print("EPOCH ", epoch)
 
             losses = []
-            train_acc = []
+            train_pred = []
+            train_real = []
             pbar = tqdm.tqdm(range(n_train_batches))
             for i in pbar:
                 #print("Batch ", i, " of ", n_batches)
@@ -172,22 +173,39 @@ with graph.as_default():
                 })
                 predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
                 real_next_event = np.argmax(batch_dec_o[:, 0, :], axis=-1)
-                train_acc.append(accuracy_score(real_next_event, predicted_next_event))
+                for predicted, real in zip(predicted_next_event, real_next_event):
+                    train_pred.append(predicted)
+                    train_real.append(real)
+                train_acc = accuracy_score(train_real, train_pred)
                 losses.append(loss_value)
-                pbar.set_description_str("Epoch  " + str(epoch) + "/" + str(EPOCHS) + " | Loss " + str(np.mean(losses)) + " | Train acc: " + str(np.mean(train_acc)))
+                pbar.set_description_str("Epoch  " + str(epoch) + "/" + str(EPOCHS) + " | Loss " + str(np.mean(losses)) + " | Train acc: " + str(train_acc))
                 pbar.update()
             print("Epoch loss: ", np.mean(losses))
 
-            val_acc = []
+            val_pred = []
+            val_real = []
+            val_losses = []
             for batch in range(n_val_batches):
                 # Start validation
-                batch_enc_i, batch_dec_i, batch_dec_o, batch_masks = next(
+                batch_enc_i, batch_dec_i, batch_dec_o, batch_masks, id = next(
                     get_batch(enc_val_input, dec_val_input, dec_val_output, masks_val, BATCH_SIZE))
                 # Convert ids to tensors
                 batch_enc_i = tf.keras.utils.to_categorical(batch_enc_i, num_classes=current_idx + 1)
                 batch_dec_i = tf.keras.utils.to_categorical(batch_dec_i, num_classes=current_idx + 1)
                 batch_dec_o = tf.keras.utils.to_categorical(batch_dec_o, num_classes=current_idx + 1)
                 # print("Shape: b_e_i", np.array(batch_enc_i).shape)
+                batch_enc_val_time_between_curr_and_prev = np.expand_dims(enc_val_time_between_curr_and_prev[id * BATCH_SIZE : (id+1) * BATCH_SIZE], axis=-1)
+                batch_enc_val_time_between_curr_and_start = np.expand_dims(enc_val_time_between_curr_and_start[id * BATCH_SIZE : (id+1) * BATCH_SIZE], axis=-1)
+                batch_enc_val_since_midnight = np.expand_dims(enc_val_since_midnight[id * BATCH_SIZE : (id+1) * BATCH_SIZE], axis=-1)
+                batch_enc_val_weekday = np.expand_dims(enc_val_weekday[id * BATCH_SIZE : (id+1) * BATCH_SIZE], axis=-1)
+                # Concatenate the time vectors with the activity features
+                batch_enc_i = np.concatenate([
+                    batch_enc_i,
+                    batch_enc_val_time_between_curr_and_prev,
+                    batch_enc_val_time_between_curr_and_start,
+                    batch_enc_val_since_midnight,
+                    batch_enc_val_weekday
+                ], axis=-1)
                 loss_value, out = session.run([
                     loss,
                     prob
@@ -203,6 +221,10 @@ with graph.as_default():
                 })
                 predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
                 real_next_event = np.argmax(batch_dec_o[:, 0, :], axis=-1)
-                val_acc.append(accuracy_score(real_next_event, predicted_next_event))
-            print("Validation acc: ", np.mean(val_acc))
+                for pred, real in zip(predicted_next_event, real_next_event):
+                    val_pred.append(pred)
+                    val_real.append(real)
+                val_losses.append(loss_value)
+            val_acc = accuracy_score(val_pred, val_real)
+            print("Validation acc: ", val_acc, " | Validation loss: ", np.mean(val_losses))
 
