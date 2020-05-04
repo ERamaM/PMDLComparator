@@ -52,7 +52,14 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Run the neural net")
 parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument("--train", help="Start the training of the neural network", action="store_true")
+parser.add_argument("--test", help="Start the testing of next event", action="store_true")
 args = parser.parse_args()
+
+if not (args.train or args.test):
+    print("Argument --train or --test (or both) are required")
+    sys.exit(-3)
+
 eventlog = args.dataset
 
 
@@ -277,40 +284,48 @@ lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verb
 model.summary()
 # We can't use validation split since that split would do a split of "events" and not a split of "traces"
 # We need to manually set the valiation set
-model.fit(X_train, {'act_output': y_a_train, 'time_output': y_t_train}, validation_data = (X_val, {"act_output" : y_a_val, "time_output" : y_t_val}),verbose=1,
-          callbacks=[early_stopping, model_checkpoint, lr_reducer], batch_size=maxlen, epochs=200)
+if args.train:
+    model.fit(X_train, {'act_output': y_a_train, 'time_output': y_t_train}, validation_data = (X_val, {"act_output" : y_a_val, "time_output" : y_t_val}),verbose=1,
+              callbacks=[early_stopping, model_checkpoint, lr_reducer], batch_size=maxlen, epochs=200)
 
 
-model.load_weights(best_model)
-model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics={"act_output" : "acc", "time_output" : "mae"})
-metrics = model.evaluate(X_test, {'act_output': y_a_test, 'time_output': y_t_test}, verbose=1, batch_size=maxlen)
+if args.test:
+    model.load_weights(best_model)
+    model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics={"act_output" : "acc", "time_output" : "mae"})
+    metrics = model.evaluate(X_test, {'act_output': y_a_test, 'time_output': y_t_test}, verbose=1, batch_size=maxlen)
 
-y_a_pred_probs = model.predict([X_test])[0]
-y_a_pred = np.argmax(y_a_pred_probs, axis=1)
-y_true = np.argmax(y_a_test, axis=1)
-from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score, accuracy_score
+    y_a_pred_probs = model.predict([X_test])[0]
+    y_a_pred = np.argmax(y_a_pred_probs, axis=1)
+    y_true = np.argmax(y_a_test, axis=1)
+    from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score, accuracy_score
 
-def calculate_brier_score(y_pred, y_true):
-    # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
-    return np.mean(np.sum((y_true - y_pred)**2, axis=1))
-with open("results/" + eventlog_name +"_next_event.log", "w") as file:
-    for metric, name in zip(metrics, model.metrics_names):
-        if name == "time_output_mae":
-            # Undo the standarization done in the line y_t[i] = next_t / divisor
-            # Divide the result by 86400 to have the result in days
-            file.write("mae_in_days: " + str(metric * (divisor / 86400)) + "\n")
-        else:
-            file.write(str(name) + ": " + str(metric) + "\n")
+    def calculate_brier_score(y_pred, y_true):
+        # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+        return np.mean(np.sum((y_true - y_pred)**2, axis=1))
+    with open("results/" + eventlog_name +"_next_event.log", "w") as file:
+        for metric, name in zip(metrics, model.metrics_names):
+            if name == "time_output_mae":
+                # Undo the standarization done in the line y_t[i] = next_t / divisor
+                # Divide the result by 86400 to have the result in days
+                file.write("mae_in_days: " + str(metric * (divisor / 86400)) + "\n")
+            else:
+                file.write(str(name) + ": " + str(metric) + "\n")
 
-    acc = accuracy_score(y_true, y_a_pred)
-    mcc = matthews_corrcoef(y_true, y_a_pred)
-    precision = precision_score(y_true, y_a_pred, average="weighted")
-    recall = recall_score(y_true, y_a_pred, average="weighted")
-    f1 = f1_score(y_true, y_a_pred, average="weighted")
-    brier_score = calculate_brier_score(y_a_pred_probs, y_a_test)
-    file.write("\nACC Sklearn: " + str(acc))
-    file.write("\nMCC: " + str(mcc))
-    file.write("\nBrier score: " + str(brier_score))
-    file.write("\nWeighted Precision: " + str(precision))
-    file.write("\nWeighted Recall: " + str(recall))
-    file.write("\nWeighted F1: " + str(f1))
+        acc = accuracy_score(y_true, y_a_pred)
+        mcc = matthews_corrcoef(y_true, y_a_pred)
+        precision = precision_score(y_true, y_a_pred, average="weighted")
+        recall = recall_score(y_true, y_a_pred, average="weighted")
+        f1 = f1_score(y_true, y_a_pred, average="weighted")
+        brier_score = calculate_brier_score(y_a_pred_probs, y_a_test)
+        file.write("\nACC Sklearn: " + str(acc))
+        file.write("\nMCC: " + str(mcc))
+        file.write("\nBrier score: " + str(brier_score))
+        file.write("\nWeighted Precision: " + str(precision))
+        file.write("\nWeighted Recall: " + str(recall))
+        file.write("\nWeighted F1: " + str(f1))
+
+    with open(os.path.join("results", "raw_" + eventlog_name + ".txt"), "w") as raw_file:
+        raw_file.write("prefix_length;ground_truth;predicted;prediction_probs\n")
+        for X, y_t, y_p, y_p_pred in zip(X_test, y_true, y_a_pred, y_a_pred_probs):
+            raw_file.write(str(np.count_nonzero(np.sum(X, axis=-1))) + ";" + str(y_t) + ";" + str(y_p) + ";" + np.array2string(
+                y_p_pred, separator=",", max_line_width=99999) + "\n")
