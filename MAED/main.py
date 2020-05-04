@@ -5,9 +5,11 @@ import os
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import tensorflow as tf
 import numpy as np
+import tqdm
 
 from MAED.dnc_v2 import DNC
 from MAED.recurrent_controller import StatelessRecurrentController
+from sklearn.metrics import accuracy_score
 
 parser = argparse.ArgumentParser(description="Run the neural net")
 parser.add_argument("--dataset", type=str, required=True)
@@ -107,14 +109,20 @@ X_validation_vectorized, _, _ = vectorize_log(val_log)
 X_test_vectorized, _, _ = vectorize_log(test_log)
 
 enc_input, dec_input, dec_output, masks = build_inputs(vectorized_log, max_len)
+enc_train_input, dec_train_input, dec_train_output, masks_train = build_inputs(X_train_vectorized, max_len)
+enc_val_input, dec_val_input, dec_val_output, masks_val = build_inputs(X_validation_vectorized, max_len)
+enc_test_input, dec_test_input, dec_test_output, masks_test = build_inputs(X_test_vectorized, max_len)
 
 graph = tf.Graph()
 
 # Hyperparameters
 EPOCHS = 100
 BATCH_SIZE = 32
-n_samples = len(enc_input)
-n_batches = int(n_samples/BATCH_SIZE)
+
+n_train_samples = len(enc_train_input)
+n_val_samples = len(enc_val_input)
+n_train_batches = int(n_train_samples/BATCH_SIZE)
+n_val_batches = int(n_val_samples / BATCH_SIZE)
 
 
 with graph.as_default():
@@ -126,9 +134,9 @@ with graph.as_default():
             current_idx+1,
             current_idx+1,
             current_idx+1,
-            32,
-            32,
-            1,
+            256,
+            64,
+            2,
             BATCH_SIZE,
             use_mem=True,
             dual_emb=False,
@@ -137,30 +145,29 @@ with graph.as_default():
             decoder_mode=True,
             dual_controller=True,
             write_protect=True,
-            emb_size=32,
-            hidden_controller_dim=32,
+            emb_size=64,
+            hidden_controller_dim=256,
             use_teacher=False,
             attend_dim=0,
             sampled_loss_dim=0,
             enable_drop_out=True,
-            nlayer=2,
+            nlayer=1,
             name='vanila'
         )
 
-        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=3e-4)
+        optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=1e-3)
         # Because sampled loss dim == 0
         _, prob, loss, apply_gradients = ncomputer.build_loss_function_mask(optimizer, clip_s=[-5, 5])
         session.run(tf.compat.v1.global_variables_initializer())
         for epoch in range(EPOCHS):
-            print("EPOCH ", epoch)
+            #print("EPOCH ", epoch)
+
             losses = []
-            for i in range(n_batches):
-                print("Batch ", i, " of ", n_batches)
-                batch_enc_i, batch_dec_i, batch_dec_o, batch_masks = next(get_batch(enc_input, dec_input, dec_output, masks, BATCH_SIZE))
-                # print("Batch enc i: ", batch_enc_i)
-                #print("Batch dec i: ", batch_dec_i)
-                #print("Batch dec o: ", batch_dec_o)
-                #print("Batch_masks: ", batch_masks)
+            train_acc = []
+            pbar = tqdm.tqdm(range(n_train_batches))
+            for i in pbar:
+                #print("Batch ", i, " of ", n_batches)
+                batch_enc_i, batch_dec_i, batch_dec_o, batch_masks = next(get_batch(enc_train_input, dec_train_input, dec_train_output, masks_train, BATCH_SIZE))
                 # Convert ids to tensors
                 batch_enc_i = tf.keras.utils.to_categorical(batch_enc_i, num_classes=current_idx+1)
                 batch_dec_i = tf.keras.utils.to_categorical(batch_dec_i, num_classes=current_idx+1)
@@ -180,9 +187,41 @@ with graph.as_default():
                     # ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(decoder_length, prob_true_max=0.5),
                     ncomputer.drop_out_keep: 0.2
                 })
-                print("Minibatch loss: ", loss_value)
+                predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
+                real_next_event = np.argmax(batch_dec_o[:, 0, :], axis=-1)
+                train_acc.append(accuracy_score(real_next_event, predicted_next_event))
                 losses.append(loss_value)
-            print("EPOCH LOSS: ", np.mean(losses))
+                pbar.set_description_str("Epoch  " + str(epoch) + "/" + str(EPOCHS) + " | Loss " + str(np.mean(losses)) + " | Train acc: " + str(np.mean(train_acc)))
+                pbar.update()
+            print("Epoch loss: ", np.mean(losses))
+
+            val_acc = []
+            for batch in range(n_val_batches):
+                # Start validation
+                batch_enc_i, batch_dec_i, batch_dec_o, batch_masks = next(
+                    get_batch(enc_val_input, dec_val_input, dec_val_output, masks_val, BATCH_SIZE))
+                # Convert ids to tensors
+                batch_enc_i = tf.keras.utils.to_categorical(batch_enc_i, num_classes=current_idx + 1)
+                batch_dec_i = tf.keras.utils.to_categorical(batch_dec_i, num_classes=current_idx + 1)
+                batch_dec_o = tf.keras.utils.to_categorical(batch_dec_o, num_classes=current_idx + 1)
+                # print("Shape: b_e_i", np.array(batch_enc_i).shape)
+                loss_value, out = session.run([
+                    loss,
+                    prob
+                ], feed_dict={
+                    ncomputer.input_encoder: batch_enc_i,
+                    ncomputer.input_decoder: batch_dec_i,
+                    ncomputer.target_output: batch_dec_o,
+                    ncomputer.sequence_length: max_len,
+                    ncomputer.decode_length: max_len,
+                    ncomputer.mask: batch_masks,
+                    # ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(decoder_length, prob_true_max=0.5),
+                    ncomputer.drop_out_keep: 0.2
+                })
+                predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
+                real_next_event = np.argmax(batch_dec_o[:, 0, :], axis=-1)
+                val_acc.append(accuracy_score(real_next_event, predicted_next_event))
+            print("Validation acc: ", np.mean(val_acc))
 
 """
 idx["[EOC]"] = 5
