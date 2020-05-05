@@ -226,7 +226,7 @@ with graph.as_default():
                         ncomputer.sequence_length: max_len,
                         ncomputer.decode_length: max_len,
                         ncomputer.mask: batch_masks,
-                        # ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(decoder_length, prob_true_max=0.5),
+                        ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(max_len, prob_true_max=0.5),
                         ncomputer.drop_out_keep: DROPOUT
                     })
                     predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
@@ -279,7 +279,7 @@ with graph.as_default():
                         ncomputer.sequence_length: max_len,
                         ncomputer.decode_length: max_len,
                         ncomputer.mask: batch_masks,
-                        # ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(decoder_length, prob_true_max=0.5),
+                        ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(max_len, prob_true_max=0),
                         ncomputer.drop_out_keep: DROPOUT
                     })
                     predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
@@ -344,11 +344,21 @@ with graph.as_default():
                     ncomputer.sequence_length: max_len,
                     ncomputer.decode_length: max_len,
                     ncomputer.mask: batch_masks,
-                    # ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(decoder_length, prob_true_max=0.5),
+                    ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(max_len, prob_true_max=0),
                     ncomputer.drop_out_keep: DROPOUT
                 })
+                session.run
                 predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
                 real_next_event = np.argmax(batch_dec_o[:, 0, :], axis=-1)
+
+                # The test decoder already predicts the full suffix.
+                # However, instead of predicting zeros, it predicts a series of [EOC] until the end of the trace
+                batch_real_suffixes = np.argmax(batch_dec_o, axis=-1)
+                batch_predicted_suffixes = np.argmax(out, axis=-1)
+                #for r, p in zip(real_suffixes, predicted_suffixes):
+                #    print("Real: ", r, " Predicted: ", p)
+                # TODO: calculate damerau-levenshtein
+
                 for pred, real, probs, e_i, real_onehot in zip(predicted_next_event, real_next_event, out[:, 0, :], batch_prev_enc_i, batch_dec_o[:, 0, :]):
                     test_pred.append(pred)
                     test_real.append(real)

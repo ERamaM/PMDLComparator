@@ -52,9 +52,11 @@ def vectorize_log(log):
 
         if "[EOC]" not in idx:
             idx["[EOC]"] = current_idx
+            print("EOC: ", idx["[EOC]"])
             current_idx += 1
         if "[START]" not in idx:
             idx["[START]"] = current_idx
+            print("START: ", idx["[START]"])
             current_idx += 1
         # Do not augment with EOC here. Do it in the build_inputs fn
         curr_len = len(trace_ids)
