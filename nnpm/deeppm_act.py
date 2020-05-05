@@ -257,7 +257,7 @@ emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
 train_len = len(prefix_sizes_train)
 val_len = train_len + len(prefix_sizes_val)
 print("Train len: ", train_len)
-print("Val len: ", val_len)
+print("Val len: ", val_len - train_len)
 print("Test len: ", len(X_a) - val_len)
 X_a_train = X_a[:train_len]
 X_a_val = X_a[train_len:val_len]
@@ -280,6 +280,7 @@ X_t_test = X_t_test / np.max(X_t)
 y_a_train = to_categorical(y_a_train, num_classes=n_classes)
 y_a_val = to_categorical(y_a_val, num_classes=n_classes)
 y_a_test = to_categorical(y_a_test, num_classes=n_classes)
+
 
 n_iter = 20
 

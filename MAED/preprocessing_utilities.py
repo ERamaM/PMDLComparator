@@ -128,3 +128,7 @@ def get_batch(enc_i, dec_i, dec_o, masks, batch_size):
         batch_mask = masks[i * batch_size : (i + 1) * batch_size]
 
         yield batch_enc_i, batch_dec_i, batch_dec_o, batch_mask, i
+
+def calculate_brier_score(y_pred, y_true):
+    # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+    return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
