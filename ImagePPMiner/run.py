@@ -163,9 +163,9 @@ def get_image(act_val, time_val, max_trace, n_activity):
             if count == 1:
                 pass
             else:
+                # HAX: reduce the image size to float16 to avoid wasting the memory
+                # This avoids problems in BPI_2012
                 image = image.astype(np.float16)
-                print("Image size: ", sys.getsizeof(image), " bytes")
-                print("current length: ", len(list_image), " elements")
                 list_image.append(image)
                 image = np.zeros(matrix_zero)
         i = i + 1
