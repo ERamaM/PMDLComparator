@@ -14,6 +14,8 @@ from preprocessing_utilities import vectorize_log, build_inputs, get_batch, calc
 from recurrent_controller import StatelessRecurrentController
 from sklearn.metrics import accuracy_score, matthews_corrcoef, f1_score, precision_score, recall_score
 
+tf.compat.v1.disable_eager_execution()
+
 # Avoid saturating the GPU memory
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:

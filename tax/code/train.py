@@ -306,8 +306,7 @@ if args.test:
         for metric, name in zip(metrics, model.metrics_names):
             if name == "time_output_mae":
                 # Undo the standarization done in the line y_t[i] = next_t / divisor
-                # Divide the result by 86400 to have the result in days
-                file.write("mae_in_days: " + str(metric * (divisor / 86400)) + "\n")
+                file.write("mae_in_days: " + str(metric * divisor) + "\n")
             else:
                 file.write(str(name) + ": " + str(metric) + "\n")
 
