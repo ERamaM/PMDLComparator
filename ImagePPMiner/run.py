@@ -163,6 +163,9 @@ def get_image(act_val, time_val, max_trace, n_activity):
             if count == 1:
                 pass
             else:
+                image = image.astype(np.float16)
+                print("Image size: ", sys.getsizeof(image), " bytes")
+                print("current length: ", len(list_image), " elements")
                 list_image.append(image)
                 image = np.zeros(matrix_zero)
         i = i + 1
@@ -194,9 +197,7 @@ val_temp = df_val.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 
 
 # generate training and test set
-print("Getting training image")
 X_train = get_image(train_act, train_temp, max_trace, n_activity)
-print("Getting val image")
 X_val = get_image(val_act, val_temp, max_trace, n_activity)
 
 l_train = get_label(train_act)
