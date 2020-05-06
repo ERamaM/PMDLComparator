@@ -175,6 +175,9 @@ df, max_trace, n_caseid, n_activity = dataset_summary(arguments.dataset)
 # group by activity and timestamp by caseid
 act = df.groupby('CaseID').agg({'Activity': lambda x: list(x)})
 temp = df.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
+le = preprocessing.LabelEncoder()
+l_total = get_label(act)
+le.fit(l_total)
 
 # Load the splits
 # Perform the same operations as above
@@ -191,7 +194,9 @@ val_temp = df_val.groupby('CaseID').agg({'Timestamp': lambda x: list(x)})
 
 
 # generate training and test set
+print("Getting training image")
 X_train = get_image(train_act, train_temp, max_trace, n_activity)
+print("Getting val image")
 X_val = get_image(val_act, val_temp, max_trace, n_activity)
 
 l_train = get_label(train_act)
@@ -199,16 +204,15 @@ l_val = get_label(val_act)
 # Get the labels for the whole training set
 # It may happen that some labels are present in the test set but no in
 # the training (Helpdesk)
-l_total = get_label(act)
 
-le = preprocessing.LabelEncoder()
 # Calculate the labels on the whole training set but transform
 # only the splits
-le.fit(l_total)
 l_train = le.transform(l_train)
 l_val = le.transform(l_val)
 num_classes = le.classes_.size
 print(list(le.classes_))
+
+print("Training labels: ", l_train)
 
 X_train = np.asarray(X_train)
 l_train = np.asarray(l_train)
@@ -219,7 +223,6 @@ l_val = np.asarray(l_val)
 
 train_Y_one_hot = to_categorical(l_train, num_classes)
 val_Y_one_hot = to_categorical(l_val, num_classes)
-
 
 # define neural network architecture
 model = Sequential()
