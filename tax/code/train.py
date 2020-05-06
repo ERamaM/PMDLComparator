@@ -294,7 +294,10 @@ if args.test:
     model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics={"act_output" : "acc", "time_output" : "mae"})
     metrics = model.evaluate(X_test, {'act_output': y_a_test, 'time_output': y_t_test}, verbose=1, batch_size=maxlen)
 
-    y_a_pred_probs = model.predict([X_test])[0]
+    preds = model.predict([X_test])
+    y_a_pred_probs = preds[0]
+    y_t_pred_probs = preds[1]
+    #print("Y_T: ", y_t_pred_probs)
     y_a_pred = np.argmax(y_a_pred_probs, axis=1)
     y_true = np.argmax(y_a_test, axis=1)
     from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score, accuracy_score
@@ -306,7 +309,7 @@ if args.test:
         for metric, name in zip(metrics, model.metrics_names):
             if name == "time_output_mae":
                 # Undo the standarization done in the line y_t[i] = next_t / divisor
-                file.write("mae_in_days: " + str(metric * divisor) + "\n")
+                file.write("mae_in_days: " + str(metric * (divisor / 86400)) + "\n")
             else:
                 file.write(str(name) + ": " + str(metric) + "\n")
 
