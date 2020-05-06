@@ -183,7 +183,7 @@ with graph.as_default():
         session.run(tf.compat.v1.global_variables_initializer())
 
         if args.train:
-            max_val_loss = float("inf")
+            max_val_acc = 0
             for epoch in range(EPOCHS):
                 losses = []
                 train_pred = []
@@ -294,9 +294,9 @@ with graph.as_default():
                 mean_val_loss = np.mean(val_losses)
                 print("Validation acc: ", val_acc, " | Validation loss: ", mean_val_loss)
                 # Save model with best validation loss
-                if mean_val_loss < max_val_loss:
-                    print("Val loss improved from ", max_val_loss, " to ", mean_val_loss, ". Saving model.")
-                    max_val_loss = mean_val_loss
+                if val_acc > max_val_acc:
+                    print("Val acc improved from ", max_val_acc, " to ", val_acc, ". Saving model.")
+                    max_val_acc = val_acc
                     ncomputer.save(session, "models/", file_name + ".h5")
 
         if args.test:
@@ -349,7 +349,6 @@ with graph.as_default():
                     ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(max_len, prob_true_max=0),
                     ncomputer.drop_out_keep: DROPOUT
                 })
-                session.run
                 predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
                 real_next_event = np.argmax(batch_dec_o[:, 0, :], axis=-1)
 
