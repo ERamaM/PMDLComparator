@@ -54,7 +54,7 @@ class ProjectionOp:
 
 class DNC:
 
-    def __init__(self, controller_class, input_encoder_size, input_decoder_size, output_size,
+    def __init__(self, i_e, i_d, t_o, m, controller_class, input_encoder_size, input_decoder_size, output_size,
                  memory_words_num=256, memory_word_size=64, memory_read_heads=4,
                  batch_size=1, hidden_controller_dim=256, use_emb_encoder=True, use_emb_decoder=True,
                  use_mem=True, decoder_mode=False, emb_size=64,
@@ -199,16 +199,19 @@ class DNC:
         elif sampled_loss_dim > 0:
             self.target_output = tf.placeholder(tf.float32, [batch_size, None, 1], name='targets')
         else:
-            self.target_output = tf.placeholder(tf.float32, [batch_size, None, output_size], name='targets')
+            #self.target_output = tf.placeholder(tf.float32, [batch_size, None, output_size], name='targets')
+            self.target_output = t_o
 
-        self.input_encoder = tf.placeholder(tf.float32, [batch_size, None, input_encoder_size], name='input_encoder')
+        #self.input_encoder = tf.placeholder(tf.float32, [batch_size, None, input_encoder_size], name='input_encoder')
+        self.input_encoder = i_e
         if sampled_loss_dim > 0:
             self.input_decoder = tf.placeholder(tf.float32, [batch_size, None, 1], name='input_decoder')
         else:
-            self.input_decoder = tf.placeholder(tf.float32, [batch_size, None, input_decoder_size],
-                                                name='input_decoder')
+            #self.input_decoder = tf.placeholder(tf.float32, [batch_size, None, input_decoder_size], name='input_decoder')
+            self.input_decoder = i_d
 
-        self.mask = tf.placeholder(tf.bool, [batch_size, None], name='mask')
+        # self.mask = tf.placeholder(tf.bool, [batch_size, None], name='mask')
+        self.mask = m
         self.sequence_length = tf.placeholder(tf.int32, name='sequence_length')  # variant length?
         self.decode_length = tf.placeholder(tf.int32, name='decode_length')  # variant length?
 
