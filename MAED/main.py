@@ -151,66 +151,7 @@ with graph.as_default():
     tf.compat.v1.train.get_or_create_global_step()
     with tf.compat.v1.Session(graph=graph) as session:
         print("Current idx: ", current_idx)
-        print("Len train input: ", len(enc_train_input))
-
-        # Convert ids to tensors
-        batch_enc_i_train = tf.keras.utils.to_categorical(enc_train_input, num_classes=current_idx + 1)
-        batch_dec_i_train = tf.keras.utils.to_categorical(dec_train_input, num_classes=current_idx + 1)
-        batch_dec_o_train = tf.keras.utils.to_categorical(dec_train_output, num_classes=current_idx + 1)
-        # Partition time features
-        # Expand the dimesntions so as the dimensions are: (batch, len, 1)
-        batch_enc_train_time_between_curr_and_prev = np.expand_dims(
-            enc_train_time_between_curr_and_prev, axis=-1)
-        batch_enc_train_time_between_curr_and_start = np.expand_dims(
-            enc_train_time_between_curr_and_start, axis=-1)
-        batch_enc_train_since_midnight = np.expand_dims(
-            enc_train_since_midnight, axis=-1)
-        batch_enc_train_weekday = np.expand_dims(enc_train_weekday,
-                                                 axis=-1)
-        # Concatenate the time vectors with the activity features
-        batch_enc_i_train = np.concatenate([
-            batch_enc_i_train,
-            batch_enc_train_time_between_curr_and_prev,
-            batch_enc_train_time_between_curr_and_start,
-            batch_enc_train_since_midnight,
-            batch_enc_train_weekday
-        ], axis=-1)
-
-        # VALIDATIO
-        # Convert ids to tensors
-        batch_enc_i_val = tf.keras.utils.to_categorical(enc_val_input, num_classes=current_idx + 1)
-        batch_dec_i_val = tf.keras.utils.to_categorical(dec_val_input, num_classes=current_idx + 1)
-        batch_dec_o_val = tf.keras.utils.to_categorical(dec_val_output, num_classes=current_idx + 1)
-        # Partition time features
-        # Expand the dimesntions so as the dimensions are: (batch, len, 1)
-        batch_enc_val_time_between_curr_and_prev = np.expand_dims(
-            enc_val_time_between_curr_and_prev, axis=-1)
-        batch_enc_val_time_between_curr_and_start = np.expand_dims(
-            enc_val_time_between_curr_and_start, axis=-1)
-        batch_enc_val_since_midnight = np.expand_dims(
-            enc_val_since_midnight, axis=-1)
-        batch_enc_val_weekday = np.expand_dims(enc_val_weekday,
-                                                 axis=-1)
-        # Concatenate the time vectors with the activity features
-        batch_enc_i_val = np.concatenate([
-            batch_enc_i_val,
-            batch_enc_val_time_between_curr_and_prev,
-            batch_enc_val_time_between_curr_and_start,
-            batch_enc_val_since_midnight,
-            batch_enc_val_weekday
-        ], axis=-1)
-
-        train_dataset = tf.compat.v1.data.Dataset.from_tensor_slices((batch_enc_i_train, batch_dec_i_train, batch_dec_o_train, masks_train)).batch(BATCH_SIZE)
-        val_dataset = tf.compat.v1.data.Dataset.from_tensor_slices((batch_enc_i_val, batch_dec_i_val, batch_dec_o_val, masks_val)).batch(BATCH_SIZE)
-        iterator = tf.compat.v1.data.Iterator.from_structure(train_dataset.output_types, train_dataset.output_shapes)
-        training_op = iterator.make_initializer(train_dataset)
-        val_op = iterator.make_initializer(val_dataset)
-        session.run(training_op)
-        i_e, i_d, t_o, m = iterator.get_next()
-
-
         ncomputer = DNC(
-            i_e, i_d, t_o, m,
             StatelessRecurrentController,
             current_idx + 1 + 4,  # Sum 1 for the EOC and 4 for the time features
             current_idx + 1,
@@ -239,86 +180,69 @@ with graph.as_default():
         optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=LR)
         # Because sampled loss dim == 0
         _, prob, loss, apply_gradients = ncomputer.build_loss_function_mask(optimizer, clip_s=[MIN_CLIP_VALUE, MAX_CLIP_VALUE])
-
         session.run(tf.compat.v1.global_variables_initializer())
 
         if args.train:
             max_val_acc = 0
-            train_pred_values = []
-            train_real_values = []
-
-            session.run(training_op)
             for epoch in range(EPOCHS):
                 losses = []
                 train_pred = []
                 train_real = []
-                # print("Shape: b_e_i", np.array(batch_enc_i).shape)
+                pbar = tqdm.tqdm(range(n_train_batches))
+                for i in pbar:
+                    # print("Batch ", i, " of ", n_batches)
+                    batch_enc_i, batch_dec_i, batch_dec_o, batch_masks, id = next(
+                        get_batch(enc_train_input, dec_train_input, dec_train_output, masks_train, BATCH_SIZE))
+                    # Convert ids to tensors
+                    batch_enc_i = tf.keras.utils.to_categorical(batch_enc_i, num_classes=current_idx + 1)
+                    batch_dec_i = tf.keras.utils.to_categorical(batch_dec_i, num_classes=current_idx + 1)
+                    batch_dec_o = tf.keras.utils.to_categorical(batch_dec_o, num_classes=current_idx + 1)
+                    # Partition time features
+                    # Expand the dimesntions so as the dimensions are: (batch, len, 1)
+                    batch_enc_train_time_between_curr_and_prev = np.expand_dims(
+                        enc_train_time_between_curr_and_prev[id * BATCH_SIZE: (id + 1) * BATCH_SIZE], axis=-1)
+                    batch_enc_train_time_between_curr_and_start = np.expand_dims(
+                        enc_train_time_between_curr_and_start[id * BATCH_SIZE: (id + 1) * BATCH_SIZE], axis=-1)
+                    batch_enc_train_since_midnight = np.expand_dims(
+                        enc_train_since_midnight[id * BATCH_SIZE: (id + 1) * BATCH_SIZE], axis=-1)
+                    batch_enc_train_weekday = np.expand_dims(enc_train_weekday[id * BATCH_SIZE: (id + 1) * BATCH_SIZE],
+                                                             axis=-1)
+                    # Concatenate the time vectors with the activity features
+                    batch_enc_i = np.concatenate([
+                        batch_enc_i,
+                        batch_enc_train_time_between_curr_and_prev,
+                        batch_enc_train_time_between_curr_and_start,
+                        batch_enc_train_since_midnight,
+                        batch_enc_train_weekday
+                    ], axis=-1)
 
-                print("Run")
-                progress_bar = tqdm.tqdm(range(n_train_batches))
-                for b in progress_bar:
-                    loss_value, _, out, _ = session.run([
+                    # print("Shape: b_e_i", np.array(batch_enc_i).shape)
+                    loss_value, _, out = session.run([
                         loss,
                         apply_gradients,
-                        prob, training_op
-                    ], feed_dict = {
+                        prob
+                    ], feed_dict={
+                        ncomputer.input_encoder: batch_enc_i,
+                        ncomputer.input_decoder: batch_dec_i,
+                        ncomputer.target_output: batch_dec_o,
                         ncomputer.sequence_length: max_len,
                         ncomputer.decode_length: max_len,
+                        ncomputer.mask: batch_masks,
+                        ncomputer.teacher_force: ncomputer.get_bool_rand_incremental(max_len, prob_true_max=0.5),
                         ncomputer.drop_out_keep: DROPOUT
-                    }
-                    )
+                    })
                     predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
-                    #print("Predicted_next: ", predicted_next_event)
-                    # Run the real tensors in a session to retrieve its numpy value
-                    # From the sequences select the first chars
-                    real_next_event = np.argmax(session.run(t_o), axis=-1)[:, 0]
-                    #print("Real next: ", real_next_event)
-                    for p, r in zip(predicted_next_event, real_next_event):
-                        train_pred_values.append(p)
-                        train_real_values.append(r)
-                    losses.append(loss_value)
-
-                    train_acc = accuracy_score(train_real_values, train_pred_values)
-                    progress_bar.set_description_str("Epoch  " + str(epoch) + "/" + str(EPOCHS) + " | Loss " + str(
-                        np.mean(losses)) + " | Train acc: " + str(train_acc))
-
-                    #print("Train acc: ", train_acc)
-                    #print("Epoch loss: ", np.mean(losses))
-
-                val_losses =[]
-                val_pred = []
-                val_real = []
-                session.run(val_op)
-                for i in range(n_val_batches):
-                    val_loss_value, out, _, = session.run([
-                        loss,
-                        prob, val_op
-                    ], feed_dict = {
-                        ncomputer.sequence_length: max_len,
-                        ncomputer.decode_length: max_len,
-                        ncomputer.drop_out_keep: DROPOUT
-                    }
-                    )
-
-                    predicted_next_event = np.argmax(out[:, 0, :], axis=-1)
-                    real_next_event = np.argmax(session.run(t_o), axis=-1)[:, 0]
+                    real_next_event = np.argmax(batch_dec_o[:, 0, :], axis=-1)
                     for predicted, real in zip(predicted_next_event, real_next_event):
-                        val_pred.append(predicted)
-                        val_real.append(real)
-                    val_acc = accuracy_score(val_real, val_pred)
-                    val_losses.append(val_loss_value)
+                        train_pred.append(predicted)
+                        train_real.append(real)
+                    train_acc = accuracy_score(train_real, train_pred)
+                    losses.append(loss_value)
+                    pbar.set_description_str("Epoch  " + str(epoch) + "/" + str(EPOCHS) + " | Loss " + str(
+                        np.mean(losses)) + " | Train acc: " + str(train_acc))
+                    pbar.update()
+                print("Epoch loss: ", np.mean(losses))
 
-                val_acc = accuracy_score(val_real, val_pred)
-                print("Val loss: ", np.mean(val_losses))
-                print("Val acc: ", val_acc)
-
-                """
-                pbar.set_description_str("Epoch  " + str(epoch) + "/" + str(EPOCHS) + " | Loss " + str(
-                    np.mean(losses)) + " | Train acc: " + str(train_acc))
-                pbar.update()
-                """
-
-"""
                 val_pred = []
                 val_real = []
                 val_losses = []
@@ -457,4 +381,3 @@ with graph.as_default():
                 file.write("Brier score: " + str(test_brier_score) + "\n")
                 file.write("MCC: " + str(test_mcc) + "\n")
 
-"""
