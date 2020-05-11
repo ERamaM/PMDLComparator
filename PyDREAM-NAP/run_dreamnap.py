@@ -12,44 +12,73 @@ from PyDREAM.pydream.LogWrapper import LogWrapper
 from PyDREAM.pydream.predictive.nap.NAP import NAP
 from PyDREAM.pydream.predictive.nap.NAPr import NAPr
 
-
-
-# log_name = "BPI_Challenge_2012_W_Complete.xes.gz"
-# log_name = "Helpdesk.xes.gz"
-log_name = "bpi_challenge_2013_incidents.xes.gz"
-attributes = ["org:group", "resource country", "organization involved", "org:role", "impact", "product", "lifecycle:transition"]
-# attributes = ["org:resource"]
+import tensorflow as tf
+import numpy as np
+import argparse
+import yaml
+from pathlib import Path
 
 enhanced_pn_folder = "./enhanced_pns/"
 best_model_folder = "./best_models/"
-model_file = None
 
-model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.pnml"
-train_log_file = "./logs/train_val_" + log_name
+# Avoid saturating the GPU memory
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        # Currently, memory growth needs to be the same across GPUs
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+    except RuntimeError as e:
+        # Memory growth must be set before GPUs have been initialized
+        print(e)
+tf.random.set_seed(42)
+np.random.seed(42)
+
+parser = argparse.ArgumentParser(description="Run the neural net")
+parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument("--train", help="Start training the neural network", action="store_true")
+parser.add_argument("--test", help="Start testing next event of the neural network", action="store_true")
+args = parser.parse_args()
+
+dataset_path = args.dataset
+dataset_directory = Path(dataset_path).parent
+log_name = Path(dataset_path).name
+
+# Import the yaml and select attributes
+with open("attributes.yaml") as yaml_file:
+    data = yaml.safe_load(yaml_file)
+    if log_name.find(".") != -1:
+        name = log_name.split(".")[0]
+    else:
+        name = log_name
+
+    attributes = data[name]
+
+model_regex = "train_" + log_name + "_\d\.\d_\d\.\d\.pnml"
+train_log_file = "./logs/train_" + log_name
+val_log_file = "./logs/val_" + log_name
 test_log_file = "./logs/test_" + log_name
-
 total_log_file = "./logs/" + log_name
 
-main_log = xes_import_factory.apply(total_log_file)
+main_log = xes_import_factory.apply(dataset_path)
 main_log = LogWrapper(main_log, resources=attributes)
 
+model_file = None
+for file in os.listdir(best_model_folder):
+    if re.match(model_regex, file):
+        model_file = file
+        break
 
-def load_and_process(log_file, regex, type):
-    for file in os.listdir(best_model_folder):
-        if re.match(regex, file):
-            model_file = file
-            break
+if model_file is None:
+    raise FileNotFoundError("Unable to find mined model. Have you executed the splitminer?")
+
+net, initial_marking, final_marking = pnml_importer.import_net(best_model_folder + model_file)
+
+
+def load_and_process(log_file, type):
     log = xes_import_factory.apply(log_file)
-
-    net, initial_marking, final_marking = pnml_importer.import_net(best_model_folder + model_file)
-
-    """
-    if not type == "test_":
-        net, im, fm = heuristics_miner.apply(log, parameters={"dependency_thresh": 0.99})
-        pnml_exporter.export_net(net, im, "discovered_pn.pnml")
-
-    net, initial_marking, final_marking = pnml_importer.import_net("discovered_pn.pnml")
-    """
 
     log_wrapper = LogWrapper(log, resources=attributes)
     print("Resource keys: ", main_log.getResourceKeys())
@@ -62,7 +91,6 @@ def load_and_process(log_file, regex, type):
 
     save_json_path = enhanced_pn_folder + type + log_name + "_timedstatesamples.json"
 
-
     with open(save_json_path, "w") as f:
         json.dump(timedstatesamples_json, f)
 
@@ -73,15 +101,14 @@ def load_and_process(log_file, regex, type):
 if not os.path.isdir(enhanced_pn_folder):
     os.mkdir(enhanced_pn_folder)
 
-train_file = load_and_process(train_log_file, model_regex, "train_")
-test_file = load_and_process(test_log_file, model_regex, "test_")
+train_file = load_and_process(train_log_file, "train_")
+val_file = load_and_process(val_log_file, "val_")
+test_file = load_and_process(test_log_file, "test_")
 
-
-nap = NAPr(tss_train_file=train_file, tss_test_file=test_file, options={"n_epochs" : 100})
+nap = NAPr(tss_train_file=train_file, tss_test_file=test_file, options={"n_epochs": 100})
 if not os.path.isdir("checkpoints"):
     os.mkdir("checkpoints")
 nap.train(checkpoint_path="checkpoints", name="NAP", save_results=True)
-
 
 """
 
