@@ -123,6 +123,7 @@ if arguments.net:
             make_dir_if_not_exists("PyDREAM-NAP/logs")
             make_dir_if_not_exists("PyDREAM-NAP/output_models")
             make_dir_if_not_exists("PyDREAM-NAP/model_checkpoints")
+            make_dir_if_not_exists("PyDREAM-NAP/results")
 
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp",

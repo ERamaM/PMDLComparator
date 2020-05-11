@@ -20,6 +20,9 @@ from pathlib import Path
 
 enhanced_pn_folder = "./enhanced_pns/"
 best_model_folder = "./best_models/"
+# Beware of the last slash. NAP does not use os.path.join
+model_checkpont_folder = "./model_checkpoints"
+results_folder = "./results"
 
 # Avoid saturating the GPU memory
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -101,16 +104,31 @@ def load_and_process(log_file, type):
 if not os.path.isdir(enhanced_pn_folder):
     os.mkdir(enhanced_pn_folder)
 
+full_file = load_and_process(dataset_path, "")
 train_file = load_and_process(train_log_file, "train_")
 val_file = load_and_process(val_log_file, "val_")
 test_file = load_and_process(test_log_file, "test_")
 
-nap = NAPr(tss_train_file=train_file, tss_test_file=test_file, options={"n_epochs": 100})
-if not os.path.isdir("checkpoints"):
-    os.mkdir("checkpoints")
-nap.train(checkpoint_path="checkpoints", name="NAP", save_results=True)
+# If there is no attribute
+if attributes is None or not attributes:
+    nap = NAP(tss_train_file=train_file, tss_full_log=full_file, tss_val_file=val_file, tss_test_file=test_file, options={"n_epochs": 100})
+else:
+    nap = NAPr(tss_train_file=train_file, tss_full_log=full_file, tss_val_file=val_file, tss_test_file=test_file, options={"n_epochs": 100})
+if not os.path.isdir(model_checkpont_folder):
+    os.mkdir(model_checkpont_folder)
+
+if args.train:
+    nap.train(checkpoint_path=model_checkpont_folder, name=log_name, save_results=True)
+if args.test:
+    nap.loadModel(model_checkpont_folder, log_name)
+    if not os.path.exists(results_folder):
+        os.mkdir(results_folder)
+    nap.perform_test(
+        os.path.join(results_folder, log_name + "_results.txt"),
+        os.path.join(results_folder, "raw_" + log_name + ".txt")
+    )
+
 
 """
-
 enhanced_pn.saveToFile(enhanced_pn_folder + log_name + ".json")
 """
