@@ -59,7 +59,7 @@ with open("attributes.yaml") as yaml_file:
 
     attributes = data[name]
 
-model_regex = "train_" + log_name + "_\d\.\d_\d\.\d\.pnml"
+model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.pnml"
 train_log_file = "./logs/train_" + log_name
 val_log_file = "./logs/val_" + log_name
 test_log_file = "./logs/test_" + log_name

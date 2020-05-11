@@ -124,12 +124,13 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
     dataset.to_csv(file, sep=",", index=False)
 
 
-def split_train_val_test(file, output_directory, case_column):
+def split_train_val_test(file, output_directory, case_column, do_train_val=False):
     """
     Split the TRACES of the log in a 64/16/20 fashion (first 80/20 and then again 80/20).
     We assume the input is a csv file.
     :param file:
     :param output_directory:
+    :param do_train_val: create an additional partition with the training and validation set together
     :return:
     """
     pandas_init = pd.read_csv(file)
@@ -154,11 +155,22 @@ def split_train_val_test(file, output_directory, case_column):
     train_path = os.path.join(output_directory, "train_" + Path(file).stem + ".csv")
     val_path = os.path.join(output_directory, "val_" + Path(file).stem + ".csv")
     test_path = os.path.join(output_directory, "test_" + Path(file).stem + ".csv")
+
+    train_val_path = None
+    if do_train_val:
+        train_val_groups = groups[:val_size]
+        train_val = pd.concat(train_val_groups, sort=False).reset_index(drop=True)
+        train_val_path = os.path.join(output_directory, "train_val_" + Path(file).stem + ".csv")
+        train_val.to_csv(train_val_path, index=False)
+
     train.to_csv(train_path, index=False)
     val.to_csv(val_path, index=False)
     test.to_csv(test_path, index=False)
 
-    return file, train_path, val_path, test_path
+    if do_train_val:
+        return file, train_path, val_path, test_path, train_val_path
+    else:
+        return file, train_path, val_path, test_path
 
 def copy_file(file, output_directory, extension):
     base_file = os.path.basename(file)
@@ -182,18 +194,20 @@ def move_files(file, output_directory, extension):
     name = basename[:dot_index] + extension
     input_directory = Path(file).parent
     input_train = os.path.join(input_directory, "train_" + name)
+    input_train_val = os.path.join(input_directory, "train_val_" + name)
     input_val = os.path.join(input_directory, "val_" + name)
     input_test = os.path.join(input_directory, "test_" + name)
 
-    def _move_if_not_exists(input, output_dir):
+    def _move_if_exists(input, output_dir):
         stem = os.path.basename(input)
         if os.path.exists(input):
             os.replace(input, os.path.join(output_directory, stem))
 
-    _move_if_not_exists(input_train, output_directory)
-    _move_if_not_exists(input_val, output_directory)
-    _move_if_not_exists(input_test, output_directory)
-    _move_if_not_exists(file, output_directory)
+    _move_if_exists(input_train, output_directory)
+    _move_if_exists(input_val, output_directory)
+    _move_if_exists(input_test, output_directory)
+    _move_if_exists(input_train_val, output_directory)
+    _move_if_exists(file, output_directory)
 
 
 def make_dir_if_not_exists(directory):
