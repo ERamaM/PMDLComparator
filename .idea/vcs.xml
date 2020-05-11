@@ -2,6 +2,9 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/DALSTM_PM" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/PyDREAM-NAP/PyDREAM" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/PyDREAM-NAP/splitminer_java" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/taxlstm/taxlstm" vcs="Git" />
   </component>
 </project>
