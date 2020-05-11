@@ -2,15 +2,15 @@ from pm4py.objects.log.importer.xes import factory as xes_import_factory
 from pm4py.objects.petri.importer import pnml as pnml_importer
 from pm4py.algo.discovery.heuristics import factory as heuristics_miner
 from pm4py.objects.petri.exporter import pnml as pnml_exporter
-from PyDREAM.pydream.EnhancedPN import EnhancedPN
-from PyDREAM.pydream import LogWrapper
+from DREAM.pydream.EnhancedPN import EnhancedPN
+from DREAM.pydream import LogWrapper
 import os
 import json
 import re
 
-from PyDREAM.pydream.LogWrapper import LogWrapper
-from PyDREAM.pydream.predictive.nap.NAP import NAP
-from PyDREAM.pydream.predictive.nap.NAPr import NAPr
+from DREAM.pydream.LogWrapper import LogWrapper
+from DREAM.pydream.predictive.nap.NAP import NAP
+from DREAM.pydream.predictive.nap.NAPr import NAPr
 
 import tensorflow as tf
 import numpy as np
