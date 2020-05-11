@@ -60,6 +60,7 @@ with open("attributes.yaml") as yaml_file:
     attributes = data[name]
 
 model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.pnml"
+model_regex_logs = "logs_" + model_regex
 train_log_file = "./logs/train_" + log_name
 val_log_file = "./logs/val_" + log_name
 test_log_file = "./logs/test_" + log_name
@@ -71,6 +72,9 @@ main_log = LogWrapper(main_log, resources=attributes)
 model_file = None
 for file in os.listdir(best_model_folder):
     if re.match(model_regex, file):
+        model_file = file
+        break
+    if re.match(model_regex_logs, file):
         model_file = file
         break
 
