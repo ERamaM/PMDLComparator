@@ -1,0 +1,142 @@
+"""
+Licensed to the Apache Software Foundation (ASF) under one
+or more contributor license agreements.  See the NOTICE file
+distributed with this work for additional information
+regarding copyright ownership.  The ASF licenses this file
+to you under the Apache License, Version 2.0 (the
+"License"); you may not use this file except in compliance
+with the License.  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing,
+software distributed under the License is distributed on an
+"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, either express or implied.  See the License for the
+specific language governing permissions and limitations
+under the License.
+"""
+
+import numpy as np
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense, Input
+from tensorflow.keras.layers import LSTM, GRU
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import Embedding
+from tensorflow.keras.layers import BatchNormalization
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.models import model_from_json
+from math import sqrt
+from tensorflow.keras.preprocessing import sequence
+from tensorflow.keras import metrics
+from load_dataset import load_dataset
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+import sys, os
+import tensorflow as tf
+
+if len(sys.argv) < 3:
+    sys.exit("python LSTM_sequence.py n_neurons n_layers dataset")
+n_neurons = 150
+n_layers = 2
+import argparse
+from pathlib import Path
+parser = argparse.ArgumentParser(description="Run the neural net")
+parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument("--train", help="Start training the neural network", action="store_true")
+parser.add_argument("--test", help="Start testing next event of the neural network", action="store_true")
+args = parser.parse_args()
+dataset = args.dataset
+dataset_name = Path(dataset).name
+
+# fix random seed for reproducibility
+np.random.seed(42)
+tf.compat.v1.set_random_seed(42)
+
+(X_train, y_train), (X_test, y_test) = load_dataset(dataset)
+
+# normalize input data
+# compute the normalization values only on training set
+max = [0] * len(X_train[0][0])
+for a1 in X_train:
+    for s in a1:
+        for i in range(len(s)):
+            if s[i] > max[i]:
+                max[i] = s[i]
+
+print("MAX: ", max)
+
+for a1 in X_train:
+    for s in a1:
+        for i in range(len(s)):
+            if (max[i] > 0):  # alcuni valori hanno massimo a zero
+                s[i] = s[i] / max[i]
+
+for a1 in X_test:
+    for s in a1:
+        for i in range(len(s)):
+            if (max[i] > 0):  # alcuni valori hanno massimo a zero
+                s[i] = s[i] / max[i]
+
+X_train = sequence.pad_sequences(X_train)
+print("X_train: ", X_train[0])
+print("DEBUG: training shape", X_train.shape)
+maxlen = X_train.shape[1]
+X_test = sequence.pad_sequences(X_test, maxlen=X_train.shape[1])
+print("DEBUG: test shape", X_test.shape)
+
+# create the model
+model = Sequential()
+if n_layers == 1:
+    model.add(
+        LSTM(n_neurons, implementation=2, input_shape=(X_train.shape[1], X_train.shape[2]), recurrent_dropout=0.2))
+    model.add(BatchNormalization())
+else:
+    for i in range(n_layers - 1):
+        model.add(
+            LSTM(n_neurons, implementation=2, input_shape=(X_train.shape[1], X_train.shape[2]), recurrent_dropout=0.2,
+                 return_sequences=True))
+        model.add(BatchNormalization())
+    model.add(LSTM(n_neurons, implementation=2, recurrent_dropout=0.2))
+    model.add(BatchNormalization())
+
+# add output layer (regression)
+model.add(Dense(1))
+if not os.path.exists("model/model_data"):
+    os.mkdir("model/model_data")
+
+# compiling the model, creating the callbacks
+model.compile(loss='mae', optimizer='Nadam', metrics=['mean_squared_error', 'mae', 'mape'])
+print(model.summary())
+early_stopping = EarlyStopping(patience=42)
+model_checkpoint = ModelCheckpoint(
+    "model/model_" + dataset + "_" + str(n_neurons) + "_" + str(n_layers) + "_weights_best.h5", monitor='val_loss',
+    verbose=0, save_best_only=True,
+    mode='auto')
+lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verbose=0, mode='auto', epsilon=0.0001,
+                               cooldown=0, min_lr=0)
+
+X_train = np.asarray(X_train)
+y_train = np.asarray(y_train)
+
+# train the model
+model.fit(X_train, y_train, validation_split=0.2, callbacks=[early_stopping, model_checkpoint, lr_reducer], epochs=500,
+          batch_size=maxlen, verbose=1)
+
+# saving model to file
+model.save(os.path.join("model", dataset_name))
+
+# Final evaluation of the model
+
+# Create new model with saved architecture
+# TODO it is possible to use the same model used for training, just loading the weights
+testmodel = model
+# load saved weigths to the test model
+testmodel.load_weights("model/model_" + dataset + "_" + str(n_neurons) + "_" + str(n_layers) + "_weights_best.h5")
+# Compile model (required to make predictions)
+testmodel.compile(loss='mae', optimizer='Nadam', metrics=['mean_squared_error', 'mae', 'mape'])
+print("Created model and loaded weights from file")
+
+# compute metrics on test set (same order as in the metrics list given to the compile method)
+scores = model.evaluate(X_test, y_test, verbose=0)
+print("Root Mean Squared Error: %.4f d MAE: %.4f d MAPE: %.4f%%" % (
+sqrt(scores[1] / ((24.0 * 3600) ** 2)), scores[2] / (24.0 * 3600), scores[3]))
