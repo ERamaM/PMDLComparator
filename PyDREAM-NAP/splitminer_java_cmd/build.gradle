@@ -1,0 +1,82 @@
+plugins {
+    id "org.jetbrains.kotlin.jvm" version "1.3.31"
+    id "com.github.johnrengelman.shadow" version "5.0.0"
+}
+
+group "gal.usc.citius.processmining"
+version "1.0.0"
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    jcenter()
+    maven {
+        credentials {
+            username "efren.rama"
+            password "1234567890"
+        }
+        url "http://172.16.244.216/repository/maven/"
+    }
+    flatDir {
+        dirs 'lib'
+    }
+    maven { url "https://jitpack.io" }
+}
+
+dependencies {
+    implementation "org.apache.tika:tika-core:1.20"
+    implementation "khttp:khttp:0.1.0"
+    implementation group: "org.jetbrains.kotlin",           name: "kotlin-stdlib-jdk8"
+    implementation group: "org.jetbrains.kotlinx",          name: "kotlinx-coroutines-core",version: "1.3.0-M1"
+    implementation group: "org.jeasy",                      name: "easy-flows",             version: "0.1"
+    implementation group: "org.jeasy",                      name: "easy-rules-core",        version: "3.3.0"
+    implementation group: "net.andreinc.mockneat",          name: "mockneat",               version: "0.2.4"
+    implementation group: "org.deckfour",                   name: "openxes",                version: "2.16"
+    implementation group: "org.apache.commons",             name: "commons-math3",          version: "3.6.1"
+    implementation group: "org.nield",                      name: "kotlin-statistics",      version: "1.2.1"
+    implementation group: "javax.xml.bind",                 name: "jaxb-api",               version: "2.3.0"
+    implementation group: "com.sun.xml.bind",               name: "jaxb-impl",              version: "2.3.0"
+    implementation group: "org.glassfish.jaxb",             name: "jaxb-runtime",           version: "2.3.0"
+    implementation group: "javax.activation",               name: "activation",             version: "1.1.1"
+    implementation group: "com.xenomachina", name: "kotlin-argparser", version: "2.0.7"
+    implementation group: "dom4j", name: "dom4j", version: "1.6.1"
+
+    implementation name: "decaypns" //DREAM jar
+    /*
+    implementation name: "conformance-3.1.1"
+    implementation name: "discovery-3.1.1"
+    implementation name: "model-3.1.1"
+    implementation name: "sources-3.1.1"
+    implementation name: "utils-3.1.1"
+    implementation name: "writers-3.1.1"
+    implementation name: "openxes-2.16"
+    implementation name: "PerformanceMetrics-2.1.0"
+    implementation name: "ConformanceMetrics-2.2.2"
+    */
+    implementation group: "gal.usc.citius.processmining",   name: "model",           version: "3.2.0"
+    implementation group: "gal.usc.citius.processmining",   name: "sources",            version: "3.2.0"
+    implementation group: "gal.usc.citius.processmining",   name: "utils",                  version: "3.2.0"
+    implementation group: "gal.usc.citius.processmining",   name: "writers",            version: "3.2.0"
+    implementation group: "gal.usc.citius.processmining",   name: "discovery",              version: "3.2.0"
+    implementation group: "gal.usc.citius.processmining",   name: "conformance",     version: "3.2.0"
+
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+wrapper {
+    gradleVersion = "5.4.1"
+}
+
+shadowJar {
+    manifest {
+        attributes "Main-Class": "MainKt"
+    }
+    setZip64(true)
+}
+
