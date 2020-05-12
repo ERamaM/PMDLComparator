@@ -78,8 +78,6 @@ fun main(args: Array<String>) {
             executor.shutdown()
             executor.awaitTermination(1, TimeUnit.DAYS)
 
-            executor = Executors.newFixedThreadPool(n_threads)
-            val resultMap = ConcurrentHashMap<String, Double>()
 
             var bm = best_model_folder
             if (!bm.contains("/")){
@@ -87,44 +85,35 @@ fun main(args: Array<String>) {
             }
             val executionLog = FileWriter(
                 bm +
-                this.log_name.replace("/", "_").replace(".xes.gz", "_") + "model_logs.txt"
+                        this.log_name.replace("/", "_").replace(".xes.gz", "_") + "model_logs.txt"
             )
             // Export pnml
+            var resultMap = HashMap<String, Double>()
             for (e in eps) {
                 for (et in eta) {
-                    val thread = Runnable {
-                        print("Processing: $e $et\n")
-                        val model_name = get_filename(log_name)
-                        val mined_output = Paths.get(model_folder, model_name + "_" + "$e" + "_" + "$et").toString()
-                        val log = load_log(train_log_name)
-                        val model = PNMLFileParser("$mined_output.pnml").read()
+                    print("Processing: $e $et\n")
+                    val model_name = get_filename(log_name)
+                    val mined_output = Paths.get(model_folder, model_name + "_" + "$e" + "_" + "$et").toString()
+                    val log = load_log(train_log_name)
+                    val model = PNMLFileParser("$mined_output.pnml").read()
 
-                        val fitness = AlignmentBasedFitness().compute(model, log)
-                        // val precision = AdvancedBehaviouralAppropriateness().compute(model, log)
-                        // print("Precision: $precision")
-                        println("Model $mined_output with fitness $fitness and precision (coverage): TBD")
-
-
-                        synchronized(resultMap) {
-                            executionLog.append("Model $mined_output with fitness $fitness\n")
-                            resultMap[mined_output] = fitness
-                            executionLog.flush()
-                        }
-                    }
-                    executor.execute(thread)
+                    val fitness = AlignmentBasedFitness().compute(model, log)
+                    // val precision = AdvancedBehaviouralAppropriateness().compute(model, log)
+                    // print("Precision: $precision")
+                    println("Model $mined_output with fitness $fitness and precision (coverage): TBD")
+                    executionLog.append("Model $mined_output with fitness $fitness\n")
+                    resultMap[mined_output] = fitness
+                    executionLog.flush()
                 }
             }
-
-            executor.shutdown()
-            executor.awaitTermination(1, TimeUnit.DAYS)
 
             val sortedMap = resultMap.toList().sortedBy { (k, v) -> v }.toMap()
             val bestmodel = sortedMap.keys.last()
             // Copy model to best_models directory
             var filename = get_filename(bestmodel)
             File("$bestmodel.pnml").copyTo(File("$bm$filename.pnml"))
-        }
-        }
+    }
+}
 }
 
 private fun mine_and_save(log_name: String, model_folder: String, e: Double, et: Double) : String {
