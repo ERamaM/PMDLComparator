@@ -34,6 +34,21 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error
 import sys, os
 import tensorflow as tf
 
+# Avoid saturating the GPU memory
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        # Currently, memory growth needs to be the same across GPUs
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+    except RuntimeError as e:
+        # Memory growth must be set before GPUs have been initialized
+        print(e)
+tf.random.set_seed(42)
+np.random.seed(42)
+
 if len(sys.argv) < 3:
     sys.exit("python LSTM_sequence.py n_neurons n_layers dataset")
 n_neurons = 150
@@ -136,24 +151,32 @@ lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verb
 
 
 # train the model
-model.fit(X_train, y_train, validation_data=(X_val, y_val), callbacks=[early_stopping, model_checkpoint, lr_reducer], epochs=500,
-          batch_size=maxlen, verbose=1)
+if args.train:
+    model.fit(X_train, y_train, validation_data=(X_val, y_val), callbacks=[early_stopping, model_checkpoint, lr_reducer], epochs=500,
+              batch_size=maxlen, verbose=1)
+    # saving model to file
+    model.save_weights(os.path.join("model", dataset_name + ".h5"))
 
-# saving model to file
-model.save(os.path.join("model", dataset_name))
+if args.test:
+    # Final evaluation of the model
+    # Create new model with saved architecture
+    # TODO it is possible to use the same model used for training, just loading the weights
+    testmodel = model
+    # load saved weigths to the test model
+    testmodel.load_weights(os.path.join("model", dataset_name + ".h5"))
+    # Compile model (required to make predictions)
+    testmodel.compile(loss='mae', optimizer='Nadam', metrics=['mean_squared_error', 'mae', 'mape'])
+    print("Created model and loaded weights from file")
 
-# Final evaluation of the model
+    # compute metrics on test set (same order as in the metrics list given to the compile method)
+    scores = model.evaluate(X_test, y_test, verbose=0)
+    print("Root Mean Squared Error: %.4f d MAE: %.4f d MAPE: %.4f%%" % (
+    sqrt(scores[1] / ((24.0 * 3600) ** 2)), scores[2] / (24.0 * 3600), scores[3]))
 
-# Create new model with saved architecture
-# TODO it is possible to use the same model used for training, just loading the weights
-testmodel = model
-# load saved weigths to the test model
-testmodel.load_weights("model/model_" + dataset + "_" + str(n_neurons) + "_" + str(n_layers) + "_weights_best.h5")
-# Compile model (required to make predictions)
-testmodel.compile(loss='mae', optimizer='Nadam', metrics=['mean_squared_error', 'mae', 'mape'])
-print("Created model and loaded weights from file")
+    if not os.path.exists("results"):
+        os.mkdir("results")
 
-# compute metrics on test set (same order as in the metrics list given to the compile method)
-scores = model.evaluate(X_test, y_test, verbose=0)
-print("Root Mean Squared Error: %.4f d MAE: %.4f d MAPE: %.4f%%" % (
-sqrt(scores[1] / ((24.0 * 3600) ** 2)), scores[2] / (24.0 * 3600), scores[3]))
+    with open("results/" + dataset_name + ".txt", "w") as result_file:
+        result_file.write("Root Mean Squared Error: %.4f d MAE: %.4f d MAPE: %.4f%%" % (
+            sqrt(scores[1] / ((24.0 * 3600) ** 2)), scores[2] / (24.0 * 3600), scores[3]))
+

@@ -141,6 +141,7 @@ if arguments.net:
             make_dir_if_not_exists("DALSTM/data")
             make_dir_if_not_exists("DALSTM/model")
             make_dir_if_not_exists("DALSTM/model/model_data/")
+            make_dir_if_not_exists("DALSTM/results")
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
             # Load attribute list from file
             attributes = load_attributes_from_file("attributes.yaml", Path(xes).name)
