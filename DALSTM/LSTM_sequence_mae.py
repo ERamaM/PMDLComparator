@@ -47,12 +47,17 @@ parser.add_argument("--test", help="Start testing next event of the neural netwo
 args = parser.parse_args()
 dataset = args.dataset
 dataset_name = Path(dataset).name
+dataset_directory = Path(dataset).parent
 
 # fix random seed for reproducibility
 np.random.seed(42)
 tf.compat.v1.set_random_seed(42)
 
-(X_train, y_train), (X_test, y_test) = load_dataset(dataset)
+(X, y), values = load_dataset(dataset)
+(X_train, y_train), _ = load_dataset(os.path.join(dataset_directory, "train_" + dataset_name), values)
+(X_val, y_val), _ = load_dataset(os.path.join(dataset_directory, "val_" + dataset_name), values)
+(X_test, y_test), _ = load_dataset(os.path.join(dataset_directory, "test_" + dataset_name), values)
+
 
 # normalize input data
 # compute the normalization values only on training set
@@ -71,17 +76,31 @@ for a1 in X_train:
             if (max[i] > 0):  # alcuni valori hanno massimo a zero
                 s[i] = s[i] / max[i]
 
+for a1 in X_val:
+    for s in a1:
+        for i in range(len(s)):
+            if (max[i] > 0):  # alcuni valori hanno massimo a zero
+                s[i] = s[i] / max[i]
+
 for a1 in X_test:
     for s in a1:
         for i in range(len(s)):
             if (max[i] > 0):  # alcuni valori hanno massimo a zero
                 s[i] = s[i] / max[i]
 
+X_train = np.asarray(X_train)
+y_train = np.asarray(y_train)
+X_val = np.asarray(X_val)
+y_val = np.asarray(y_val)
+X_test = np.asarray(X_test)
+y_test = np.asarray(y_test)
+
 X_train = sequence.pad_sequences(X_train)
 print("X_train: ", X_train[0])
 print("DEBUG: training shape", X_train.shape)
 maxlen = X_train.shape[1]
 X_test = sequence.pad_sequences(X_test, maxlen=X_train.shape[1])
+X_val = sequence.pad_sequences(X_val, maxlen=X_train.shape[1])
 print("DEBUG: test shape", X_test.shape)
 
 # create the model
@@ -115,11 +134,9 @@ model_checkpoint = ModelCheckpoint(
 lr_reducer = ReduceLROnPlateau(monitor='val_loss', factor=0.5, patience=10, verbose=0, mode='auto', epsilon=0.0001,
                                cooldown=0, min_lr=0)
 
-X_train = np.asarray(X_train)
-y_train = np.asarray(y_train)
 
 # train the model
-model.fit(X_train, y_train, validation_split=0.2, callbacks=[early_stopping, model_checkpoint, lr_reducer], epochs=500,
+model.fit(X_train, y_train, validation_data=(X_val, y_val), callbacks=[early_stopping, model_checkpoint, lr_reducer], epochs=500,
           batch_size=maxlen, verbose=1)
 
 # saving model to file

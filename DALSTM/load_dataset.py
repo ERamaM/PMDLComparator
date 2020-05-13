@@ -29,28 +29,24 @@ def buildOHE(index, n):
     L[index] = 1
     return L
 
-def load_dataset(filename):
+def load_dataset(filename, prev_values=None):
     dataframe = pandas.read_csv(filename, header=0)
     dataframe = dataframe.replace(r's+', 'empty', regex=True)
     dataframe = dataframe.fillna(0)
-    # print dataframe.dtypes
-    # print dataframe.select_dtypes(['float64','int64'])
 
     dataset = dataframe.values
-    # print dataset[0]
-    # dataset=dataset[:,:8]
-    values = []
-    for i in range(dataset.shape[1]):
-        values.append(len(np.unique(dataset[:, i])))  # +1
-    # print values
-    # exit(1)
-    # print np.unique(dataset[:, 5])
-    elems_per_fold = int(values[0] / 3)
+    if prev_values is None:
+        values = []
+        for i in range(dataset.shape[1]):
+            values.append(len(np.unique(dataset[:, i])))  # +1
+    else:
+        values = prev_values
 
-    print("DEBUG: elemns per fold", elems_per_fold)
-    datasetTR = dataset[dataset[:, 0] < 2 * elems_per_fold]
-    # test set
-    datasetTS = dataset[dataset[:, 0] >= 2 * elems_per_fold]
+    print("Dataset: ", dataset)
+    print("Values: ", values)
+
+
+    datasetTR = dataset
 
     # trick empty column siav log
     # datasetTR=datasetTR[:,:8]
@@ -178,4 +174,4 @@ def load_dataset(filename):
         # print temptarget
         return data, temptarget
 
-    return generate_set(datasetTR), generate_set(datasetTS)
+    return generate_set(datasetTR), values

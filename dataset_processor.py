@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 from utils import *
 
 parser = argparse.ArgumentParser(description="Prepare datasets for multiple SOTA DL-PPM studies")
@@ -134,6 +135,29 @@ if arguments.net:
             test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
             train_val_file, train_val_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
             move_files(xes_path, "PyDREAM-NAP/logs", EXTENSIONS.XES_COMPRESSED)
+    elif arguments.net == "navarin":
+        for xes in dataset_list:
+            print("Process: ", xes)
+            make_dir_if_not_exists("DALSTM/data")
+            make_dir_if_not_exists("DALSTM/model")
+            make_dir_if_not_exists("DALSTM/model/model_data/")
+            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+            # Load attribute list from file
+            attributes = load_attributes_from_file("attributes.yaml", Path(xes).name)
+            # Normalize columns
+            select_columns(
+                csv_path,
+                input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN] + attributes,
+                category_columns=None,
+                timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                output_columns=None, categorize=False
+            )
+            # Reorder columns
+            reorder_columns(csv_path, [XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
+            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=False)
+            move_files(csv_path, "DALSTM/data", EXTENSIONS.CSV)
+
+
 
             #copy_file(xes, "evermann/data", EXTENSIONS.XES_COMPRESSED)
     else:

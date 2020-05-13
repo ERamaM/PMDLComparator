@@ -13,6 +13,7 @@ from pathlib import Path
 import glob
 import datetime
 import shutil
+import yaml
 
 
 def convert_xes_to_csv(file, output_folder):
@@ -92,14 +93,15 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
     """
     Select columns from CSV converted from XES
     :param file: csv file
-    :param input_columns: array with the columns to be selected
+    :param input_columns: array with the columns to be selected. If none selects every column
     :param timestamp_format: timestamp format to be converted
-    :param output_columns: dictionary with the assignment
+    :param output_columns: dictionary with the assignment of renaming the columns. If none, no renaming is done
     :return: overwrites the csv file with the subselected csv
     """
     dataset = pd.read_csv(file)
 
-    dataset = dataset[input_columns]
+    if input_columns is not None:
+        dataset = dataset[input_columns]
 
     timestamp_column = XES_Fields.TIMESTAMP_COLUMN
     dataset[timestamp_column] = pd.to_datetime(dataset[timestamp_column], utc=True)
@@ -115,13 +117,38 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
         for category_column in category_columns:
             dataset[category_column] = dataset[category_column].astype("category").cat.codes
 
-    dataset.rename(
-        output_columns,
-        axis="columns",
-        inplace=True
-    )
+    if output_columns is not None:
+        dataset.rename(
+            output_columns,
+            axis="columns",
+            inplace=True
+        )
 
     dataset.to_csv(file, sep=",", index=False)
+
+def reorder_columns(file, ordered_columns):
+    """
+    Reorder the columns of the dataset.
+    :param file: Data file
+    :param ordered_columns: Array with the ordered columns of the df.
+    If the column array size is less than the total number of columns of the dataset,
+     only that columns are ordered and the rest is left alone.
+    :return:
+    """
+    df = pd.read_csv(file)
+    df = df.reindex(columns=(ordered_columns + list([a for a in df.columns if a not in ordered_columns])))
+    df.to_csv(file, sep=",", index=False)
+
+def load_attributes_from_file(filename, log_name):
+    with open(filename) as yaml_file:
+        data = yaml.safe_load(yaml_file)
+        if log_name.find(".") != -1:
+            name = log_name.split(".")[0]
+        else:
+            name = log_name
+
+        attributes = data[name]
+    return attributes
 
 
 def split_train_val_test(file, output_directory, case_column, do_train_val=False):
