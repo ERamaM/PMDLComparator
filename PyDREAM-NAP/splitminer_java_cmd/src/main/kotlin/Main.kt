@@ -5,36 +5,25 @@ import com.raffaeleconforti.context.FakePluginContext
 import com.raffaeleconforti.conversion.bpmn.BPMNToPetriNetConverter
 import com.raffaeleconforti.conversion.petrinet.PetriNetToBPMNConverter
 import com.raffaeleconforti.marking.MarkingDiscoverer
-import com.raffaeleconforti.measurements.impl.AlignmentBasedPrecision
 import com.raffaeleconforti.wrappers.PetrinetWithMarking
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.DefaultHelpFormatter
 import com.xenomachina.argparser.default
 import com.xenomachina.argparser.mainBody
-import edu.uic.prominent.processmining.decaypns.log.EventLog
-import edu.uic.prominent.processmining.decaypns.log.EventLogParser
-import edu.uic.prominent.processmining.decaypns.log.XLogLoader
-import edu.uic.prominent.processmining.decaypns.log.util.Trace
-import edu.uic.prominent.processmining.decaypns.pnmetrics.FitnessReplayer
-import edu.uic.prominent.processmining.decaypns.pntools.PetriNetParser
 import edu.uic.prominent.processmining.decaypns.prom.model.ModelUtils
 import gal.usc.citius.processmining.datasources.log.XESFileParser
 import gal.usc.citius.processmining.datasources.log.common.Mappings
 import gal.usc.citius.processmining.datasources.log.common.Producers
-import gal.usc.citius.processmining.datasources.processmodel.PNMLFileParser
-import gal.usc.citius.processmining.metrics.fitness.AlignmentBasedFitness
-import gal.usc.citius.processmining.metrics.precision.AdvancedBehaviouralAppropriateness
-import gal.usc.citius.processmining.metrics.precision.ETCBestAlignPrecision
-import gal.usc.citius.processmining.metrics.precision.ModelCoverage
 import gal.usc.citius.processmining.model.log.Lifecycle
 import gal.usc.citius.processmining.model.log.ProcessLog
 import gal.usc.citius.processmining.utils.translators.toXLog
 import org.deckfour.xes.classification.XEventNameClassifier
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram
-import java.io.*
+import java.io.FileDescriptor
+import java.io.FileOutputStream
+import java.io.PrintStream
 import java.nio.file.Paths
 import java.time.Instant
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
@@ -78,7 +67,7 @@ fun main(args: Array<String>) {
             executor.shutdown()
             executor.awaitTermination(1, TimeUnit.DAYS)
 
-
+            /*
             var bm = best_model_folder
             if (!bm.contains("/")){
                 bm += "/"
@@ -112,6 +101,7 @@ fun main(args: Array<String>) {
             // Copy model to best_models directory
             var filename = get_filename(bestmodel)
             File("$bestmodel.pnml").copyTo(File("$bm$filename.pnml"))
+            */
     }
 }
 }
@@ -156,22 +146,6 @@ private fun get_filename(bestmodel: String): String {
     }
     return filename
 }
-
-private fun find_name(path : String, concat : String) : String{
-    var full = ""
-    if (path.contains("/")) {
-        var spl = path.split("/")
-        val file = concat + spl[spl.size - 1]
-        spl = spl.dropLast(1)
-        val directories = spl.joinToString("/") + "/"
-        full = directories + file
-    }
-    else{
-        full = concat + path
-    }
-    return full
-}
-
 
 fun load_log(log_name : String) : ProcessLog{
     val mappings = Mappings<String>(activity = "concept:name", start = null, end = "time:timestamp", lifecycle = null, process = null, case = null)
