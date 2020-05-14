@@ -18,7 +18,7 @@ parser.add_argument("--output_folder", help="Output folder of the mined models",
 parser.add_argument("--n_threads", help="Number of threads to use", type=int, required=True)
 arguments = parser.parse_args()
 
-os.system("java -jar splitminer_cmd-1.0.0-all.jar -l " + arguments.log + " -b " + arguments.best_model + " -m " + arguments.output_folder + " -t " + str(arguments.n_threads))
+# os.system("java -jar splitminer_cmd-1.0.0-all.jar -l " + arguments.log + " -b " + arguments.best_model + " -m " + arguments.output_folder + " -t " + str(arguments.n_threads))
 
 log_file = Path(arguments.log).name
 model_regex = log_file + "_\d\.\d_\d\.\d\.pnml"
@@ -29,7 +29,6 @@ for file in os.listdir(arguments.output_folder):
         files_to_process.append(file)
 
 model_fitnesses = {}
-pbar = tqdm.tqdm(total=len(files_to_process))
 import os
 def process_file(file):
     # Import petri net and calculate fitness
@@ -40,20 +39,18 @@ def process_file(file):
     alignments = pm4pycvxopt.align_factory.apply_log(log, net, initial_marking, final_marking)
     trace_fitnesses = [alignment["fitness"] for alignment in alignments]
     fitness = np.mean(trace_fitnesses)
-    model_fitnesses[file] = fitness
-    pbar.update(1)
-    #print("Finished: ", file, " with fitness: ", fitness)
+    return fitness, file
 
-import concurrent.futures
+import multiprocessing as mp
 print("Calculating fitnesses. Please wait.")
 print("CPU count: ", os.cpu_count())
 if arguments.n_threads * 4 <= os.cpu_count():
-    max_workers = arguments.n_threads * 4
+    max_workers = arguments.n_threads * 6
 else:
     max_workers = arguments.n_threads
-with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-    for file in files_to_process:
-        executor.submit(process_file, file)
+pool = mp.Pool(processes=max_workers)
+for fitness, file in tqdm.tqdm(pool.imap_unordered(process_file, files_to_process), total=len(files_to_process)):
+    model_fitnesses[file] = fitness
 
 print("Model fitnesses: ", model_fitnesses)
 sorted_fitnesses = {k: v for k, v in sorted(model_fitnesses.items(), key=lambda item: item[1], reverse=True)}
