@@ -7,6 +7,6 @@
 "BPI_Challenge_2012_O" : []
 "BPI_Challenge_2013_closed_problems" : ["org:group"]
 "SEPSIS" : ["org:group"]
-"nasa" : ["apploc:joinpoint", "apprun:extrowtype", "apploc:etype", "apprun:excatchtype"]
+"nasa" : ["apploc:joinpoint", "apprun:exthrowtype", "apploc:etype", "apprun:excatchtype"]
 "env_permit" : ["org:group"]
 "Helpdesk" : ["org:resource"] # Lifecycle transition is always "complete"
