@@ -18,7 +18,7 @@ parser.add_argument("--output_folder", help="Output folder of the mined models",
 parser.add_argument("--n_threads", help="Number of threads to use", type=int, required=True)
 arguments = parser.parse_args()
 
-# os.system("java -jar splitminer_cmd-1.0.0-all.jar -l " + arguments.log + " -b " + arguments.best_model + " -m " + arguments.output_folder + " -t " + str(arguments.n_threads))
+os.system("java -jar splitminer_cmd-1.0.0-all.jar -l " + arguments.log + " -b " + arguments.best_model + " -m " + arguments.output_folder + " -t " + str(arguments.n_threads))
 
 log_file = Path(arguments.log).name
 model_regex = log_file + "_\d\.\d_\d\.\d\.pnml"
@@ -31,15 +31,20 @@ for file in os.listdir(arguments.output_folder):
 model_fitnesses = {}
 import os
 def process_file(file):
-    # Import petri net and calculate fitness
-    # This function throws a warning and it is unavoidable
-    #print("Running: ", file)
-    net, initial_marking, final_marking = pnml_importer.import_net(os.path.join(arguments.output_folder, file))
-    log = xes_importer.import_log(arguments.log)
-    alignments = pm4pycvxopt.align_factory.apply_log(log, net, initial_marking, final_marking)
-    trace_fitnesses = [alignment["fitness"] for alignment in alignments]
-    fitness = np.mean(trace_fitnesses)
-    return fitness, file
+    try:
+        # Import petri net and calculate fitness
+        # This function throws a warning and it is unavoidable
+        #print("Running: ", file)
+        net, initial_marking, final_marking = pnml_importer.import_net(os.path.join(arguments.output_folder, file))
+        log = xes_importer.import_log(arguments.log)
+        alignments = pm4pycvxopt.align_factory.apply_log(log, net, initial_marking, final_marking)
+        trace_fitnesses = [alignment["fitness"] for alignment in alignments]
+        fitness = np.mean(trace_fitnesses)
+        return fitness, file
+    except Exception:
+        print("Ignoring ", file, " for not being a relaxed sound net")
+        return 0.0, file
+
 
 import multiprocessing as mp
 print("Calculating fitnesses. Please wait.")
