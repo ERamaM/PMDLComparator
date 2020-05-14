@@ -10,6 +10,7 @@ from pm4py.objects.petri.importer import pnml as pnml_importer
 from pm4py.objects.log.importer.xes import factory as xes_importer
 from pm4py.algo.conformance.alignments import factory as align_factory
 import pm4pycvxopt # Fast alignments
+
 parser = argparse.ArgumentParser(description="Run splitminer")
 parser.add_argument("--log", help="Log to process", required=True)
 parser.add_argument("--best_model", help="Best model store folder", required=True)
@@ -27,16 +28,32 @@ for file in os.listdir(arguments.output_folder):
     if re.match(model_regex, file):
         files_to_process.append(file)
 
-print("Calculating fitnesses. Please wait.")
-for file, i in zip(files_to_process, tqdm.tqdm(range(len(files_to_process)))):
+model_fitnesses = {}
+pbar = tqdm.tqdm(total=len(files_to_process))
+import os
+def process_file(file):
     # Import petri net and calculate fitness
     # This function throws a warning and it is unavoidable
+    #print("Running: ", file)
     net, initial_marking, final_marking = pnml_importer.import_net(os.path.join(arguments.output_folder, file))
     log = xes_importer.import_log(arguments.log)
-    alignments = align_factory.apply_log_multiprocessing(log, net, initial_marking, final_marking)
+    alignments = pm4pycvxopt.align_factory.apply_log(log, net, initial_marking, final_marking)
     trace_fitnesses = [alignment["fitness"] for alignment in alignments]
     fitness = np.mean(trace_fitnesses)
     model_fitnesses[file] = fitness
+    pbar.update(1)
+    #print("Finished: ", file, " with fitness: ", fitness)
+
+import concurrent.futures
+print("Calculating fitnesses. Please wait.")
+print("CPU count: ", os.cpu_count())
+if arguments.n_threads * 4 <= os.cpu_count():
+    max_workers = arguments.n_threads * 4
+else:
+    max_workers = arguments.n_threads
+with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+    for file in files_to_process:
+        executor.submit(process_file, file)
 
 print("Model fitnesses: ", model_fitnesses)
 sorted_fitnesses = {k: v for k, v in sorted(model_fitnesses.items(), key=lambda item: item[1], reverse=True)}
