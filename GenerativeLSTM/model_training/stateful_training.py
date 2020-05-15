@@ -9,7 +9,7 @@ import csv
 import math
 import itertools
 
-import keras.utils as ku
+import tensorflow.keras.utils as ku
 
 import pandas as pd
 import numpy as np

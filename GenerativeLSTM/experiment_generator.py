@@ -140,6 +140,30 @@ def sbatch_creator(configs):
         file_name = sup.folder_id()
         sup.create_text_file(default, os.path.join(output_folder, file_name))
 
+def tsp_creator(configs, tsp="ts"):
+    commands = []
+    for i, _ in enumerate(configs):
+        def format_option(short, parm):
+            return (' -'+short+' None'
+                    if configs[i][parm] is None
+                    else ' -'+short+' '+str(configs[i][parm]))
+
+        options = tsp + ' python lstm.py -f ' + log + ' -i ' + str(imp)
+        options += ' -a training'
+        options += ' -o True'
+        options += format_option('l', 'lstm_act')
+        options += format_option('y', 'l_sizes')
+        options += format_option('d', 'dense_act')
+        options += format_option('n', 'norm_method')
+        options += format_option('m', 'model_type')
+        options += format_option('p', 'optimizers')
+        if arch == 'sh':
+            options += format_option('z', 'n_sizes')
+
+        commands.append(options)
+    return commands
+
+
 # =============================================================================
 # Sbatch files submission
 # =============================================================================
@@ -187,8 +211,14 @@ else:
     model_type = ['seq2seq_inter', 'seq2seq']
 
 # configs definition
-configs = configs_creation(num_choice=15)
+configs = configs_creation(num_choice=20)
+print("Configs:", configs)
 # sbatch creation
-sbatch_creator(configs)
+
+tsp_executable = "ts"
+commands = tsp_creator(configs, tsp=tsp_executable)
+commands = [tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
+print(commands)
+
 # submission
 # sbatch_submit(True)

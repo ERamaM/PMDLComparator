@@ -60,6 +60,7 @@ class ModelTrainer():
         # indexes creation
         self.indexing()
         # split validation
+        # TODO: change this function to load the training, val and test splits
         self.split_train_test(0.3, params['one_timestamp'])
         # create examples
         seq_creator = exc.SequencesCreator(self.log_train,
@@ -185,7 +186,7 @@ class ModelTrainer():
                                                 'test_log.csv'))
 
 
-class LogLoader():
+class LogLoader:
 
     def __init__(self, path, read_options):
         """constructor"""

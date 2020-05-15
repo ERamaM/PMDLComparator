@@ -8,7 +8,7 @@ import itertools
 import numpy as np
 
 from nltk.util import ngrams
-import keras.utils as ku
+import tensorflow.keras.utils as ku
 
 from support_modules import nn_support as nsup
 

@@ -13,7 +13,7 @@ If you want to use a GPU (recommended) install this instead:;
 
 Install additional dependencies:
 
-    python -m pip install pm4py==1.2.12 hyperopt==0.2.3 jellyfish==0.7.2 distance==0.1.3 strsim==0.0.3 pyyaml==5.3.1
+    python -m pip install pm4py==1.2.12 hyperopt==0.2.3 jellyfish==0.7.2 distance==0.1.3 strsim==0.0.3 pyyaml==5.3.1 nltk==3.5 swifter==0.304
     
 If you want to use the task spooler, install, in debian based systems:
 

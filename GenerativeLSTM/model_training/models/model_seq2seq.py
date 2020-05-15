@@ -7,10 +7,10 @@ Created on Sun Sep 22 20:52:26 2019
 import os
 #import datetime
 
-from keras.models import Model
-from keras.optimizers import Nadam, Adam, SGD, Adagrad
-from keras.layers import Input, LSTM, Dense, Embedding, Concatenate
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.models import Model
+from tensorflow.keras.optimizers import Nadam, Adam, SGD, Adagrad
+from tensorflow.keras.layers import Input, LSTM, Dense, Embedding, Concatenate
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
 
 from support_modules.callbacks import time_callback as tc
 from support_modules.callbacks import clean_models_callback as cm

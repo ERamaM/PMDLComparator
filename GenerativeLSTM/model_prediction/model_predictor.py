@@ -9,7 +9,7 @@ import json
 
 import pandas as pd
 
-from keras.models import load_model
+from tensorflow.keras.models import load_model
 
 from support_modules.readers import log_reader as lr
 from support_modules import nn_support as nsup

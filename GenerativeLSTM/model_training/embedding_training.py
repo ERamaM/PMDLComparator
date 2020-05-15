@@ -11,8 +11,8 @@ import math
 import pandas as pd
 import numpy as np
 
-from keras.models import Model
-from keras.layers import Input, Embedding, Dot, Reshape
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Embedding, Dot, Reshape
 
 from support_modules.readers import log_reader as lr
 from support_modules import role_discovery as rl

@@ -7,13 +7,13 @@ Created on Thu Feb 28 10:15:12 2019
 
 import os
 
-from keras.models import Model
-from keras.layers import Input, Embedding, Concatenate
-from keras.layers.core import Dense
-from keras.layers.recurrent import LSTM
-from keras.optimizers import Nadam, Adam, SGD, Adagrad
-from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
-from keras.layers.normalization import BatchNormalization
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Input, Embedding, Concatenate
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.layers import LSTM
+from tensorflow.keras.optimizers import Nadam, Adam, SGD, Adagrad
+from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau
+from tensorflow.keras.layers import BatchNormalization
 
 from support_modules.callbacks import time_callback as tc
 from support_modules.callbacks import clean_models_callback as cm
