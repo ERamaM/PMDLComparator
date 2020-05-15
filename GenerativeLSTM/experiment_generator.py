@@ -148,7 +148,7 @@ def tsp_creator(configs, tsp="ts"):
                     if configs[i][parm] is None
                     else ' -'+short+' '+str(configs[i][parm]))
 
-        options = tsp + ' python lstm.py -f ' + log + ' -i ' + str(imp)
+        options = "cd .. && " + tsp + ' python lstm.py -f ' + log + ' -i ' + str(imp)
         options += ' -a training'
         options += ' -o True'
         options += format_option('l', 'lstm_act')
@@ -240,9 +240,9 @@ print("Configs:", configs)
 
 tsp_executable = "ts"
 commands = tsp_creator(configs, tsp=tsp_executable)
-commands = [tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
+commands = ["cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
 
-with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh", "w")) as f:
+with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh"), "w") as f:
     f.write("#!/bin/bash\n")
     for command in commands:
         f.write(command + "\n")
