@@ -157,6 +157,18 @@ if arguments.net:
             reorder_columns(csv_path, [XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=False)
             move_files(csv_path, "DALSTM/data", EXTENSIONS.CSV)
+    elif arguments.net == "camargo":
+        for xes in dataset_list:
+            print("Process: ", xes)
+            make_dir_if_not_exists("GenerativeLSTM/input_files")
+            make_dir_if_not_exists("GenerativeLSTM/input_files/embedded_matrix")
+            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
+            xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            train_file, train_path = convert_csv_to_xes(train_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            move_files(xes_path, "GenerativeLSTM/input_files", EXTENSIONS.XES_COMPRESSED)
 
 
 

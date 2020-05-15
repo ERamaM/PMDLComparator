@@ -201,7 +201,30 @@ for _, _, files in os.walk(output_folder):
 is_single_exp = False
 # s2, sh
 arch = 'sh'
-log = 'BPI_Challenge_2013_closed_problems.xes'
+
+import argparse, gzip, shutil, os
+from pathlib import Path
+parser = argparse.ArgumentParser(description="Generate training script")
+parser.add_argument("--log", help="Log to generate the script")
+args = parser.parse_args()
+log_path = args.log
+log_name = Path(log_path).name
+log_dir = Path(log_path).parent
+
+if ".gz" in log_path:
+    log_name = log_name.replace(".gz", "")
+    with gzip.open(log_path, "rb") as f_in:
+        with open(os.path.join(log_dir, log_name), "wb") as f_out:
+            shutil.copyfileobj(f_in, f_out)
+
+# Anyways, the code is hardcoded to load the files from "input_files"
+log = log_name
+# We also hardcode the script output location
+output_folder_scripts = "training_scripts"
+if not os.path.exists(output_folder_scripts):
+    os.mkdir(output_folder_scripts)
+
+
 imp = 1  # keras lstm implementation 1 cpu, 2 gpu
 
 # Same experiment for both models
@@ -218,7 +241,11 @@ print("Configs:", configs)
 tsp_executable = "ts"
 commands = tsp_creator(configs, tsp=tsp_executable)
 commands = [tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
-print(commands)
+
+with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh", "w")) as f:
+    f.write("#!/bin/bash\n")
+    for command in commands:
+        f.write(command + "\n")
 
 # submission
 # sbatch_submit(True)
