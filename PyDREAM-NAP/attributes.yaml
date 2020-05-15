@@ -1,12 +1,12 @@
-"bpi_challenge_2013_incidents" : ["org:group", "resource country", "organization involved", "org:role", "impact", "product", "lifecycle:transition"]
-"BPI_Challenge_2012" : ["lifecycle:transition"]
-"BPI_Challenge_2012_Complete" : [] # Ignore lifecycle transition since it is always complete
-"BPI_Challenge_2012_W_Complete" : [] # Ignore lifecycle transition since it is always complete
-"BPI_Challenge_2012_W" : ["lifecycle:transition"]
-"BPI_Challenge_2012_A" : []
-"BPI_Challenge_2012_O" : []
-"BPI_Challenge_2013_closed_problems" : ["org:group"]
+"bpi_challenge_2013_incidents" : ["org:group", "resource country", "organization involved", "org:role", "impact", "product", "lifecycle:transition", "org:resource"]
+"BPI_Challenge_2012" : ["lifecycle:transition", "org:resource"]
+"BPI_Challenge_2012_Complete" : ["org:resource"] # Ignore lifecycle transition since it is always complete
+"BPI_Challenge_2012_W_Complete" : ["org:resource"] # Ignore lifecycle transition since it is always complete
+"BPI_Challenge_2012_W" : ["lifecycle:transition", "org:resource"]
+"BPI_Challenge_2012_A" : ["org:resource"]
+"BPI_Challenge_2012_O" : ["org:resource"]
+"BPI_Challenge_2013_closed_problems" : ["org:group", "org:resource"]
 "SEPSIS" : ["org:group"]
-"nasa" : ["apploc:joinpoint", "apprun:extrowtype", "apploc:etype", "apprun:excatchtype"]
-"env_permit" : ["org:group"]
+"nasa" : ["apploc:joinpoint", "apprun:exthrowtype", "apploc:etype", "apprun:excatchtype"]
+"env_permit" : ["org:group", "org:resource"]
 "Helpdesk" : ["org:resource"] # Lifecycle transition is always "complete"

@@ -81,6 +81,7 @@ class XES_Fields:
     ACTIVITY_COLUMN = "concept:name"
     TIMESTAMP_COLUMN = "time:timestamp"
     LIFECYCLE_COLUMN = "lifecycle:transition"
+    RESOURCE_COLUMN = "org:resource"
 
 
 class EXTENSIONS:

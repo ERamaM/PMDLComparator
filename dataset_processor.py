@@ -159,6 +159,7 @@ if arguments.net:
             move_files(csv_path, "DALSTM/data", EXTENSIONS.CSV)
     elif arguments.net == "camargo":
         for xes in dataset_list:
+            """
             print("Process: ", xes)
             make_dir_if_not_exists("GenerativeLSTM/input_files")
             make_dir_if_not_exists("GenerativeLSTM/input_files/embedded_matrix")
@@ -169,10 +170,33 @@ if arguments.net:
             val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
             test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
             move_files(xes_path, "GenerativeLSTM/input_files", EXTENSIONS.XES_COMPRESSED)
-
-
-
-            #copy_file(xes, "evermann/data", EXTENSIONS.XES_COMPRESSED)
+            """
+            print("Process: ", xes)
+            attributes = load_attributes_from_file("attributes.yaml", Path(xes).name)
+            make_dir_if_not_exists("GenerativeLSTM/input_files")
+            make_dir_if_not_exists("GenerativeLSTM/input_files/embedded_matrix")
+            # Only process files with resources
+            if XES_Fields.RESOURCE_COLUMN in attributes:
+                csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+                # Load attribute list from file
+                    # Normalize columns
+                output_columns = {
+                    XES_Fields.CASE_COLUMN: "caseid",
+                    XES_Fields.ACTIVITY_COLUMN: "task",
+                    XES_Fields.RESOURCE_COLUMN: "user",
+                    XES_Fields.TIMESTAMP_COLUMN: "end_timestamp"
+                }
+                select_columns(
+                    csv_path,
+                    input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.RESOURCE_COLUMN],
+                    category_columns=None,
+                    timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                    output_columns=output_columns, categorize=False
+                )
+                # Reorder columns
+                reorder_columns(csv_path, [XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
+                csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=False)
+                move_files(csv_path, "GenerativeLSTM/input_files", EXTENSIONS.CSV)
     else:
         print("Unrecognized approach")
 
