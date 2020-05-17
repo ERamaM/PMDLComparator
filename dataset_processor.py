@@ -162,7 +162,7 @@ if arguments.net:
             """
             print("Process: ", xes)
             make_dir_if_not_exists("GenerativeLSTM/input_files")
-            make_dir_if_not_exists("GenerativeLSTM/input_files/embedded_matrix")
+            make_dir_if_not_exists("GenerativeLSTM/input_files/embedded_matix")
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
             xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
@@ -174,7 +174,8 @@ if arguments.net:
             print("Process: ", xes)
             attributes = load_attributes_from_file("attributes.yaml", Path(xes).name)
             make_dir_if_not_exists("GenerativeLSTM/input_files")
-            make_dir_if_not_exists("GenerativeLSTM/input_files/embedded_matrix")
+            # Note the typo in "matix"
+            make_dir_if_not_exists("GenerativeLSTM/input_files/embedded_matix")
             # Only process files with resources
             if XES_Fields.RESOURCE_COLUMN in attributes:
                 csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
@@ -194,8 +195,8 @@ if arguments.net:
                     output_columns=output_columns, categorize=False
                 )
                 # Reorder columns
-                reorder_columns(csv_path, [XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
-                csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=False)
+                reorder_columns(csv_path, ["caseid", "task", "user", "end_timestamp"])
+                csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "caseid", do_train_val=False)
                 move_files(csv_path, "GenerativeLSTM/input_files", EXTENSIONS.CSV)
     else:
         print("Unrecognized approach")

@@ -8,8 +8,7 @@ from shutil import copyfile
 from pathlib import Path
 from pm4py.objects.petri.importer import pnml as pnml_importer
 from pm4py.objects.log.importer.xes import factory as xes_importer
-from pm4py.algo.conformance.alignments import factory as align_factory
-import pm4pycvxopt # Fast alignments
+from pm4py.evaluation.replay_fitness import factory as replay_factory
 
 parser = argparse.ArgumentParser(description="Run splitminer")
 parser.add_argument("--log", help="Log to process", required=True)
@@ -29,21 +28,17 @@ for file in os.listdir(arguments.output_folder):
         files_to_process.append(file)
 
 model_fitnesses = {}
+
 import os
 def process_file(file):
-    try:
-        # Import petri net and calculate fitness
-        # This function throws a warning and it is unavoidable
-        #print("Running: ", file)
-        net, initial_marking, final_marking = pnml_importer.import_net(os.path.join(arguments.output_folder, file))
-        log = xes_importer.import_log(arguments.log)
-        alignments = pm4pycvxopt.align_factory.apply_log(log, net, initial_marking, final_marking)
-        trace_fitnesses = [alignment["fitness"] for alignment in alignments]
-        fitness = np.mean(trace_fitnesses)
-        return fitness, file
-    except Exception:
-        print("Ignoring ", file, " for not being a relaxed sound net")
-        return 0.0, file
+    # Import petri net and calculate fitness
+    # This function throws a warning and it is unavoidable
+    #print("Running: ", file)
+    net, initial_marking, final_marking = pnml_importer.import_net(os.path.join(arguments.output_folder, file))
+    log = xes_importer.import_log(arguments.log)
+    fitness = replay_factory.apply(log, net, initial_marking, final_marking)
+    fitness = fitness["averageFitness"]
+    return fitness, file
 
 
 import multiprocessing as mp
