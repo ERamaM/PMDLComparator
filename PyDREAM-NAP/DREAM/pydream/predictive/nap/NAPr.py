@@ -156,6 +156,7 @@ class NAPr:
         with open(path + "/" + name + "_napr_model.json", 'r') as f:
             self.model = model_from_json(f.read())
         self.model.load_weights(path + "/" + name + "_napr_weights.hdf5")
+        self.model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
         with open(path + "/" + name + "_napr_onehotdict.json", 'r') as f:
             self.one_hot_dict = json.load(f)
         # When we load the model, we do not need the scalers in fact, only the weights
