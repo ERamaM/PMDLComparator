@@ -37,7 +37,11 @@ def process_file(file):
     net, initial_marking, final_marking = pnml_importer.import_net(os.path.join(arguments.output_folder, file))
     log = xes_importer.import_log(arguments.log)
     fitness = replay_factory.apply(log, net, initial_marking, final_marking)
-    fitness = fitness["averageFitness"]
+    try:
+        fitness = fitness["averageFitness"]
+    except:
+        # Depending on the version is one or another
+        fitness = fitness["average_trace_fitness"]
     return fitness, file
 
 
