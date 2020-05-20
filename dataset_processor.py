@@ -105,17 +105,28 @@ if arguments.net:
     elif arguments.net == "thai":
             for xes in dataset_list:
                 print("Process: ", xes)
-                make_dir_if_not_exists("MAED/data")
-                make_dir_if_not_exists("MAED/models")
-                make_dir_if_not_exists("MAED/results")
+                make_dir_if_not_exists("MAED-TaxIntegration/busi_task")
+                make_dir_if_not_exists("MAED-TaxIntegration/busi_task/data")
+
+                # Tax already performs the augmentation in their script
+                # so there is no need to perform it here
                 csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
-                csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp",
-                                                                                 XES_Fields.CASE_COLUMN)
-                xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-                train_file, train_path = convert_csv_to_xes(train_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-                val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-                test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-                move_files(xes_path, "MAED/data", EXTENSIONS.XES_COMPRESSED)
+
+                output_columns = {
+                    XES_Fields.CASE_COLUMN: "CaseID",
+                    XES_Fields.ACTIVITY_COLUMN: "ActivityID",
+                    XES_Fields.TIMESTAMP_COLUMN: "CompleteTimestamp"
+                }
+                select_columns(
+                    csv_path,
+                    input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
+                    category_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN],
+                    timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                    output_columns=output_columns, categorize=True
+                )
+                csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
+                move_files(csv_path, "MAED-TaxIntegration/busi_task/data", EXTENSIONS.CSV)
+
     elif arguments.net == "theis":
         for xes in dataset_list:
             print("Process: ", xes)

@@ -1,5 +1,5 @@
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 
 def pairwise_add(u, v=None, is_batch=False):
@@ -105,27 +105,6 @@ def pack_into_tensor(array, axis):
     rank = len(shape)
 
     dim_permutation = [axis] + list(range(1, axis)) + [0]  + list(range(axis + 1, rank))
-    correct_shape_tensor = tf.transpose(packed_tensor, dim_permutation)# put the extra dimension to axis you want
-
-    return correct_shape_tensor
-
-def pack_into_tensor2(array, axis):
-    """
-    packs a given TensorArray into a tensor along a given axis
-    Parameters:
-    ----------
-    array: TensorArray
-        the tensor array to pack
-    axis: int
-        the axis to pack the array along
-    Returns: Tensor
-        the packed tensor
-    """
-
-    packed_tensor = array.stack() # add 1 dimension at the 0 dim
-
-
-    dim_permutation = [axis] + list(range(1, axis)) + [0]  + list(range(axis + 1, 3))
     correct_shape_tensor = tf.transpose(packed_tensor, dim_permutation)# put the extra dimension to axis you want
 
     return correct_shape_tensor

@@ -1,5 +1,5 @@
-import tensorflow as tf
-from MAED.controller import BaseController
+import tensorflow.compat.v1 as tf
+from controller import BaseController
 import numpy as np
 
 class FeedforwardController(BaseController):

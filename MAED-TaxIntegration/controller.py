@@ -4,7 +4,7 @@ import numpy as np
 class BaseController:
 
     def __init__(self, input_size, output_size, memory_read_heads, memory_word_size, batch_size=1,
-                 use_mem=True, hidden_dim=256, is_two_mem=0, drop_out_keep=1, vae_mode=False, nlayer=1):
+                 use_mem=True, hidden_dim=256, is_two_mem=False):
         """
         constructs a controller as described in the DNC paper:
         http://www.nature.com/nature/journal/vaop/ncurrent/full/nature20101.html
@@ -29,9 +29,7 @@ class BaseController:
         self.word_size = memory_word_size
         self.batch_size = batch_size
         self.hidden_dim = hidden_dim
-        self.drop_out_keep = drop_out_keep
-        self.vae_mode = vae_mode
-        self.nlayer = nlayer
+
         # indicates if the internal neural network is recurrent
         # by the existence of recurrent_update and get_state methods
         # subclass should implement these methods if it is rnn based controller
@@ -42,10 +40,8 @@ class BaseController:
         # the actual size of the neural network input after flatenning and
         # concatenating the input vector with the previously read vctors from memory
         if use_mem:
-            if is_two_mem>0:
+            if is_two_mem:
                 self.nn_input_size = self.word_size * self.read_heads*2 + self.input_size
-            elif self.vae_mode:
-                self.nn_input_size = self.word_size + self.input_size
             else:
                 self.nn_input_size = self.word_size * self.read_heads + self.input_size
         else:
@@ -76,7 +72,7 @@ class BaseController:
         this method can be overwritten to use a different initialization scheme
         """
         # defining internal weights of the controller
-        if self.is_two_mem==2:
+        if self.is_two_mem:
             self.interface_weights = tf.Variable(
                 tf.random_normal([self.nn_output_size, self.interface_vector_size*2], stddev=0.1),
                 name='interface_weights'
@@ -91,24 +87,16 @@ class BaseController:
             tf.random_normal([self.nn_output_size, self.output_size], stddev=0.1),
             name='nn_output_weights'
         ) # function to compute output of the whole : v = H x yW
-        if self.is_two_mem>0:
+        if self.is_two_mem:
             self.mem_output_weights = tf.Variable(
                 tf.random_normal([2*self.word_size * self.read_heads, self.output_size], stddev=0.1),
                 name='mem_output_weights'
             )
-
         else:
-            # if self.vae_mode:
-            #     final_win=self.word_size
-            # else:
-            final_win = self.word_size * self.read_heads
-
             self.mem_output_weights = tf.Variable(
-                tf.compat.v1.random_normal([final_win, self.output_size],  stddev=0.1),
+                tf.random_normal([self.word_size * self.read_heads, self.output_size],  stddev=0.1),
                 name='mem_output_weights'
         ) # function to compute final output of the whole, combine output and read values: y = v + rs x Wr
-
-
 
     def network_vars(self):
         """
@@ -214,13 +202,7 @@ class BaseController:
         pre_output = tf.zeros([self.batch_size, self.output_size],dtype=np.float32)
         interface = tf.zeros([self.batch_size, self.interface_vector_size],dtype=np.float32)
         parsed_interface = self.parse_interface_vector(interface)
-        parsed_interface['read_strengths'] *= 0
-        parsed_interface['write_strength'] *= 0
-        parsed_interface['erase_vector'] *= 0
-        parsed_interface['free_gates'] *= 0
-        parsed_interface['allocation_gate'] *= 0
-        parsed_interface['write_gate'] *= 0
-        parsed_interface['read_modes'] *= 0
+
         if self.has_recurrent_nn:
             return pre_output, parsed_interface, self.lstm_cell.zero_state(self.batch_size, tf.float32)
         else:
@@ -256,15 +238,14 @@ class BaseController:
         # print(flat_read_vectors.shape)
         # print(complete_input.shape)
         if self.has_recurrent_nn:
+            print(complete_input.shape)
             nn_output, nn_state = self.network_op(complete_input, state)
-            print('recurrent state')
-            print(nn_state)
         else:
             nn_output = self.network_op(complete_input)
 
         pre_output = tf.matmul(nn_output, self.nn_output_weights) #batch x output_dim -->later combine with new read vector
         interface = tf.matmul(nn_output, self.interface_weights) #batch x interface_dim
-        if self.is_two_mem==2:
+        if self.is_two_mem:
             interface1, interface2 = tf.split(interface, num_or_size_splits=2, axis=-1)
             parsed_interface = (self.parse_interface_vector(interface1),
                                 self.parse_interface_vector(interface2))
@@ -300,31 +281,5 @@ class BaseController:
         if self.use_mem:
             final_output+=tf.matmul(flat_read_vectors, self.mem_output_weights)
 
+
         return final_output #same size as pre_output: batch_size x outputdim (classification problem, outputdim=number of labels)
-
-    def final_output_pointer(self, new_read_weights, all_write_weights):
-        """
-        returns the final output by taking rececnt memory changes into account
-
-        Parameters:
-        ----------
-        new_read_weights: Tensor (batch_size, mem_size, read_heads)
-            the newly read vectors from the updated memory
-        all_write_weights: Tensor (batch_size, L_in, mem_size)
-
-        Returns: Tensor (batch_size, L_in)
-        """
-
-        if self.use_mem and new_read_weights:
-            final_output=tf.matmul(all_write_weights, new_read_weights)
-            # shift here
-            flat_output_vectors = tf.concat([final_output[:, -2:,:], final_output[:, :-2,:]],
-                                            axis=1)  # shift to match index input
-
-            flat_output_vectors = tf.reshape(flat_output_vectors, [self.batch_size,-1]) # batch_size x Lin.read_heads
-        else:
-            #assume all_write_weight is already attention vector
-            flat_output_vectors=  all_write_weights
-            #shift here
-            flat_output_vectors = tf.concat([flat_output_vectors[:, -2:], flat_output_vectors[:, :-2]], axis=1)  # shift to match index input
-        return flat_output_vectors

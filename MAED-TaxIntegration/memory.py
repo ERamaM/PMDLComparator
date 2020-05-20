@@ -1,6 +1,6 @@
 import tensorflow.compat.v1 as tf
 import numpy as np
-import utility as utility
+import utility
 
 class Memory:
 
@@ -36,33 +36,23 @@ class Memory:
             np.cumsum([0] + [words_num] * (batch_size - 1), dtype=np.int32)[:, np.newaxis]# [[0], [word_num], [word_num*2], [word_num*3], ...]
         )
 
-    def init_memory(self, read_heads=None):
+    def init_memory(self):
         """
         returns the initial values for the memory Parameters
         Returns: Tuple
         """
-        if read_heads is None:
-            return (
-                # each sample in batch has its own version of memory
-                tf.fill([self.batch_size, self.words_num, self.word_size], 1e-6),  # initial memory matrix
-                tf.zeros([self.batch_size, self.words_num]),  # initial usage vector u
-                tf.zeros([self.batch_size, self.words_num]),  # initial precedence vector p
-                tf.zeros([self.batch_size, self.words_num, self.words_num]),  # initial link matrix L
-                tf.fill([self.batch_size, self.words_num], 1e-6),  # initial write weighting
-                tf.fill([self.batch_size, self.words_num, self.read_heads], 1e-6),  # initial read weightings
-                tf.fill([self.batch_size, self.word_size, self.read_heads], 1e-6),  # initial read vectors
-            )
-        else:
-            return (
-                # each sample in batch has its own version of memory
-                tf.fill([self.batch_size, self.words_num, self.word_size], 1e-6),  # initial memory matrix
-                tf.zeros([self.batch_size, self.words_num]),  # initial usage vector u
-                tf.zeros([self.batch_size, self.words_num]),  # initial precedence vector p
-                tf.zeros([self.batch_size, self.words_num, self.words_num]),  # initial link matrix L
-                tf.fill([self.batch_size, self.words_num], 1e-6),  # initial write weighting
-                tf.fill([self.batch_size, self.words_num, read_heads], 1e-6),  # initial read weightings
-                tf.fill([self.batch_size, self.word_size, read_heads], 1e-6),  # initial read vectors
-            )
+
+        return (
+            # each sample in batch has its own version of memory
+            tf.fill([self.batch_size, self.words_num, self.word_size], 1e-6),  # initial memory matrix
+            tf.zeros([self.batch_size, self.words_num, ]),  # initial usage vector u
+            tf.zeros([self.batch_size, self.words_num, ]),  # initial precedence vector p
+            tf.zeros([self.batch_size, self.words_num, self.words_num]),  # initial link matrix L
+            tf.fill([self.batch_size, self.words_num, ], 1e-6),  # initial write weighting
+            tf.fill([self.batch_size, self.words_num, self.read_heads], 1e-6),  # initial read weightings
+            tf.fill([self.batch_size, self.word_size, self.read_heads], 1e-6),  # initial read vectors
+        )
+
     '''
     USE FOR BOTH READ WRITE
     '''
@@ -395,13 +385,9 @@ class Memory:
 
         return new_usage_vector, new_write_weighting, new_memory_matrix, new_link_matrix, new_precedence_vector
 
-    def read_zero(self, read_heads=None):
-        if read_heads is None:
-            return tf.fill([self.batch_size, self.words_num, self.read_heads], 1e-6),  \
-                   tf.fill([self.batch_size, self.word_size, self.read_heads], 1e-6)
-        else:
-            return tf.fill([self.batch_size, self.words_num, read_heads], 1e-6), \
-                   tf.fill([self.batch_size, self.word_size, read_heads], 1e-6)
+    def read_zero(self):
+        return tf.fill([self.batch_size, self.words_num, self.read_heads], 1e-6),  \
+               tf.fill([self.batch_size, self.word_size, self.read_heads], 1e-6)
 
     def read(self, memory_matrix, read_weightings, keys, strengths, link_matrix, read_modes):
         """
