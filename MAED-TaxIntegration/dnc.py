@@ -491,7 +491,7 @@ class DNC:
 
     def build_mix_loss_function_mask(self):
         print('build loss mask mix....')
-        optimizer = tf.train.AdamOptimizer(learning_rate=0.001)
+        optimizer = tf.train.AdamOptimizer(learning_rate=3e-4)
         outputm, _ = self.get_outputs()
         output = tf.slice(outputm, [0, 0, 0],
                           [self.batch_size, self.sequence_length, self.output_size - 1])

@@ -395,8 +395,8 @@ def bpi_task_mix(X_train, y_a_train, y_t_train, X_val, y_a_val, y_t_val, eventlo
     output_size = dim_out + 2
     sequence_max_length = 100
 
-    words_count = 5
-    word_size = 20
+    words_count = 64
+    word_size = 100
     read_heads = 1
 
     iterations = 20000
@@ -701,8 +701,8 @@ def exact_bpi_test_mix(
     output_size = dim_out + 2
     sequence_max_length = 100
 
-    words_count = 5
-    word_size = 20
+    words_count = 64
+    word_size = 100
     read_heads = 1
     test_data = []
     iterations = 10000
