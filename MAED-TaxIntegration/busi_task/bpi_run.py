@@ -750,7 +750,8 @@ def exact_bpi_test_mix(
                     ["Prefix length", "Groud truth", "Predicted", "Levenshtein", "Damerau", "Jaccard",
                      "Ground truth times",
                      "Predicted times", "RMSE", "MAE", "Median AE", "Real idx prediction", "Predictions", "Prediction probabilities"])
-                for prefix_size in range(2, maxlen):
+
+                for prefix_size in range(1, maxlen):
                     print(prefix_size)
                     for line, times, times2, times3, times4 in zip(lines, lines_t, lines_t2, lines_t3, lines_t4):
                         times.append(0)
@@ -759,6 +760,8 @@ def exact_bpi_test_mix(
                         cropped_times2 = times2[:prefix_size]
                         cropped_times3 = times3[:prefix_size]
                         cropped_times4 = times4[:prefix_size]
+                        #print("CR_L: ", cropped_line)
+                        #print("LINE: ", line)
                         if '!' in cropped_line:
                             continue  # make no prediction for this case, since this case has ended already
                         ground_truth = ''.join(line[prefix_size:prefix_size + predict_size])
