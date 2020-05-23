@@ -150,7 +150,7 @@ def tsp_creator(configs, tsp="ts"):
                     if configs[i][parm] is None
                     else ' -'+short+' '+str(configs[i][parm]))
 
-        options = tsp + ' python lstm.py -f ' + log + ' -i ' + str(imp)
+        options = 'python lstm.py -f ' + log + ' -i ' + str(imp)
         options += ' -a training'
         options += ' -o True'
         options += format_option('l', 'lstm_act')
@@ -255,15 +255,14 @@ if not args.execute_inplace:
     with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh"), "w") as f:
         f.write("#!/bin/bash\n")
         for command in commands:
-            f.write(command + "\n")
+            f.write(tsp_executable + " " + command + "\n")
 else:
     # Wait for the training of the embeddings
     emb_command = "python lstm.py -a emb_training -f " + log + " -o True"
     os.system(emb_command)
     # Send all to tsp
-    os.environ["TS_SLOTS"] = "10"
     for command in commands:
-        os.system(command)
+        os.system(tsp_executable + " -S 5 " + command)
 
 # submission
 # sbatch_submit(True)
