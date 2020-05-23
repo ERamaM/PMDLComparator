@@ -28,7 +28,7 @@ class ModelTrainer():
     def __init__(self, params):
         """constructor"""
         self.log = self.load_log(params)
-        self.output_folder = os.path.join('output_files', sup.folder_id())
+        self.output_folder = os.path.join('output_files', params["file_name"], sup.folder_id())
         # Split validation partitions
         self.log_train = pd.DataFrame()
         self.log_test = pd.DataFrame()
@@ -44,6 +44,8 @@ class ModelTrainer():
         self.ac_weights = list()
         self.rl_weights = list()
         # Preprocess the event-log
+
+        # This function overwrites "examples"
         self.preprocess(params)
         # Train model
         m_loader = mload.ModelLoader(params)
@@ -51,22 +53,26 @@ class ModelTrainer():
                        self.examples,
                        self.ac_weights,
                        self.rl_weights,
-                       self.output_folder)
+                       self.output_folder, self.examples_val)
 
     def preprocess(self, params):
         # Features treatement
         inp = feat.FeaturesMannager(params)
+        print("WHAT IS LOG: ", self.log)
         self.log = inp.calculate(params, self.log)
         # indexes creation
         self.indexing()
         # split validation
-        # TODO: change this function to load the training, val and test splits
-        self.split_train_test(0.3, params['one_timestamp'])
+        self.split_train_test(0.2, params['one_timestamp'])
         # create examples
         seq_creator = exc.SequencesCreator(self.log_train,
                                            self.ac_index,
                                            self.rl_index)
+        seq_val_creator = exc.SequencesCreator(self.log_val, self.ac_index, self.rl_index)
         self.examples = seq_creator.vectorize(params['model_type'], params)
+        self.examples_val = seq_val_creator.vectorize(params["model_type"], params)
+        print("Train examples: ", self.examples["prefixes"]["activities"].shape)
+        print("Val examples: ", self.examples_val["prefixes"]["activities"].shape)
         # Load embedded matrix
         self.ac_weights = self.load_embedded(
             self.index_ac, 'ac_' + params['file_name'].split('.')[0]+'.emb')
@@ -124,6 +130,7 @@ class ModelTrainer():
         percentage : float, validation percentage.
         one_timestamp : bool, Support only one timestamp.
         """
+        """
         cases = self.log.caseid.unique()
         num_test_cases = int(np.round(len(cases)*percentage))
         test_cases = cases[:num_test_cases]
@@ -137,6 +144,27 @@ class ModelTrainer():
         self.log_train = (df_train
                           .sort_values(key, ascending=True)
                           .reset_index(drop=True))
+        """
+        # Instead of splitting by events, we split by traces.
+        # Disable the sorting. Otherwise it would mess with the order of the timestamps
+        # The percentage is ignored and we use the ones from the original preprocessing
+        key = 'end_timestamp' if one_timestamp else 'start_timestamp'
+        log = self.log
+        log = log.sort_values(key, ascending=True)
+        groups = [pandas_df for _, pandas_df in log.groupby("caseid", sort=False)]
+
+        train_size = round(len(groups) * 0.64)
+        val_size = round(len(groups) * 0.8)
+
+        train_groups = groups[:train_size]
+        val_groups = groups[train_size:val_size]
+        test_groups = groups[val_size:]
+
+        # Disable the sorting. Otherwise it would mess with the order of the timestamps
+        self.log_train = pd.concat(train_groups, sort=False).reset_index(drop=True)
+        self.log_val = pd.concat(val_groups, sort=False).reset_index(drop=True)
+        self.log_test = pd.concat(test_groups, sort=False).reset_index(drop=True)
+
 
     @staticmethod
     def load_embedded(index, filename):

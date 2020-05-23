@@ -15,9 +15,12 @@ class ModelLoader():
     def __init__(self, parms):
         self.parms = parms
 
-    def train(self, model_type, examples, ac_weights, rl_weights, output_folder):
+    def train(self, model_type, examples, ac_weights, rl_weights, output_folder, val_examples=None):
         loader = self._get_trainer(model_type)
-        loader(examples, ac_weights, rl_weights, output_folder, self.parms)
+        if val_examples is None:
+            loader(examples, ac_weights, rl_weights, output_folder, self.parms)
+        else:
+            loader(examples, ac_weights, rl_weights, output_folder, self.parms, val_examples)
 
     def _get_trainer(self, model_type):
         if model_type == 'shared_cat':

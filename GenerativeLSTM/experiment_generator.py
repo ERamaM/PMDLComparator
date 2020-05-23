@@ -8,11 +8,13 @@ import itertools
 from support_modules import support as sup
 import os
 import random
+random.seed(42) # The seed makes the set of explored hyperparameters the same
 import time
 
 # =============================================================================
 #  Support
 # =============================================================================
+
 
 
 def create_file_list(path):
@@ -148,7 +150,7 @@ def tsp_creator(configs, tsp="ts"):
                     if configs[i][parm] is None
                     else ' -'+short+' '+str(configs[i][parm]))
 
-        options = "cd .. && " + tsp + ' python lstm.py -f ' + log + ' -i ' + str(imp)
+        options = tsp + ' python lstm.py -f ' + log + ' -i ' + str(imp)
         options += ' -a training'
         options += ' -o True'
         options += format_option('l', 'lstm_act')
@@ -205,7 +207,8 @@ arch = 'sh'
 import argparse, gzip, shutil, os
 from pathlib import Path
 parser = argparse.ArgumentParser(description="Generate training script")
-parser.add_argument("--log", help="Log to generate the script")
+parser.add_argument("--log", help="Log to generate the script", required=True)
+parser.add_argument("--execute_inplace", help="Do not write the commands to a file. Instead, execute them directly", action="store_true")
 args = parser.parse_args()
 log_path = args.log
 log_name = Path(log_path).name
@@ -238,14 +241,25 @@ configs = configs_creation(num_choice=20)
 print("Configs:", configs)
 # sbatch creation
 
-tsp_executable = "ts"
+# Search for the executable
+import shutil
+if shutil.which("tsp") is not None:
+    tsp_executable = "tsp"
+else:
+    tsp_executable = "ts"
 commands = tsp_creator(configs, tsp=tsp_executable)
-commands = ["cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
 
-with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh"), "w") as f:
-    f.write("#!/bin/bash\n")
+
+if not args.execute_inplace:
+    commands = ["cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
+    with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh"), "w") as f:
+        f.write("#!/bin/bash\n")
+        for command in commands:
+            f.write(command + "\n")
+else:
+    commands = [tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
     for command in commands:
-        f.write(command + "\n")
+        os.system(command)
 
 # submission
 # sbatch_submit(True)

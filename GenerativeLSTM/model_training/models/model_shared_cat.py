@@ -6,6 +6,7 @@ Created on Thu Feb 28 10:15:12 2019
 """
 
 import os
+import numpy as np
 
 from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Input, Embedding, Concatenate
@@ -18,7 +19,21 @@ from tensorflow.keras.layers import BatchNormalization
 from support_modules.callbacks import time_callback as tc
 from support_modules.callbacks import clean_models_callback as cm
 
-def _training_model(vec, ac_weights, rl_weights, output_folder, args):
+# Allow growth to avoid error initializing gpu
+import tensorflow as tf
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        # Currently, memory growth needs to be the same across GPUs
+        for gpu in gpus:
+            tf.config.experimental.set_memory_growth(gpu, True)
+        logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+        print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+    except RuntimeError as e:
+        # Memory growth must be set before GPUs have been initialized
+        print(e)
+
+def _training_model(vec, ac_weights, rl_weights, output_folder, args, vec_val):
     """Example function with types documented in the docstring.
     Args:
         param1 (int): The first parameter.
@@ -146,8 +161,7 @@ def _training_model(vec, ac_weights, rl_weights, output_folder, args):
 
     # Output file
     output_file_path = os.path.join(output_folder,
-                                    'model_' + str(args['model_type']) +
-                                    '_{epoch:02d}-{val_loss:.2f}.h5')
+                                    'best_model_' + args["file_name"] + ".h5")
 
     # Saving
     model_checkpoint = ModelCheckpoint(output_file_path,
@@ -166,14 +180,45 @@ def _training_model(vec, ac_weights, rl_weights, output_folder, args):
                                    min_lr=0)
 
     batch_size = vec['prefixes']['activities'].shape[1]
-    model.fit({'ac_input':vec['prefixes']['activities'],
+    history = model.fit({'ac_input':vec['prefixes']['activities'],
                'rl_input':vec['prefixes']['roles'],
                't_input':vec['prefixes']['times']},
               {'act_output':vec['next_evt']['activities'],
                'role_output':vec['next_evt']['roles'],
                'time_output':vec['next_evt']['times']},
-              validation_split=0.2,
-              verbose=2,
+
+                        validation_data=({'ac_input': vec_val['prefixes']['activities'],
+                                          'rl_input': vec_val['prefixes']['roles'],
+                                          't_input': vec_val['prefixes']['times']},
+                                         {'act_output': vec_val['next_evt']['activities'],
+                                          'role_output': vec_val['next_evt']['roles'],
+                                          'time_output': vec_val['next_evt']['times']}),
+                        verbose=1,
               callbacks=[early_stopping, model_checkpoint, lr_reducer, cb, clean_models],
               batch_size=batch_size,
-              epochs=500)
+              epochs=1)
+
+    """
+    validation_data = ({'ac_input': vec_val['prefixes']['activities'],
+     'rl_input': vec_val['prefixes']['roles'],
+     't_input': vec_val['prefixes']['times']},
+    {'act_output': vec_val['next_evt']['activities'],
+     'role_output': vec_val['next_evt']['roles'],
+     'time_output': vec_val['next_evt']['times']}),
+     """
+
+    print("History: ", history.history)
+    loss_file = os.path.join("output_files", args["file_name"], "losses_" + args["file_name"])
+    if os.path.isfile(loss_file):
+        open_mode = "a"
+    else:
+        open_mode = "w"
+    with open(loss_file, open_mode) as file:
+        if open_mode == "w":
+            file.write("best_model;loss\n")
+        # The true loss is the minimum val loss since ModelCheckpoint saves the model with the best validation loss
+        file.write(output_file_path + ";" + str(np.min(history.history["val_loss"])) + "\n")
+
+
+
+

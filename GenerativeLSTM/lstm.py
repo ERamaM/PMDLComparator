@@ -5,6 +5,13 @@
 import sys
 import getopt
 
+import random
+import numpy as np
+import tensorflow as tf
+random.seed(42)
+np.random.seed(42)
+tf.compat.v1.set_random_seed(42)
+
 from model_prediction import model_predictor as pr
 from model_training import model_trainer as tr
 from model_training import embedding_training as em
@@ -94,6 +101,8 @@ def main(argv):
                     parameters[key] = int(arg)
                 else:
                     parameters[key] = arg
+
+            print("PARAMETERS: ", parameters)
             parameters['read_options'] = {'timeformat': '%Y-%m-%dT%H:%M:%S.%f',
                                           'column_names': column_names,
                                           'one_timestamp':

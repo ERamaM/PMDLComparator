@@ -41,59 +41,37 @@ def create_folder_list(path, num_models):
                     file_list.append(dict(folder=d, file=f['filename']))
     return file_list
 
-# kernel
-# repeat_num = 1
+
+import argparse, gzip, shutil, os
+from pathlib import Path
+import pandas as pd
+pd.set_option('display.max_colwidth',1000)
+parser = argparse.ArgumentParser(description="Generate training script")
+parser.add_argument("--log", help="Log to generate the script", required=True)
+args = parser.parse_args()
+log_path = args.log
+log_name = Path(log_path).name
+log_dir = Path(log_path).parent
+import shutil
+if shutil.which("tsp") is not None:
+    tsp_executable = "tsp"
+else:
+    tsp_executable = "ts"
+
+loss_file = os.path.join("output_files", log_name, "losses_" + log_name)
+loss_df = pd.read_csv(loss_file, sep=";", index_col=False)
+min_loss = loss_df[loss_df.loss == loss_df.loss.min()]
+best_model = min_loss["best_model"].to_string()
+
+split = best_model.split("/")
+for s in split:
+    print("split: ", s)
+folder = os.path.join(split[1], split[2])
+model = os.path.join(split[-1])
 
 
-imp = 1
-exp_name = 'help_next'
-models_folder = 'output_files'
-file_list = create_folder_list(models_folder, 2)
+command_next = tsp_executable + " python lstm.py -a predict_next -c " + folder + " -b \"" + model + "\" -x False -ho True"
+command_sfx = tsp_executable + " python lstm.py -a pred_sfx -c " + folder + " -b \"" + model + "\" -x False -ho True -t 100"
+os.system(command_next)
+os.system(command_sfx)
 
-output_folder = 'jobs_files'
-
-for _, _, files in os.walk(output_folder):
-    for file in files:
-        os.unlink(os.path.join(output_folder, file))
-
-for file in file_list:
-    if imp == 2:
-        default = ['#!/bin/bash',
-                   '#SBATCH --partition=gpu',
-                   '#SBATCH --gres=gpu:tesla:1',
-                   '#SBATCH -J ' + exp_name,
-                   '#SBATCH -N 1',
-                   '#SBATCH --mem=7000',
-                   '#SBATCH -t 24:00:00',
-                   'module load  python/3.6.3/virtenv',
-                   'source activate lstm_dev_cpu'
-                   ]
-    else:
-        default = ['#!/bin/bash',
-                   '#SBATCH --partition=main',
-                   '#SBATCH -J ' + exp_name,
-                   '#SBATCH -N 1',
-                   '#SBATCH --mem=7000',
-                   '#SBATCH -t 24:00:00',
-                   'module load  python/3.6.3/virtenv',
-                   'source activate lstm_dev_cpu'
-                   ]
-
-    default.append('python lstm.py' +
-                   ' -a predict_next' +
-                   ' -c ' + file['folder'] +
-                   ' -b "' + file['file'] + '"' +
-                   ' -o True' +
-                   ' -x False' +
-                   ' -t 100')
-    file_name = sup.folder_id()
-    sup.create_text_file(default, os.path.join(output_folder, file_name))
-
-file_list = create_file_list(output_folder)
-print('Number of experiments: ' + str(len(file_list)))
-for i, _ in enumerate(file_list):
-    if (i % 10) == 0:
-        time.sleep(20)
-        os.system('sbatch ' + os.path.join(output_folder, file_list[i]))
-    else:
-        os.system('sbatch ' + os.path.join(output_folder, file_list[i]))

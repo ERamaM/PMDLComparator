@@ -73,7 +73,8 @@ def delete_tmp():
 class Timestamp_Formats:
     TIMESTAMP_FORMAT_YMDHMS_DASH = "%Y-%m-%d %H:%M:%S"
     TIMESTAMP_FORMAT_DAYS = "d"  # Used by: pasquadibisceglie
-    TIMESTAMP_FORMAT_YMDHMS_SLASH = "%Y/%m/%d %H:%M:%S.%f"  # Used by: mauro
+    TIMESTAMP_FORMAT_YMDHMS_SLASH = "%Y/%m/%d %H:%M:%S.%f"  # Used by: mauro"
+    TIMESTAMP_FORMAT_YMDHMSf_DASH_T = "%Y-%m-%dT%H:%M:%S.%f"
 
 
 class XES_Fields:
