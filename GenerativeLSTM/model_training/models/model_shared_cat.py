@@ -196,7 +196,7 @@ def _training_model(vec, ac_weights, rl_weights, output_folder, args, vec_val):
                         verbose=1,
               callbacks=[early_stopping, model_checkpoint, lr_reducer, cb, clean_models],
               batch_size=batch_size,
-              epochs=1)
+              epochs=500)
 
     """
     validation_data = ({'ac_input': vec_val['prefixes']['activities'],
