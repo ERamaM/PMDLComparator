@@ -250,6 +250,8 @@ else:
 commands = tsp_creator(configs, tsp=tsp_executable)
 
 
+# Set the number of concurrent jobs
+os.environ["TS_SLOTS"] = "10"
 if not args.execute_inplace:
     commands = ["cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
     with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh"), "w") as f:
