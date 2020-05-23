@@ -91,7 +91,7 @@ class EXTENSIONS:
     XES_COMPRESSED = ".xes.gz"
 
 
-def select_columns(file, input_columns, category_columns, timestamp_format, output_columns, categorize=False):
+def select_columns(file, input_columns, category_columns, timestamp_format, output_columns, categorize=False, fill_na=None):
     """
     Select columns from CSV converted from XES
     :param file: csv file
@@ -101,6 +101,9 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
     :return: overwrites the csv file with the subselected csv
     """
     dataset = pd.read_csv(file)
+    
+    if fill_na is not None:
+        dataset = dataset.fillna(fill_na)
 
     if input_columns is not None:
         dataset = dataset[input_columns]

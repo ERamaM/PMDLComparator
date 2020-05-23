@@ -186,12 +186,13 @@ if arguments.net:
                     XES_Fields.RESOURCE_COLUMN: "user",
                     XES_Fields.TIMESTAMP_COLUMN: "end_timestamp"
                 }
+                # The code fails with unknown resources
                 select_columns(
                     csv_path,
                     input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.RESOURCE_COLUMN],
                     category_columns=None,
                     timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMSf_DASH_T,
-                    output_columns=output_columns, categorize=False
+                    output_columns=output_columns, categorize=False, fill_na="UNK"
                 )
                 # Reorder columns
                 reorder_columns(csv_path, ["caseid", "task", "user", "end_timestamp"])
