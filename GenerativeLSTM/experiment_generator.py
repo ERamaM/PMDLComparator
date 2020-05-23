@@ -209,10 +209,12 @@ from pathlib import Path
 parser = argparse.ArgumentParser(description="Generate training script")
 parser.add_argument("--log", help="Log to generate the script", required=True)
 parser.add_argument("--execute_inplace", help="Do not write the commands to a file. Instead, execute them directly", action="store_true")
+parser.add_argument("--slots", help="Number of parallel training procedures (TS_SLOTS)", default=5, type=int)
 args = parser.parse_args()
 log_path = args.log
 log_name = Path(log_path).name
 log_dir = Path(log_path).parent
+
 
 if ".gz" in log_path:
     log_name = log_name.replace(".gz", "")
@@ -262,7 +264,5 @@ else:
     os.system(emb_command)
     # Send all to tsp
     for command in commands:
-        os.system(tsp_executable + " -S 5 " + command)
+        os.system("TS_SLOTS=" + str(args.slots) + " " + tsp_executable + " " +  command)
 
-# submission
-# sbatch_submit(True)
