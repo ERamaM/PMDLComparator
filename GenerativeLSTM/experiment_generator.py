@@ -249,7 +249,6 @@ else:
     tsp_executable = "ts"
 commands = tsp_creator(configs, tsp=tsp_executable)
 
-
 # Set the number of concurrent jobs
 if not args.execute_inplace:
     commands = ["cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
@@ -258,11 +257,11 @@ if not args.execute_inplace:
         for command in commands:
             f.write(command + "\n")
 else:
-    os.environ["TS_SLOTS"] = "10"
     # Wait for the training of the embeddings
     emb_command = "python lstm.py -a emb_training -f " + log + " -o True"
     os.system(emb_command)
     # Send all to tsp
+    os.environ["TS_SLOTS"] = "10"
     for command in commands:
         os.system(command)
 
