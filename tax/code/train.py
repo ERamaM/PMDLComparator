@@ -54,11 +54,13 @@ parser = argparse.ArgumentParser(description="Run the neural net")
 parser.add_argument("--dataset", type=str, required=True)
 parser.add_argument("--train", help="Start the training of the neural network", action="store_true")
 parser.add_argument("--test", help="Start the testing of next event", action="store_true")
+parser.add_argument("--test_suffix", help="Start the testing of suffix", action="store_true")
+parser.add_argument("--test_suffix_calculus", help="Calculate the metrics from the suffix output file", action="store_true")
 args = parser.parse_args()
 
-if not (args.train or args.test):
-    print("Argument --train or --test (or both) are required")
-    sys.exit(-3)
+#if not (args.train or args.test or args.test_suffix or args.test_suffix_calculus):
+    #print("You must specify an operation to perform")
+    #sys.exit(-3)
 
 eventlog = args.dataset
 
@@ -72,6 +74,7 @@ def load_file(eventlog):
     line = ''
     firstLine = True
     lines = []
+    caseids = []
     timeseqs = []
     timeseqs2 = []
     timeseqs3 = []
@@ -86,6 +89,7 @@ def load_file(eventlog):
     for row in spamreader:
         t = time.strptime(row[2], "%Y-%m-%d %H:%M:%S")
         if row[0] != lastcase:
+            caseids.append(row[0])
             casestarttime = t
             lasteventtime = t
             lastcase = row[0]
@@ -123,7 +127,7 @@ def load_file(eventlog):
     timeseqs3.append(times3)
     timeseqs4.append(times4)
     numlines += 1
-    return lines, timeseqs, timeseqs2, timeseqs3, timeseqs4
+    return lines, timeseqs, timeseqs2, timeseqs3, timeseqs4, caseids
 
 from pathlib import Path
 import os
@@ -131,10 +135,10 @@ eventlog_name = Path(eventlog).stem
 extension = ".csv"
 folders = Path(eventlog).parent
 
-lines, timeseqs, timeseqs2, timeseqs3, timeseqs4 = load_file(eventlog)
-lines_train, timeseqs_train, timeseqs2_train, timeseqs3_train, timeseqs4_train = load_file(os.path.join(folders, "train_" + eventlog_name + extension))
-lines_val, timeseqs_val, timeseqs2_val, timeseqs3_val, timeseqs4_val = load_file(os.path.join(folders, "val_" + eventlog_name + extension))
-lines_test, timeseqs_test, timeseqs2_test, timeseqs3_test, timeseqs4_test = load_file(os.path.join(folders, "test_" + eventlog_name + extension))
+lines, timeseqs, timeseqs2, timeseqs3, timeseqs4, caseids = load_file(eventlog)
+lines_train, timeseqs_train, timeseqs2_train, timeseqs3_train, timeseqs4_train, caseids_train = load_file(os.path.join(folders, "train_" + eventlog_name + extension))
+lines_val, timeseqs_val, timeseqs2_val, timeseqs3_val, timeseqs4_val, caseids_val = load_file(os.path.join(folders, "val_" + eventlog_name + extension))
+lines_test, timeseqs_test, timeseqs2_test, timeseqs3_test, timeseqs4_test, caseids_test = load_file(os.path.join(folders, "test_" + eventlog_name + extension))
 
 # The divisors are calculated from only the training set
 # Otherwise we would be filtering information from the test set
@@ -147,6 +151,9 @@ print('divisor2: {}'.format(divisor2))
 
 # Add the termination character AFTER calculating the metrics
 lines = list(map(lambda x: x + '!', lines))
+lines_train = list(map(lambda x: x + '!', lines_train))
+lines_val = list(map(lambda x: x + '!', lines_val))
+lines_test = list(map(lambda x: x + '!', lines_test))
 
 # We need to vectorize the dataset at once because the folds could
 # contain activities that are not in the other folds
@@ -331,3 +338,223 @@ if args.test:
         for X, y_t, y_p, y_p_pred in zip(X_test, y_true, y_a_pred, y_a_pred_probs):
             raw_file.write(str(np.count_nonzero(np.sum(X, axis=-1))) + ";" + str(y_t) + ";" + str(y_p) + ";" + np.array2string(
                 y_p_pred, separator=",", max_line_width=99999) + "\n")
+
+
+if args.test_suffix:
+    model.load_weights(best_model)
+    model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics={"act_output" : "acc", "time_output" : "mae"})
+    predict_size = maxlen
+    from datetime import timedelta
+    import distance
+    from jellyfish._jellyfish import damerau_levenshtein_distance
+    from sklearn import metrics
+
+    def load_file_suffix(eventlog):
+        ascii_offset = 161
+        csvfile = open('%s' % eventlog, 'r')
+        spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
+        next(spamreader, None)  # skip the headers
+        lastcase = ''
+        line = ''
+        firstLine = True
+        lines = []
+        caseids = []
+        timeseqs = []
+        timeseqs2 = []
+        timeseqs3 = []
+        times = []
+        times2 = []
+        times3 = []
+        numlines = 0
+        casestarttime = None
+        lasteventtime = None
+        for row in spamreader:
+            t = time.strptime(row[2], "%Y-%m-%d %H:%M:%S")
+            if row[0] != lastcase:
+                caseids.append(row[0])
+                casestarttime = t
+                lasteventtime = t
+                lastcase = row[0]
+                if not firstLine:
+                    lines.append(line)
+                    timeseqs.append(times)
+                    timeseqs2.append(times2)
+                    timeseqs3.append(times3)
+                line = ''
+                times = []
+                times2 = []
+                times3 = []
+                numlines += 1
+            line += chr(int(row[1]) + ascii_offset)
+            timesincelastevent = datetime.fromtimestamp(time.mktime(t)) - datetime.fromtimestamp( time.mktime(lasteventtime))
+            timesincecasestart = datetime.fromtimestamp(time.mktime(t)) - datetime.fromtimestamp( time.mktime(casestarttime))
+            timediff = 86400 * timesincelastevent.days + timesincelastevent.seconds
+            timediff2 = 86400 * timesincecasestart.days + timesincecasestart.seconds
+            times.append(timediff)
+            times2.append(timediff2)
+            times3.append(datetime.fromtimestamp(time.mktime(t)))
+            lasteventtime = t
+            firstLine = False
+        # add last case
+        lines.append(line)
+        timeseqs.append(times)
+        timeseqs2.append(times2)
+        timeseqs3.append(times3)
+        numlines += 1
+        return lines, timeseqs, timeseqs2, timeseqs3, caseids
+
+    lines, timeseqs, timeseqs2, timeseqs3, caseids = load_file_suffix(eventlog)
+    lines_train, timeseqs_train, timeseqs2_train, timeseqs3_train, caseids_train = load_file_suffix(
+        os.path.join(folders, "train_" + eventlog_name + extension))
+    lines_val, timeseqs_val, timeseqs2_val, timeseqs3_val, caseids_val = load_file_suffix(
+        os.path.join(folders, "val_" + eventlog_name + extension))
+    lines_test, timeseqs_test, timeseqs2_test, timeseqs3_test, caseids_test = load_file_suffix(
+        os.path.join(folders, "test_" + eventlog_name + extension))
+
+    # The divisors are calculated from only the training set
+    # Otherwise we would be filtering information from the test set
+    # into the training set
+    divisor = np.mean([item for sublist in timeseqs_train for item in sublist])  # average time between events
+    print('divisor: {}'.format(divisor))
+    divisor2 = np.mean(
+        [item for sublist in timeseqs2_train for item in sublist])  # average time between current and first events
+    print('divisor2: {}'.format(divisor2))
+    divisor3 = np.mean(list(map(lambda x: np.mean(list(map(lambda y: x[len(x) - 1] - y, x))), timeseqs2_train)))
+    print('divisor3: {}'.format(divisor3))
+
+    lines = list(map(lambda x: x + '!', lines))
+    # NOPE: in the suffix version the lines addition is overwriten
+    # using another loading of the dataset
+    # Thus, we shouldn't add the termination symbol.
+    # Otherwise, we would have to add ! after predicting the last event
+    #lines_train = list(map(lambda x: x + '!', lines_train))
+    #lines_val = list(map(lambda x: x + '!', lines_val))
+    #lines_test = list(map(lambda x: x + '!', lines_test))
+
+    # We need to vectorize the dataset at once because the folds could
+    # contain activities that are not in the other folds
+    maxlen = max(map(lambda x: len(x), lines))  # find maximum line size
+    chars = map(lambda x: set(x), lines)
+    chars = list(set().union(*chars))
+    chars.sort()
+    target_chars = copy.copy(chars)
+    chars.remove('!')
+    num_features = len(chars) + 5
+    char_indices = dict((c, i) for i, c in enumerate(chars))
+    indices_char = dict((i, c) for i, c in enumerate(chars))
+    target_char_indices = dict((c, i) for i, c in enumerate(target_chars))
+    target_indices_char = dict((i, c) for i, c in enumerate(target_chars))
+    print("Target indices char: ", target_indices_char)
+
+
+    # define helper functions
+    def encode(sentence, times, times3, maxlen=maxlen):
+        num_features = len(chars) + 5
+        X = np.zeros((1, maxlen, num_features), dtype=np.float32)
+        leftpad = maxlen - len(sentence)
+        times2 = np.cumsum(times)
+        for t, char in enumerate(sentence):
+            midnight = times3[t].replace(hour=0, minute=0, second=0, microsecond=0)
+            timesincemidnight = times3[t] - midnight
+            multiset_abstraction = Counter(sentence[:t + 1])
+            for c in chars:
+                if c == char:
+                    X[0, t + leftpad, char_indices[c]] = 1
+            X[0, t + leftpad, len(chars)] = t + 1
+            X[0, t + leftpad, len(chars) + 1] = times[t] / divisor
+            X[0, t + leftpad, len(chars) + 2] = times2[t] / divisor2
+            X[0, t + leftpad, len(chars) + 3] = timesincemidnight.seconds / 86400
+            X[0, t + leftpad, len(chars) + 4] = times3[t].weekday() / 7
+        return X
+
+
+    def getSymbol(predictions):
+        maxPrediction = 0
+        symbol = ''
+        i = 0;
+        for prediction in predictions:
+            if (prediction >= maxPrediction):
+                maxPrediction = prediction
+                symbol = target_indices_char[i]
+            i += 1
+        return symbol
+
+
+    one_ahead_gt = []
+    one_ahead_pred = []
+
+    two_ahead_gt = []
+    two_ahead_pred = []
+
+    three_ahead_gt = []
+    three_ahead_pred = []
+
+    # make predictions
+    with open('results/raw_suffix_and_remaining_time_%s.csv' % eventlog_name, 'w') as csvfile:
+        spamwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        spamwriter.writerow(["CaseID", "Prefix length", "Groud truth", "Predicted", "Levenshtein", "Damerau", "Jaccard",
+                             "Ground truth times", "Predicted times", "RMSE", "MAE (days)"])
+        for prefix_size in range(1, maxlen):
+            # print(prefix_size)
+            for line, caseid, times, times2, times3 in zip(lines_test, caseids_test, timeseqs_test, timeseqs2_test, timeseqs3_test):
+                times.append(0)
+                cropped_line = ''.join(line[:prefix_size])
+                cropped_times = times[:prefix_size]
+                cropped_times3 = times3[:prefix_size]
+                if len(times2) < prefix_size:
+                    continue  # make no prediction for this case, since this case has ended already
+                ground_truth = ''.join(line[prefix_size:prefix_size + predict_size])
+                ground_truth_t = times2[prefix_size - 1]
+                case_end_time = times2[len(times2) - 1]
+                ground_truth_t = case_end_time - ground_truth_t
+                predicted = ''
+                total_predicted_time = 0
+                for i in range(predict_size):
+                    enc = encode(cropped_line, cropped_times, cropped_times3)
+                    y = model.predict(enc, verbose=0)  # make predictions
+                    # split predictions into seperate activity and time predictions
+                    y_char = y[0][0]
+                    y_t = y[1][0][0]
+                    prediction = getSymbol(y_char)  # undo one-hot encoding
+                    cropped_line += prediction
+                    if y_t < 0:
+                        y_t = 0
+                    cropped_times.append(y_t)
+                    if prediction == '!':  # end of case was just predicted, therefore, stop predicting further into the future
+                        one_ahead_pred.append(total_predicted_time)
+                        one_ahead_gt.append(ground_truth_t)
+                        #print('! predicted, end case. Predicted: ', predicted)
+                        break
+                    # TODO: for unknown reasons, the denormalization is different from training and from testing
+                    y_t = y_t * divisor
+                    cropped_times3.append(cropped_times3[-1] + timedelta(seconds=y_t))
+                    total_predicted_time = total_predicted_time + y_t
+                    predicted += prediction
+                output = []
+                if len(ground_truth) > 0:
+                    output.append(caseid)
+                    output.append(prefix_size)
+                    output.append(str(ground_truth))
+                    output.append(str(predicted))
+                    output.append(1 - distance.nlevenshtein(predicted, ground_truth))
+                    dls = 1 - (damerau_levenshtein_distance(str(predicted), str(ground_truth)) / max(
+                        len(predicted), len(ground_truth)))
+                    if dls < 0:
+                        dls = 0  # we encountered problems with Damerau-Levenshtein Similarity on some linux machines where the default character encoding of the operating system caused it to be negative, this should never be the case
+                    output.append(dls)
+                    output.append(1 - distance.jaccard(predicted, ground_truth))
+                    output.append(ground_truth_t)
+                    output.append(total_predicted_time)
+                    output.append('')
+                    output.append(metrics.mean_absolute_error([ground_truth_t], [total_predicted_time]) / 86400)
+                    # output.append(metrics.median_absolute_error([ground_truth_t], [total_predicted_time]))
+                    spamwriter.writerow(output)
+
+if args.test_suffix_calculus:
+    import pandas as pd
+    df = pd.read_csv(os.path.join("results", "raw_suffix_and_remaining_time_" + eventlog_name + ".csv"))
+    with open(os.path.join("results", "suffix_" + eventlog_name + ".csv"), "w") as result_f:
+        result_f.write("Mean MAE per prefix: " + str(df.groupby("Prefix length")["MAE (days)"].mean()) + "\n")
+        result_f.write("Mean DL per prefix: " + str(df.groupby("Prefix length")["Damerau"].mean()) + "\n")
+        result_f.write("Mean MAE: " + str(df["MAE (days)"].mean()) + "\n")
+        result_f.write("Mean DL: " + str(df["Damerau"].mean()) + "\n")
