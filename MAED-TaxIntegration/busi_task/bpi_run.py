@@ -898,6 +898,10 @@ if __name__ == '__main__':
     if not (args.train or args.test):
         print("Argument --train or --test (or both) are required")
         sys.exit(-3)
+    if args.train and args.test:
+        print("Can't do training and testing at the same time")
+        sys.exit(-3)
+
 
     eventlog = args.dataset
 
@@ -992,6 +996,13 @@ if __name__ == '__main__':
 
     # Add the termination character AFTER calculating the metrics
     lines = list(map(lambda x: x + '!', lines))
+    if args.train:
+        # For training we need to augment the "folds" with the end sequence
+        # For testing we don't (look in the verenich's code for the line "lines = map(lambda x: x+'!',lines)"
+        # In Train.py its duplicated but in testing is only once
+        lines_train = list(map(lambda x: x + '!', lines_train))
+        lines_val = list(map(lambda x: x + '!', lines_val))
+        lines_test = list(map(lambda x: x + '!', lines_test))
 
     # We need to vectorize the dataset at once because the folds could
     # contain activities that are not in the other folds
