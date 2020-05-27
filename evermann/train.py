@@ -27,9 +27,11 @@ parser = argparse.ArgumentParser(description="Run the neural net")
 parser.add_argument("--dataset", type=str, required=True)
 parser.add_argument("--train", help="Start the training of the neural network", action="store_true")
 parser.add_argument("--test", help="Start the testing of next event", action="store_true")
+parser.add_argument("--test_suffix", help="Test suffix prediction performance", action="store_true")
+parser.add_argument("--test_suffix_calculus", help="Calculate metrics from suffix file", action="store_true")
 args = parser.parse_args()
 
-if not (args.train or args.test):
+if not (args.train or args.test or args.test_suffix or args.test_suffix_calculus):
     print("Argument --train or --test (or both) are required")
     sys.exit(-3)
 
@@ -161,6 +163,9 @@ if args.train:
     history = model.fit(train_dataset, epochs=100, callbacks=[checkpoint_callback], validation_data=val_dataset)
 
 if args.test:
+    tf.compat.v1.set_random_seed(42)
+    random.seed(42)
+    np.random.seed(42)
     print("Start testing...")
     # Test accuracy
     model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
@@ -216,10 +221,6 @@ if args.test:
 # model.evaluate(test_dataset)
 
 # Test damerau levenshtein
-# model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
-# model.load_weights(model_file_name)
-# model.build(tf.TensorShape([1, None]))
-
 def generate_text(model, start_trace):
     # Evaluation step (generating text using the learned model)
 
@@ -248,8 +249,8 @@ def generate_text(model, start_trace):
 
         # using a categorical distribution to predict the word returned by the model
         # predictions = predictions / temperature
-        # predicted_id = tf.random.categorical(predictions, num_samples=1)[-1, 0].numpy()
-        predicted_id = np.argmax(predictions.numpy()[0])
+        predicted_id = tf.random.categorical(predictions, num_samples=1)[-1, 0].numpy()
+        # predicted_id = np.argmax(predictions.numpy()[0])
         # print("Predictions: ", predictions)
         #print("ID: ", predicted_id)
 
@@ -259,9 +260,9 @@ def generate_text(model, start_trace):
 
         text_generated.append(predicted_id)
         if predicted_id == idx["[EOC]"]:
-            return (start_trace + text_generated)
+            return text_generated
 
-    return (start_trace + text_generated)
+    return text_generated
 
 def damerau_levenshtein(X_pred, X_real):
     first_printable_chr = 33
@@ -276,14 +277,22 @@ def damerau_levenshtein(X_pred, X_real):
             X_real_arr_str.append(chr(int(x) + first_printable_chr))
     X_real_str = "".join(X_real_arr_str)
 
-    print("Predicted str: ", X_pred_str)
-    print("Real str: ", X_real_str)
+    #print("Predicted str: ", X_pred_str)
+    #print("Real str: ", X_real_str)
     norm = NormalizedLevenshtein()
-    return norm.similarity(X_pred_str, X_real_str)
+    return norm.similarity(X_pred_str, X_real_str), X_pred_str, X_real_str
 
 # Calculate the number of steps for the progress bar
 # TODO: this may be slow
-if do_damerau:
+if args.test_suffix:
+    tf.compat.v1.set_random_seed(42)
+    random.seed(42)
+    np.random.seed(42)
+    import csv
+    model = build_model(vocab_size, embedding_dim, rnn_units, batch_size=1)
+    model.load_weights(os.path.join(model_directory, model_file_name))
+    model.build(tf.TensorShape([1, None]))
+
     total_steps = 0
     for test_trace in X_test:
         total_steps += len(test_trace) - 1
@@ -293,22 +302,34 @@ if do_damerau:
 
     damerau_distances = []
     curr_step = 0
-    for test_trace in X_test:
-        # Iterating over the end of the array would end with suffixes with size 1
-        for i in range(len(test_trace)-1):
-            prefix = test_trace[0:i+1]
-            suffix = test_trace[i+1:]
-            if not suffix:
-                continue
-            prediction = generate_text(model, prefix)
-            distance = damerau_levenshtein(prediction, suffix)
-            damerau_distances.append(distance)
-            curr_step += 1
-            progress_bar.update(curr_step)
+    with open(os.path.join("results", "suffix_results_" + file_name + ".csv"), "w") as result_file:
+        csv_writer = csv.writer(result_file, delimiter=";", quotechar="|")
+        #result_file.write("Prefix length;predicted;groud_truth;normalized_damerau\n")
+        csv_writer.writerow(["Prefix length", "predicted", "groud_truth", "normalized_damerau"])
+        for test_trace in X_test:
+            # Iterating over the end of the array would end with suffixes with size 1
+            for i in range(len(test_trace)-1):
+                prefix = test_trace[0:i+1]
+                suffix = test_trace[i+1:]
+                if not suffix:
+                    continue
+                prediction = generate_text(model, prefix)
+                distance, pred_str, real_str = damerau_levenshtein(prediction, suffix)
+                damerau_distances.append(distance)
+                curr_step += 1
+                progress_bar.update(curr_step)
 
-            # print("Ground truth: ", test_trace)
-            # print("Prefix: ", prefix)
-            # print("Suffix: ", suffix)
-            # print("Prediction: ", prediction)
+                #result_file.write(str(len(prefix)) + ";" + pred_str + ";" + real_str + ";" + str(distance) + "\n")
+                csv_writer.writerow([str(len(prefix)), pred_str, real_str, str(distance)])
 
-    print("Mean damerau: ", np.mean(damerau_distances))
+if args.test_suffix_calculus:
+    import pandas as pd
+    df = pd.read_csv(os.path.join("results", "suffix_results_" + file_name + ".csv"), delimiter=";", quotechar="|")
+    print("--------")
+    print("Results for: ", file_name)
+    print("Mean damerau: ", df["normalized_damerau"].mean())
+    print("Damerau per prefix length")
+    print(df.groupby("Prefix length")["normalized_damerau"].mean())
+    print("--------")
+
+
