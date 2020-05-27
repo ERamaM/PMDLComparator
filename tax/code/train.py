@@ -444,7 +444,7 @@ if args.test_suffix:
     indices_char = dict((i, c) for i, c in enumerate(chars))
     target_char_indices = dict((c, i) for i, c in enumerate(target_chars))
     target_indices_char = dict((i, c) for i, c in enumerate(target_chars))
-    print("Target indices char: ", target_indices_char)
+    #print("Target indices char: ", target_indices_char)
 
 
     # define helper functions
@@ -525,8 +525,8 @@ if args.test_suffix:
                         one_ahead_gt.append(ground_truth_t)
                         #print('! predicted, end case. Predicted: ', predicted)
                         break
-                    # TODO: for unknown reasons, the denormalization is different from training and from testing
-                    y_t = y_t * divisor
+                    # for unknown reasons, the denormalization is different from training and from testing
+                    y_t = y_t * divisor3
                     cropped_times3.append(cropped_times3[-1] + timedelta(seconds=y_t))
                     total_predicted_time = total_predicted_time + y_t
                     predicted += prediction
