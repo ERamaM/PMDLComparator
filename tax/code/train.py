@@ -534,8 +534,8 @@ if args.test_suffix:
                 if len(ground_truth) > 0:
                     output.append(caseid)
                     output.append(prefix_size)
-                    output.append(str(ground_truth))
-                    output.append(str(predicted))
+                    output.append(str(ground_truth).encode("utf-8"))
+                    output.append(str(predicted).encode("utf-8"))
                     output.append(1 - distance.nlevenshtein(predicted, ground_truth))
                     dls = 1 - (damerau_levenshtein_distance(str(predicted), str(ground_truth)) / max(
                         len(predicted), len(ground_truth)))
