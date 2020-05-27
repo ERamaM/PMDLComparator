@@ -263,5 +263,5 @@ else:
     os.system(emb_command)
     # Send all to tsp
     for command in commands:
-        os.system("TS_SLOTS=" + str(args.slots) + " " + tsp_executable + " " +  command)
+        os.system("TS_SOCKET=/tmp/camargo TS_SLOTS=" + str(args.slots) + " " + tsp_executable + " " +  command)
 
