@@ -165,7 +165,6 @@ def tsp_creator(configs, tsp="ts"):
         commands.append(options)
     return commands
 
-
 # =============================================================================
 # Sbatch files submission
 # =============================================================================

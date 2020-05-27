@@ -179,7 +179,9 @@ def _training_model(vec, ac_weights, rl_weights, output_folder, args, vec_val):
                                    cooldown=0,
                                    min_lr=0)
 
-    batch_size = vec['prefixes']['activities'].shape[1]
+    #batch_size = vec['prefixes']['activities'].shape[1]
+    batch_size = 32
+    print("BATCH SIZE: ", batch_size)
     history = model.fit({'ac_input':vec['prefixes']['activities'],
                'rl_input':vec['prefixes']['roles'],
                't_input':vec['prefixes']['times']},
