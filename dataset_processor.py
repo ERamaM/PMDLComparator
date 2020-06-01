@@ -126,7 +126,6 @@ if arguments.net:
                 )
                 csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
                 move_files(csv_path, "MAED-TaxIntegration/busi_task/data", EXTENSIONS.CSV)
-
     elif arguments.net == "theis":
         for xes in dataset_list:
             print("Process: ", xes)
@@ -200,6 +199,46 @@ if arguments.net:
                 move_files(csv_path, "GenerativeLSTM/input_files", EXTENSIONS.CSV)
             else:
                 print(xes + " does not have resources.")
+
+    elif arguments.net == "francescomarino":
+        for xes in dataset_list:
+            print("Process: ", xes)
+            make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/models")
+            make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/results")
+            make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/data")
+            make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files")
+
+            # Tax already performs the augmentation in their script
+            # so there is no need to perform it here
+            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+
+            _ , _, _, _, train_val_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=True)
+            # Select the fields for the declare miner files.
+            # This avoids nan error importing in prom.
+            select_columns(
+                train_val_path,
+                input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
+                category_columns=None,
+                timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                output_columns=None
+            )
+            xes_file, xes_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            move_files(xes_path, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files", EXTENSIONS.XES_COMPRESSED)
+
+            output_columns = {
+                XES_Fields.CASE_COLUMN: "CaseID",
+                XES_Fields.ACTIVITY_COLUMN: "ActivityID",
+                XES_Fields.TIMESTAMP_COLUMN: "CompleteTimestamp"
+            }
+            select_columns(
+                csv_path,
+                input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
+                category_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN],
+                timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                output_columns=output_columns, categorize=True
+            )
+            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
+            move_files(csv_path, "Process-Sequence-Prediction-with-A-priori-knowledge/data", EXTENSIONS.CSV)
     else:
         print("Unrecognized approach")
 
