@@ -13,7 +13,7 @@ from pathlib import Path
 import glob
 import datetime
 import shutil
-import yaml
+import yaml, json
 
 
 def convert_xes_to_csv(file, output_folder):
@@ -29,7 +29,7 @@ def augment_xes_end_activity_to_csv(file, output_folder):
     csv_file, csv_path = convert_xes_to_csv(file, output_folder)
 
     dataframe = pd.read_csv(csv_path)
-    group = dataframe.groupby(XES_Fields.CASE_COLUMN, as_index=False)
+    group = dataframe.groupby(XES_Fields.CASE_COLUMN, as_index=False, sort=False)
     # Get the last rows (last event of each case, since its ordered by timestamp)
     last_rows = group.last()
     last_rows[XES_Fields.ACTIVITY_COLUMN] = "[EOC]"
@@ -48,9 +48,10 @@ def convert_csv_to_xes(file, output_folder, extension):
     csv_path = file
     xes_file = Path(file).stem.split(".")[0] + EXTENSIONS.XES
     xes_path = os.path.join(output_folder, xes_file)
-    log = csv_import_factory.apply(csv_path, parameters={"timestamp_sort": True, "timest_columns" : XES_Fields.TIMESTAMP_COLUMN})
+    log = csv_import_factory.apply(csv_path,
+                                   parameters={"timestamp_sort": True, "timest_columns": XES_Fields.TIMESTAMP_COLUMN})
     if extension == EXTENSIONS.XES_COMPRESSED:
-        xes_exporter.export_log(log, xes_path, parameters={"compress" : True})
+        xes_exporter.export_log(log, xes_path, parameters={"compress": True})
     else:
         xes_exporter.export_log(log, xes_path)
 
@@ -58,6 +59,56 @@ def convert_csv_to_xes(file, output_folder, extension):
         xes_file += ".gz"
         xes_path += ".gz"
     return xes_file, xes_path
+
+
+def convert_csv_to_json(file, output_folder, attributes, timestamp_format, prettify=False):
+    csv_path = file
+    json_log = {}
+    log_df = pd.read_csv(csv_path)
+    unique_activities = log_df[XES_Fields.ACTIVITY_COLUMN].unique().tolist()
+    # List of activities and its ids
+    activity_list = [{"name": activity, "id": i} for i, activity in enumerate(unique_activities)]
+    activity_map = {}
+    for i, activity in enumerate(unique_activities):
+        activity_map[activity] = i
+    json_log["activities"] = activity_list
+    # List of attributes
+    json_log["attributes"] = {}
+    json_log["attributes"]["event"] = attributes
+    # Note: no case attributes is taken into account
+    json_log["attributes"]["case"] = []
+
+    # Cases
+    json_log["cases"] = []
+    groups = [pandas_df for _, pandas_df in log_df.groupby(XES_Fields.CASE_COLUMN, sort=False)]
+    fields = list(log_df)
+    fields.remove(XES_Fields.CASE_COLUMN)
+    for group in groups:
+        case = {}
+        case["t"] = []
+        case["a"] = [] # Empty case attributes
+        for idx, event in group.iterrows():
+            case["n"] = str(event[XES_Fields.CASE_COLUMN]) # For some reason is a str
+            j_event = []
+            for field in fields:
+                if field == XES_Fields.TIMESTAMP_COLUMN:
+                    print("Timestamp: ",
+                          datetime.datetime.timestamp(datetime.datetime.strptime(event[field], timestamp_format)))
+                    j_event.append("/Date(" + str(int(datetime.datetime.timestamp(
+                        datetime.datetime.strptime(event[field], timestamp_format)))) + ")/")
+                elif field == XES_Fields.ACTIVITY_COLUMN:
+                    j_event.append(activity_map[event[field]])
+                else:
+                    j_event.append(event[field])
+            case["t"].append(j_event)
+        json_log["cases"].append(case)
+
+    indent = 4 if prettify else None
+    obj = json.dumps(json_log, indent=indent)
+    json_path = os.path.join(output_folder, Path(file).stem + EXTENSIONS.JSON)
+    with open(json_path, "w") as f:
+        f.write(obj)
+    print(obj)
 
 
 def create_tmp():
@@ -89,9 +140,11 @@ class EXTENSIONS:
     CSV = ".csv"
     XES = ".xes"
     XES_COMPRESSED = ".xes.gz"
+    JSON = ".json"
 
 
-def select_columns(file, input_columns, category_columns, timestamp_format, output_columns, categorize=False, fill_na=None):
+def select_columns(file, input_columns, category_columns, timestamp_format, output_columns, categorize=False,
+                   fill_na=None):
     """
     Select columns from CSV converted from XES
     :param file: csv file
@@ -101,7 +154,7 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
     :return: overwrites the csv file with the subselected csv
     """
     dataset = pd.read_csv(file)
-    
+
     if fill_na is not None:
         dataset = dataset.fillna(fill_na)
 
@@ -131,6 +184,7 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
 
     dataset.to_csv(file, sep=",", index=False)
 
+
 def reorder_columns(file, ordered_columns):
     """
     Reorder the columns of the dataset.
@@ -143,6 +197,7 @@ def reorder_columns(file, ordered_columns):
     df = pd.read_csv(file)
     df = df.reindex(columns=(ordered_columns + list([a for a in df.columns if a not in ordered_columns])))
     df.to_csv(file, sep=",", index=False)
+
 
 def load_attributes_from_file(filename, log_name):
     with open(filename) as yaml_file:
@@ -204,12 +259,14 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
     else:
         return file, train_path, val_path, test_path
 
+
 def copy_file(file, output_directory, extension):
     base_file = os.path.basename(file)
     dox_index = base_file.index(".")
     file_name = base_file[:dox_index]
     print("Copy file: ", file)
     shutil.copyfile(file, os.path.join(output_directory, file_name + extension))
+
 
 def move_files(file, output_directory, extension):
     """
@@ -220,7 +277,7 @@ def move_files(file, output_directory, extension):
     :return:
     """
 
-    #name = Path(file).stem + extension
+    # name = Path(file).stem + extension
     basename = os.path.basename(file)
     dot_index = basename.index(".")
     name = basename[:dot_index] + extension
@@ -268,7 +325,7 @@ def gather_statistics(log, abbreviate_times=True):
     first_and_last_timestamps_per_case = group_by_case[XES_Fields.TIMESTAMP_COLUMN].agg(
         ["first", "last"])
     avg_case_duration = (
-                first_and_last_timestamps_per_case["last"] - first_and_last_timestamps_per_case["first"]).mean()
+            first_and_last_timestamps_per_case["last"] - first_and_last_timestamps_per_case["first"]).mean()
     max_case_duration = (first_and_last_timestamps_per_case["last"] - first_and_last_timestamps_per_case["first"]).max()
     variants = group_by_case[XES_Fields.ACTIVITY_COLUMN].agg("->".join).nunique()
     print("N_cases: ", n_cases)

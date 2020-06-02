@@ -239,6 +239,32 @@ if arguments.net:
             )
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
             move_files(csv_path, "Process-Sequence-Prediction-with-A-priori-knowledge/data", EXTENSIONS.CSV)
+
+    elif arguments.net == "hinkka":
+        for xes in dataset_list:
+            # Tax already performs the augmentation in their script
+            # so there is no need to perform it here
+            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+            attributes = load_attributes_from_file("attributes.yaml", Path(xes).name)
+
+            output_columns = {
+                XES_Fields.CASE_COLUMN: "CaseID",
+                XES_Fields.ACTIVITY_COLUMN: "ActivityID",
+                XES_Fields.TIMESTAMP_COLUMN: "CompleteTimestamp"
+            }
+            select_columns(
+                csv_path,
+                input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN] + attributes,
+                category_columns=[XES_Fields.CASE_COLUMN],
+                timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                output_columns=None, categorize=True
+            )
+
+            json_path = convert_csv_to_json(csv_path, "hinkka/src/testdata", attributes, Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH, prettify=True)
+            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
+
+            move_files(csv_path, "hinkka/src/testdata", EXTENSIONS.CSV)
+
     else:
         print("Unrecognized approach")
 
