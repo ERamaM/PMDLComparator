@@ -130,7 +130,7 @@ default_parameters = {
     # "hidden_dim_size": 8,
     "num_iterations_between_reports": 1000,
     "grad_clipping": 100,
-    "predict_only_outcome": True,
+    "predict_only_outcome": False,
     "final_trace_only": True,
     "trace_length_modifier": 1.0,
     "truncate_unknowns": False,
@@ -179,7 +179,7 @@ default_parameters = {
     "max_num_traces_in_training_test": None,
     "test_data_percentage": 0.75,
     "split_traces_to_prefixes": False,
-    "min_splitted_trace_prefix_length": 4,
+    "min_splitted_trace_prefix_length": 1, # Use prefixes of length 1 and onwards
     "max_trace_length": 100,
     "cross-validation-splits": None,
     "create-unknown-tokens": True

@@ -242,8 +242,7 @@ if arguments.net:
 
     elif arguments.net == "hinkka":
         for xes in dataset_list:
-            # Tax already performs the augmentation in their script
-            # so there is no need to perform it here
+            print("Process: ", xes)
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
             attributes = load_attributes_from_file("attributes.yaml", Path(xes).name)
 
@@ -260,6 +259,8 @@ if arguments.net:
                 output_columns=None, categorize=True
             )
 
+            make_dir_if_not_exists("hinkka/src/testdata")
+            make_dir_if_not_exists("hinkka/src/output")
             json_path = convert_csv_to_json(csv_path, "hinkka/src/testdata", attributes, Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH, prettify=True)
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
 

@@ -296,7 +296,7 @@ class Model:
 
         rawCaseAttributes = []
         rawEventAttributes = []
-        for trace in self.traces_train:
+        for trace in self.traces_train + self.traces_validation + self.traces_test:
             durations.update(trace.durations)
             if (not predict_next_activity):
                 self.outcomes.add(trace.outcomeToken)
@@ -364,6 +364,10 @@ class Model:
             durations = [DURATION_VALUE_PLACEHOLDER_TOKEN]
 
         self.index_to_word = np.concatenate([self.outcomes, durations, eventAttributeClusters, caseAttributeClusters, others, words, rawCaseAttributes, rawEventAttributes])
+        # This HAX allows taking into account the case where an activity is present in the test set but not in the training set
+        for out in self.traces_test:
+            if out.outcome not in self.index_to_word:
+                self.index_to_word = np.append(self.index_to_word, out.outcome)
         self.word_to_index = dict([(w, i) for i, w in enumerate(self.index_to_word)])
         writeLog("Total number of unique tokens: %d" % len(self.index_to_word))
         if (predict_next_activity):
@@ -565,11 +569,13 @@ class Model:
         writeLog("Compiling propabilities computing function...")
         self.propabilities = theano.function([l_in.input_var, l_mask.input_var],network_output,allow_input_downcast=True)
 
-    def predict_outcome(self, tracesToCalculateFor, tracePercentage):
+    def predict_outcome(self, tracesToCalculateFor, tracePercentage, requireFullProbs=False):
         batches, masks = self.gen_prediction_data(tracesToCalculateFor, tracePercentage)
         correct = 0
         predictions = []
         probs_out = []
+        real_probs = []
+        index_predictions = []
         predict_next_activity = self.parameters["predict_next_activity"]
 
         for i in range(len(batches)):
@@ -581,6 +587,7 @@ class Model:
                     outcomeProbs = np.asarray([p if self.is_word_token[k] or self.is_outcome[k] else 0 for k, p in enumerate(prob[1])])
                 else:
                     outcomeProbs = np.asarray([p if self.is_outcome[k] else 0 for k, p in enumerate(prob[1])])
+                real_probs.append(outcomeProbs)
                 sumProb = 0
                 maxProb = 0
                 for t, p in enumerate(outcomeProbs):
@@ -590,13 +597,19 @@ class Model:
                         maxIndex = t
                 probs_out.append(maxProb / sumProb)
                 word = self.index_to_word[maxIndex]
+                index_predictions.append(maxIndex)
                 if predict_next_activity and word.startswith(OUTCOME_SELECTION_TOKEN_PREFIX):
                     word = word[len(OUTCOME_SELECTION_TOKEN_PREFIX):]
                 predictions.append(word)
-        return predictions, probs_out
+        if not requireFullProbs:
+            return predictions, probs_out
+        else:
+            return predictions, probs_out, real_probs, index_predictions
+
 
     def createModel(self):
         self.initializeTraces()
+
 
         self.layer_preparation_start_time = time()
         self.train_initialization_time_used = self.layer_preparation_start_time - self.train_start_time
@@ -889,7 +902,7 @@ class Model:
         except:
             writeLog("Exception: " + sys.exc_info()[0])
 
-    def test(self, eventlog, tracePercentage = 1.0, maxNumTraces = None):
+    def test(self, eventlog, tracePercentage = 1.0, maxNumTraces = None, fullProbs=False):
         self.eventlog = eventlog
         self.eventlog.model = self
         eventlog.initializeForTesting(self)
@@ -897,6 +910,7 @@ class Model:
         self.prepareTestData(eventlog)
         self.traces_train = []
         self.traces_test = eventlog.convertTracesFromInputData(eventlog.testData, self.parameters, self.trace_length_modifier)
+
         if (maxNumTraces != None) and (maxNumTraces < len(self.traces_test)):
             writeLog("Filtering %d traces out of %d test traces" % (maxNumTraces, len(self.traces_test)))
             self.traces_test = list(np.random.choice(np.asarray(self.traces_test), maxNumTraces, replace=False))
@@ -907,18 +921,31 @@ class Model:
         sl = self.prepareTokenizedSentences(self.traces_test, tokenized_sentences_test, None, self.seq_length, True)
         writeLog("Maximum sequence length in the test set is %d tokens." % (sl))
 
-        predictions, probs = self.predict_outcome(self.traces_test, tracePercentage)
+        predictions, probs, real_probs, index_predictions = self.predict_outcome(self.traces_test, tracePercentage, requireFullProbs=True)
         numSuccess = 0
         cases = eventlog.data["cases"]
+        real_idx = []
         if len(cases) > 0:
             predict_next_activity = self.parameters["predict_next_activity"]
 
             if (predict_next_activity or ("s" in cases[0])):
                 prefix = ("" if predict_next_activity else OUTCOME_SELECTION_TOKEN_PREFIX)
+                print("WORD TO INDEX DICT: ", self.word_to_index)
+                print("INDEX TO WORD DICT: ", self.index_to_word)
+                print("PROBS SHAPE: ", np.array(real_probs).shape)
                 for i, pred in enumerate(predictions):
                     if pred == prefix + self.traces_test[i].outcome:
                         numSuccess += 1
+                    real_outcome = self.traces_test[i].outcome
+                    if real_outcome == TRACE_FINISH_TOKEN:
+                        real_idx.append(self.word_to_index["_O_" + self.traces_test[i].outcome])
+                    else:
+                        real_idx.append(self.word_to_index[self.traces_test[i].outcome])
+
 
         print("numSucess: ", numSuccess)
-        return self.traces_test, predictions, probs, numSuccess
-        
+        if not fullProbs:
+            return self.traces_test, predictions, probs, numSuccess
+        else:
+            return self.traces_test, predictions, probs, numSuccess, real_probs, index_predictions, real_idx
+

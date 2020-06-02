@@ -256,7 +256,7 @@ class ModelCluster:
         t0 = time()
         for i, model in enumerate(self.models):
             writeLog("Testing model %d of %d" % (i + 1, len(self.eventlogs)))
-            t, pred, prob, ns = model.test(self.eventlogs[i], tracePercentage, maxNumTraces)
+            t, pred, prob, ns, real_probs, index_predictions, ground_truth = model.test(self.eventlogs[i], tracePercentage, maxNumTraces, fullProbs=True)
             traces += t
             predictions += pred
             probs += prob
@@ -264,8 +264,16 @@ class ModelCluster:
 
         tutest = (time() - t0)
         sr_test = numSuccess / len(predictions)
-        print("Predictions: ", predictions)
-        print("Probs: ", probs)
+
+        import os
+        print("Model cluster parameters: ", self.parameters)
+        filename = self.parameters["test_filename"] if self.parameters["test_filename"] is not None else self.parameters["dataset_name"]
+        with open(os.path.join("output", "results_" + filename), "w") as result_file:
+            result_file.write("Accuracy: " + str(sr_test))
+            result_file.write("Len preds: " + str(len(index_predictions)))
+            result_file.write("Len gt: " + str(len(ground_truth)))
+            # TODO: zumbarle ahí el resto de metricas a ver si se puede
+
         writeLog("Success rate for test data: %d/%d (=%f%%)" % (numSuccess, len(predictions), 100 * sr_test))
 
         train_success_rate = ""

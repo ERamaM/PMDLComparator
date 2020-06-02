@@ -92,8 +92,6 @@ def convert_csv_to_json(file, output_folder, attributes, timestamp_format, prett
             j_event = []
             for field in fields:
                 if field == XES_Fields.TIMESTAMP_COLUMN:
-                    print("Timestamp: ",
-                          datetime.datetime.timestamp(datetime.datetime.strptime(event[field], timestamp_format)))
                     j_event.append("/Date(" + str(int(datetime.datetime.timestamp(
                         datetime.datetime.strptime(event[field], timestamp_format)))) + ")/")
                 elif field == XES_Fields.ACTIVITY_COLUMN:
@@ -108,7 +106,7 @@ def convert_csv_to_json(file, output_folder, attributes, timestamp_format, prett
     json_path = os.path.join(output_folder, Path(file).stem + EXTENSIONS.JSON)
     with open(json_path, "w") as f:
         f.write(obj)
-    print(obj)
+    return json_path
 
 
 def create_tmp():

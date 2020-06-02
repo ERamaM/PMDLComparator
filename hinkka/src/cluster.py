@@ -103,7 +103,11 @@ def train_xmeans(df, parameters):
     max_num_clusters = parameters["max_num_clusters"]
     num_clusters = parameters["num_clusters"]
     initial_centers = kmeans_plusplus_initializer(df, min(df.shape[0], num_clusters)).initialize()
-    xmeans_instance = xmeans(df, initial_centers, ccore=True, kmax=max_num_clusters)
+    print("CLUSTERING DF: ", df)
+    print("CLUSTERING DF shape: ", df.shape)
+    # NaNs on the numpy matrix give segmentation fault from the pyclustering xmeans
+    df = np.nan_to_num(df)
+    xmeans_instance = xmeans(df, initial_centers, ccore=True, kmax=num_clusters)
 
     # run cluster analysis
     xmeans_instance.process()
@@ -132,6 +136,7 @@ def train_xmeans(df, parameters):
 def predict_xmeans(df, model):
     if model == None:
         return len(df) * [0]
+    df = np.nan_to_num(df)
     return model.predict(df)
 
 def train_skmeans(df, parameters):
