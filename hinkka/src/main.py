@@ -221,6 +221,7 @@ def run(parameters):
 
     if (parameters["model_filename"] != None):
         m = ModelCluster(rng)
+        print("Parameters model filename: ", parameters["model_filename"])
         m.load(parameters["model_filename"], parameters)
         inputFilename = None if parameters["test_filename"] == None else parameters["test_filename"]
         if (inputFilename != None):

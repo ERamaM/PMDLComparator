@@ -60,16 +60,20 @@ class EventLog:
 
         # Filename is not null and inputJson is always null
         # Open the csvs and count the number of events
-        name = Path(filename).stem
-        train_df = pd.read_csv(os.path.join("testdata", "train_" + name + ".csv"))
-        val_df = pd.read_csv(os.path.join("testdata", "val_" + name + ".csv"))
-        test_df = pd.read_csv(os.path.join("testdata", "test_" + name + ".csv"))
-        self.train_cases = len(train_df.groupby("case:concept:name"))
-        self.val_cases = len(val_df.groupby("case:concept:name"))
-        self.test_cases = len(test_df.groupby("case:concept:name"))
-        print("Train evn: ", self.train_cases)
-        print("Val evn: ", self.val_cases)
-        print("Test evn: ", self.test_cases)
+        print("FILENAME EVENTLOG: ", filename)
+        print("FILENAME INPUTJSON: ", inputJson)
+        print("PARAMETERS: ", parameters)
+        if filename is not None:
+            name = Path(filename).stem
+            train_df = pd.read_csv(os.path.join("testdata", "train_" + name + ".csv"))
+            val_df = pd.read_csv(os.path.join("testdata", "val_" + name + ".csv"))
+            test_df = pd.read_csv(os.path.join("testdata", "test_" + name + ".csv"))
+            self.train_cases = len(train_df.groupby("case:concept:name"))
+            self.val_cases = len(val_df.groupby("case:concept:name"))
+            self.test_cases = len(test_df.groupby("case:concept:name"))
+            print("Train evn: ", self.train_cases)
+            print("Val evn: ", self.val_cases)
+            print("Test evn: ", self.test_cases)
 
 
         if (inputJson != None):

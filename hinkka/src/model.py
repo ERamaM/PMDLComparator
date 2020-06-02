@@ -92,17 +92,25 @@ class Model:
 #            writeLog("Exception: " + sys.exc_info()[0])
 
     def prepareTestData(self, eventlog):
+        # Cluster validation and test splits
         testData = eventlog.testData
         if (self.case_clustering != None):
             self.case_clustering.clusterCases(eventlog, eventlog.testData)
+            self.case_clustering.clusterCases(eventlog, eventlog.validationData)
         else:
             for td in enumerate(testData):
+                td["_cluster"] = 0
+            for td in enumerate(eventlog.validationData):
                 td["_cluster"] = 0
 
         if (self.event_clustering != None):
             self.event_clustering.clusterEvents(eventlog, eventlog.testData)
+            self.event_clustering.clusterEvents(eventlog, eventlog.validationData)
         else:
             for c in testData:
+                for e in c["t"]:
+                    e.append(0)
+            for c in eventlog.validationData:
                 for e in c["t"]:
                     e.append(0)
 
@@ -221,9 +229,12 @@ class Model:
                         if w != None:
                             x[batchRow, i, w] = 1.
                 if (not disableRawEventAttributes):
-                    for w in eaWords[i]:
-                        if w != None:
-                            x[batchRow, i, w] = 1.
+                    try: # For some reason this fails when calculating the validation accuracy
+                        for w in eaWords[i]:
+                            if w != None:
+                                x[batchRow, i, w] = 1.
+                    except:
+                        pass
             for i in range(self.seq_length):
                 m[batchRow, i] = 1 if i < len(labels) else 0
             batchRow += 1
@@ -599,6 +610,7 @@ class Model:
         self.auc = 0
         self.sr_trains = []
         self.sr_tests = []
+        self.sr_vals = []
         self.sr_tests_75p = []
         self.sr_tests_50p = []
         self.sr_tests_25p = []
@@ -607,6 +619,7 @@ class Model:
         self.time_used_for_test = []
         self.all_cms = []
         self.best_sr_test = 0
+        self.best_sr_vals = 0
         self.best_sr_train = 0
         self.best_num_success = 0
         self.best_num_fail = 0
@@ -648,15 +661,22 @@ class Model:
             self.time_used.append(tutrain)
             self.cms = {}
             self.cms_str = ""
-            writeLog("Testing 100% test samples")
-            numSuccess, numFail, sr_test = calculateSuccessRate(self.traces_test, 1.0, 1)
-            self.cumul_exact_train_time = self.cumul_exact_train_time + (time() - self.previous_time)
-            self.sr_tests.append(sr_test)
-            
+
             writeLog("Testing 100% training samples")
             numSuccess, numFail, sr_train = calculateSuccessRate(self.traces_train, 1.0, 0)
             self.sr_trains.append(sr_train)
             sr_tests_75p = sr_tests_50p = sr_tests_25p = None
+
+            writeLog("Testing 100% validation samples")
+            numSuccess, numFail, sr_vals = calculateSuccessRate(self.traces_validation, 1.0, 2)
+            self.cumul_exact_train_time = self.cumul_exact_train_time + (time() - self.previous_time)
+            self.sr_vals.append(sr_vals)
+
+            writeLog("Testing 100% test samples")
+            numSuccess, numFail, sr_test = calculateSuccessRate(self.traces_test, 1.0, 1)
+            self.cumul_exact_train_time = self.cumul_exact_train_time + (time() - self.previous_time)
+            self.sr_tests.append(sr_test)
+
             if (test_partial_traces):
                 writeLog("Testing 75% test samples")
                 numSuccess, numFail, sr_tests_75p = calculateSuccessRate(self.traces_test, 0.75, 2)
@@ -682,14 +702,17 @@ class Model:
             if (test_partial_traces):
                 writeLog("Success rates: test: %f test 75%%: %f test 50%%: %f test 25%%: %f train: %f" % (sr_test, sr_tests_75p, sr_tests_50p, sr_tests_25p, sr_train))
             else:
-                writeLog("Success rates: test: %f train: %f" % (sr_test, sr_train))
-            if (sr_test > self.best_sr_test):
+                writeLog("Success rates: validation: %f test: %f train: %f" % (sr_vals, sr_test, sr_train))
+
+            # IMPORTANT: store validation values
+            if (sr_vals > self.best_sr_vals):
                 writeLog("Best accuracy thus far achieved. Storing parameters...")
                 self.best_sr_test = sr_test
+                self.best_sr_vals = sr_vals
                 self.best_sr_train = sr_train
                 self.best_num_success = numSuccess
                 self.best_num_fail = numFail
-                self.best_params = lasagne.layers.get_all_param_values(self.l_out,trainable=True)
+                self.best_params = lasagne.layers.get_all_param_values(self.l_out, trainable=True)
                 self.best_iteration = num_report_iterations
 
             writeResultRow([datetime.now().replace(microsecond=0).isoformat(), 
@@ -895,5 +918,7 @@ class Model:
                 for i, pred in enumerate(predictions):
                     if pred == prefix + self.traces_test[i].outcome:
                         numSuccess += 1
+
+        print("numSucess: ", numSuccess)
         return self.traces_test, predictions, probs, numSuccess
         

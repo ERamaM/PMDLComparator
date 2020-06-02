@@ -264,6 +264,8 @@ class ModelCluster:
 
         tutest = (time() - t0)
         sr_test = numSuccess / len(predictions)
+        print("Predictions: ", predictions)
+        print("Probs: ", probs)
         writeLog("Success rate for test data: %d/%d (=%f%%)" % (numSuccess, len(predictions), 100 * sr_test))
 
         train_success_rate = ""
@@ -283,7 +285,7 @@ class ModelCluster:
             test_iterations = trainResult["test_iterations"]
             train_input_vector_size = trainResult["input_vector_size"]
             train_best_iteration = trainResult["best_iteration"]
-
+        """
         writeTestResultRow([datetime.now().replace(microsecond=0).isoformat(), 
             "ok-test", self.parameters["test_name"], self.case_name, 
             self.parameters["dataset_name"] if (("dataset_name" in self.parameters) and (self.parameters["dataset_name"] != None)) else self.eventlog.filename, 
@@ -322,6 +324,7 @@ class ModelCluster:
             self.parameters["ignore_values_threshold_for_case_attributes"],
             self.parameters["ignore_values_threshold_for_event_attributes"]
         ])
+        """
 
         writeLog("Collecting results...")
         result = {}
