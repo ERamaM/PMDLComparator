@@ -69,14 +69,14 @@ def create_text_file(index, output_file):
 
 #print debuging csv file
 def create_csv_file(index, output_file, mode='w'):
-    with open(output_file, mode) as f:
+    with open(output_file, mode, encoding='utf-8-sig') as f:
         for element in index:
             w = csv.DictWriter(f, element.keys())
             w.writerow(element)
         f.close()
 
 def create_csv_file_header(index, output_file, mode='w'):
-    with open(output_file, mode, newline='') as f:
+    with open(output_file, mode, newline='', encoding='utf-8-sig') as f:
         fieldnames = index[0].keys()
         w = csv.DictWriter(f, fieldnames)
         w.writeheader()
