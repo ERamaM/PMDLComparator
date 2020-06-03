@@ -122,7 +122,7 @@ default_parameters = {
     "test_name": "",
     "num_layers": 1,
     "optimizer": "adam",
-    "learning_rate": 0.01,
+    "learning_rate": 0.001,
     "num_callbacks": 100,
     "batch_size": 256,
     "hidden_dim_size": 256,

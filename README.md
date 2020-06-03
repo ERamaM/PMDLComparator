@@ -76,3 +76,40 @@ Do NOT run the experiments with "BOTH" instead of ACT since the neural network i
 Run the training procedure and next event prediction with the following command (inside the "code" folder)
 
     python train.py --dataset ../data/Helpdesk.csv
+    
+# Hinkka
+
+For this study is better to create a new anaconda environment. Create an environment based on tensorflow-gpu (to install the gpu dependencies) and python3.6
+
+    conda create -n hinkka python=3.6 tensorflow-gpu theano pygpu
+
+Activate the environment and install additional pip dependencies:
+
+    conda activate hinkka
+    python -m pip install nltk==3.5 pillow==7.1.2 pyclustering==0.9.3.1 regex==2020.5.14
+    
+Then, install theano and lasagne (0.2.dev1):
+
+    python -m pip install --upgrade https://github.com/Lasagne/Lasagne/archive/master.zip
+   
+Then, force Theano to use a GPU. For that, edit the file ~/.theanorc (create it if it does not exist) with the following information
+
+    [global]
+    device = cuda
+    floatX = float32
+   
+To run the experiments, you need to specify the json configuration file. That is done like:
+
+    python main.py -c config/pmdlcomparator.json
+    
+The configuration automatically takes care of the iteration over the datasets used in the paper. Check whether the gpu is being used by searching the following message at runtime (with your installed graphics card):
+
+    Mapped name None to device cuda: GeForce RTX 2080 SUPER (0000:01:00.0)
+    
+The results are stored in the directory "output". The code generates a bunch of .txt, .csv, and .json that can be safely removed. The .json MIGHT be a caching procedure so, if the code is behaving strangely, just delete these files generated.
+
+The script provided "delete_cache.sh" does precisely just that.
+
+     
+
+    
