@@ -115,7 +115,7 @@ class EventLog:
 
     def initializeForTesting(self, model):
         self.trainingData = []
-        self.testData = np.asarray(self.data["cases"])
+        self.testData = self.data["cases"][self.train_cases + self.val_cases:]
         if (model.eventlogActivities != None):
             self.data["activities"] = model.eventlogActivities
         if (model.eventlogAttributes != None):

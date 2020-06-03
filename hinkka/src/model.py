@@ -925,6 +925,7 @@ class Model:
         numSuccess = 0
         cases = eventlog.data["cases"]
         real_idx = []
+        print("LEN CASES: ", len(cases))
         if len(cases) > 0:
             predict_next_activity = self.parameters["predict_next_activity"]
 
