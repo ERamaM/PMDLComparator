@@ -106,10 +106,6 @@ The configuration automatically takes care of the iteration over the datasets us
 
     Mapped name None to device cuda: GeForce RTX 2080 SUPER (0000:01:00.0)
     
-The results are stored in the directory "output". The code generates a bunch of .txt, .csv, and .json that can be safely removed. The .json MIGHT be a caching procedure so, if the code is behaving strangely, just delete these files generated.
+The results are stored in the directory "output". The code generates a bunch of .txt, .csv, and .json that can be safely removed. The .json MIGHT be a caching procedure so, if the code is behaving strangely, just delete these files generated. The script provided "delete_cache.sh" does precisely just that.
 
-The script provided "delete_cache.sh" does precisely just that.
-
-     
-
-    
+The models parameters are stored inside the "testdata" directory. To remove them use the script "delete_models".
