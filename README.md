@@ -81,12 +81,13 @@ Run the training procedure and next event prediction with the following command 
 
 For this study is better to create a new anaconda environment. Create an environment based on tensorflow-gpu (to install the gpu dependencies) and python3.6
 
-    conda create -n hinkka python=3.6 tensorflow-gpu theano pygpu
+    conda create -n hinkka python=3.6 
+    conda activate hinkka
+    conda install tensorflow-gpu theano pygpu
 
 Activate the environment and install additional pip dependencies:
 
-    conda activate hinkka
-    python -m pip install nltk==3.5 pillow==7.1.2 pyclustering==0.9.3.1 regex==2020.5.14
+    python -m pip install nltk==3.5 pillow==7.1.2 pyclustering==0.9.3.1 regex==2020.5.14 sklearn pandas
     
 Then, install theano and lasagne (0.2.dev1):
 

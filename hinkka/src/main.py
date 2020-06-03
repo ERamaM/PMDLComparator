@@ -180,7 +180,7 @@ default_parameters = {
     "test_data_percentage": 0.75,
     "split_traces_to_prefixes": False,
     "min_splitted_trace_prefix_length": 1, # Use prefixes of length 1 and onwards
-    "max_trace_length": 100,
+    "max_trace_length": 10000,
     "cross-validation-splits": None,
     "create-unknown-tokens": True
 }
