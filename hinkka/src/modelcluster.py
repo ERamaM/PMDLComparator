@@ -268,10 +268,37 @@ class ModelCluster:
         import os
         print("Model cluster parameters: ", self.parameters)
         filename = self.parameters["test_filename"] if self.parameters["test_filename"] is not None else self.parameters["dataset_name"]
+        prob_shape = np.array(real_probs).shape[1]
+        print("idx SHAPE: ", np.array(index_predictions).shape)
+        print("REAL PROBS: ", np.array(real_probs).shape)
+        print("GT Shape: ", np.array(ground_truth).shape)
+        from sklearn.metrics import accuracy_score, matthews_corrcoef, precision_score, recall_score, f1_score
+
+        def calculate_brier_score(y_pred, y_true):
+            # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+            return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
+
+        ground_truth_one_hot = []
+        for idx in index_predictions:
+            one_hot = np.eye(np.array(real_probs).shape[1])[idx]
+            ground_truth_one_hot.append(one_hot)
+
+        ground_truth_one_hot = np.array(ground_truth_one_hot)
+
         with open(os.path.join("output", "results_" + filename), "w") as result_file:
-            result_file.write("Accuracy: " + str(sr_test))
-            result_file.write("Len preds: " + str(len(index_predictions)))
-            result_file.write("Len gt: " + str(len(ground_truth)))
+            accuracy = accuracy_score(ground_truth, index_predictions)
+            precision = precision_score(ground_truth, index_predictions, average="weighted")
+            recall = recall_score(ground_truth, index_predictions, average="weighted")
+            f1 = f1_score(ground_truth, index_predictions, average="weighted")
+            mcc = matthews_corrcoef(ground_truth, index_predictions)
+            result_file.write("Accuracy sklearn: " + str(accuracy) + "\n")
+            result_file.write("Weighted Precision: " + str(precision) + "\n")
+            result_file.write("Weighted recall: " + str(recall) + "\n")
+            result_file.write("Weighted f1: " + str(f1) + "\n")
+            result_file.write("MCC: " + str(mcc) + "\n")
+            brier_score = calculate_brier_score(real_probs, ground_truth_one_hot)
+            result_file.write("Brier score: " + str(brier_score) + "\n")
+
             # TODO: zumbarle ahí el resto de metricas a ver si se puede
 
         writeLog("Success rate for test data: %d/%d (=%f%%)" % (numSuccess, len(predictions), 100 * sr_test))
