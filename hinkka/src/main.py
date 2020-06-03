@@ -182,7 +182,7 @@ default_parameters = {
     "min_splitted_trace_prefix_length": 1, # Use prefixes of length 1 and onwards
     "max_trace_length": 10000,
     "cross-validation-splits": None,
-    "create-unknown-tokens": True
+    "create-unknown-tokens": False
 }
 
 configuration = {
