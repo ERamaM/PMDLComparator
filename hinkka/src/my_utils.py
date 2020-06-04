@@ -186,7 +186,7 @@ def configure(input_files_path, output_path, log_to_file_only):
     _log_filename = get_filename("log", "", "txt")
     _results_filename = get_filename("results", "", "csv")
     _log_to_file_only = log_to_file_only
-    with open(_results_filename, "w", newline="") as csvfile:
+    with open(_results_filename, "w", newline="", encoding='utf-8-sig') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         csvwriter.writerow(["Time", "Status", "Name", "TestName", "Dataset", "CVRunId", "TrainDatasetSize", "TestDatasetSize", "DatasetSize", "Algorithm", "NumLayers", "HiddenDimSize", "Optimizer", "LearningRate", "SeqLength", "InputVectorSize", "BatchSize", "GradClipping", "ItemsBetween", "BestModelIteration", "TestIteration", "Iteration", "Epoch", "TrainDataInitTimeUsed", "TrainLayerInitTimeUsed", "CumulExactTrainTimeUsed", "TimeUsed", "CumulTimeUsed", "TimeUsedForTest", "CumulTimeUsedForTest", "SR_Train", "SR_Test", "SR_Test75p", "SR_Test50p", "SR_Test25p", "AvgCost", "AUC", "TP", "TN", "FP", "FN", "AllConfusions", "PredictOnlyOutcome", "FinalTraceOnly", "TraceLengthMod", "FixedLength", "MaxNumActivities", "TruncateUnknowns", "ActivityLabels", "Durations", "EventAttributes", "CaseAttributes", "RawEventAttributes", "RawCaseAttributes", "PredictNextActivity", "SingleEventClustering", "DurationSplitMethod", "CaseClusteringMethod", "EventClusteringMethod", "CaseClusteringIncludeActivityOccurrences", "CaseClusteringIncludeCaseAttributes", "IncludeActivityOccurrencesAsRawCaseAttributes", "UseSingleValueForDuration", "MaxNumCaseClusters", "MaxNumEventClusters", "MinimumUsageForCaseAttributes", "MinimumUsageForEventAttributes"])
 
@@ -198,11 +198,11 @@ def writeLog(message):
     message = datetime.now().replace(microsecond=0).isoformat() + " \t" + message
     if (not _log_to_file_only):
         print(message)
-    with open(_log_filename, "a") as logfile:
+    with open(_log_filename, "a", encoding='utf-8-sig') as logfile:
         logfile.write(message + "\n")
 
 def writeResultRow(cells):
-    with open(_results_filename, "a", newline="") as csvfile:
+    with open(_results_filename, "a", newline="", encoding='utf-8-sig') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
         csvwriter.writerow(cells)
 
