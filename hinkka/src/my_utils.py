@@ -197,7 +197,7 @@ def writeLog(message):
     global _log_to_file_only
     message = datetime.now().replace(microsecond=0).isoformat() + " \t" + message
     if (not _log_to_file_only):
-        print(message)
+        print(message.encode("utf-8"))
     with open(_log_filename, "a", encoding='utf-8-sig') as logfile:
         logfile.write(message + "\n")
 
