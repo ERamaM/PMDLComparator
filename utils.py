@@ -29,16 +29,22 @@ def augment_xes_end_activity_to_csv(file, output_folder):
     csv_file, csv_path = convert_xes_to_csv(file, output_folder)
 
     dataframe = pd.read_csv(csv_path)
-    group = dataframe.groupby(XES_Fields.CASE_COLUMN, as_index=False, sort=False)
-    # Get the last rows (last event of each case, since its ordered by timestamp)
-    last_rows = group.last()
-    last_rows[XES_Fields.ACTIVITY_COLUMN] = "[EOC]"
 
-    final_dataframe = pd.concat([dataframe, last_rows]).sort_values(
-        [XES_Fields.CASE_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
-    # final_dataframe.fillna(None)
-    final_dataframe = final_dataframe.fillna("")
-    print(final_dataframe.head(5))
+    #group = dataframe.groupby(XES_Fields.CASE_COLUMN, as_index=False, sort=False)
+    # Get the last rows (last event of each case, since its ordered by timestamp)
+    #last_rows = group.last()
+    #last_rows[XES_Fields.ACTIVITY_COLUMN] = "[EOC]"
+    #final_dataframe = pd.concat([dataframe, last_rows])
+
+    groups = [pandas_df for _, pandas_df in dataframe.groupby(XES_Fields.CASE_COLUMN, sort=False)]
+
+    for i, group in enumerate(groups):
+        last_rows = group[-1:].copy()
+        last_rows[XES_Fields.ACTIVITY_COLUMN] = "[EOC]"
+        groups[i] = pd.concat([group, last_rows])
+
+    final_dataframe = pd.concat(groups, sort=False).reset_index(drop=True)
+    
     final_dataframe.to_csv(csv_path, sep=",", index=False)
 
     return csv_file, csv_path

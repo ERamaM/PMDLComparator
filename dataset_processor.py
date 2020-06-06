@@ -48,6 +48,7 @@ if arguments.net:
         for xes in dataset_list:
             # csv_file, csv_path = augment_xes_end_activity_to_csv(xes, "./tmp")
             csv_file, csv_path = augment_xes_end_activity_to_csv(xes, "./tmp")
+            #csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
 
             output_columns = {
                 XES_Fields.CASE_COLUMN: "CaseID",

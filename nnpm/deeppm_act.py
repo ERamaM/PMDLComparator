@@ -231,7 +231,7 @@ extension = ".csv"
  max_length,
  n_classes,
  divisor,
- prefix_sizes, vocabulary, y_dict) = load_data(logfile)
+ prefix_sizes, vocabulary, y_dict) = load_data(os.path.join(directory, filename + extension))
 
 # Load the splits from the folder
 ((X_a_train, X_t_train),
@@ -250,27 +250,37 @@ extension = ".csv"
  _, _, _, _, prefix_sizes_test, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)),
                                                   max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
 
+
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
 
 # For some reason loading the datasets in parts is not good
 # We calculate the number of events and then split
-train_len = len(prefix_sizes_train)
-val_len = train_len + len(prefix_sizes_val)
+train_len = len(X_a_train)
+val_len = train_len + len(X_a_val)
+print("X_A: ", len(X_a))
 print("Train len: ", train_len)
-print("Val len: ", val_len - train_len)
+print("Val len: ", val_len)
 print("Test len: ", len(X_a) - val_len)
 X_a_train = X_a[:train_len]
-X_a_val = X_a[train_len:val_len]
-X_a_test = X_a[val_len:]
 X_t_train = X_t[:train_len]
-X_t_val = X_t[train_len:val_len]
-X_t_test = X_t[val_len:]
 y_a_train = y_a[:train_len]
-y_a_val = y_a[train_len:val_len]
-y_a_test = y_a[val_len:]
 y_t_train = y_t[:train_len]
+X_a_val = X_a[train_len:val_len]
+X_t_val = X_t[train_len:val_len]
+y_a_val = y_a[train_len:val_len]
 y_t_val = y_t[train_len:val_len]
+X_a_test = X_a[val_len:]
+X_t_test = X_t[val_len:]
+y_a_test = y_a[val_len:]
 y_t_test = y_t[val_len:]
+
+print("SHAPES: ")
+print("Shape x_a_train", X_a_train.shape)
+print("Shape X_t_train: ", X_t_train.shape)
+print("Shape y_a_train: ", y_a_train.shape)
+print("Shape x_a_val", X_a_val.shape)
+print("Shape X_t_val: ", X_t_val.shape)
+print("Shape y_a_val: ", y_a_val.shape)
 
 # normalizing times
 X_t_train = X_t_train / np.max(X_t)

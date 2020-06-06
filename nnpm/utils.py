@@ -52,6 +52,7 @@ def load_data(logfile=None, max_len=None, parsed_vocabulary=None, y_dict=None):
     lines.append(line)
     timeseqs.append(times)
 
+
     if parsed_vocabulary is None:
         vocabulary = {key: idx for idx, key in enumerate(vocabulary)}
     else:
@@ -59,6 +60,7 @@ def load_data(logfile=None, max_len=None, parsed_vocabulary=None, y_dict=None):
 
     divisor = np.mean([item for sublist in timeseqs for item in sublist]) #average time between events
     numcases += 1
+    print("----")
     print("Num cases: ", numcases)
 
     if len(line) > max_length:
@@ -132,5 +134,6 @@ def load_data(logfile=None, max_len=None, parsed_vocabulary=None, y_dict=None):
         max_length = max_len
     padded_X = pad_sequences(X, maxlen=max_length, padding='pre', dtype='float64')
     padded_X1 = pad_sequences(X1, maxlen=max_length, padding='pre', dtype='float64')
+    print("----")
 
     return ( (padded_X, padded_X1), (y, y_t), vocab_size, max_length, n_classes, divisor, prefix_sizes, vocabulary, y_dict)
