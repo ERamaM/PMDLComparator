@@ -931,9 +931,9 @@ class Model:
 
             if (predict_next_activity or ("s" in cases[0])):
                 prefix = ("" if predict_next_activity else OUTCOME_SELECTION_TOKEN_PREFIX)
-                print("WORD TO INDEX DICT: ", self.word_to_index)
-                print("INDEX TO WORD DICT: ", self.index_to_word)
-                print("PROBS SHAPE: ", np.array(real_probs).shape)
+                #print("WORD TO INDEX DICT: ", self.word_to_index)
+                #print("INDEX TO WORD DICT: ", self.index_to_word)
+                #print("PROBS SHAPE: ", np.array(real_probs).shape)
                 for i, pred in enumerate(predictions):
                     if pred == prefix + self.traces_test[i].outcome:
                         numSuccess += 1
