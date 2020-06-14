@@ -43,18 +43,55 @@ class Evaluator():
             raise ValueError(metric)
 
     def _accuracy_evaluation(self, data, feature):
+        def calculate_brier_score(y_pred, y_true):
+            # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+            return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
+
         data = data.copy()
+        data_brier = data[
+            [(feature + '_expect'), (feature + '_pred_prob'), (feature + "_len_pred"), (feature + "_pred"),
+             'run_num', 'implementation']]
         data = data[[(feature + '_expect'), (feature + '_pred'),
                      'run_num', 'implementation']]
         eval_acc = (lambda x:
                     1 if x[feature + '_expect'] == x[feature + '_pred'] else 0)
+
         data[feature + '_acc'] = data.apply(eval_acc, axis=1)
         # agregate true positives
         data = (data.groupby(['implementation', 'run_num'])[feature + '_acc']
                 .agg(['sum', 'count'])
                 .reset_index())
+
+        from sklearn.metrics import matthews_corrcoef, f1_score, precision_score, recall_score
+        groups = [pandas_df for _, pandas_df in data_brier.groupby(["implementation", "run_num"], sort=False)]
+        measure_data = []
+        for group in groups:
+            brier_score = calculate_brier_score(
+                np.array(np.eye(int(group[feature + "_len_pred"].to_numpy()[0])) [list(map(int, group[feature + "_expect"].to_list()))]),
+                np.array([t.tolist() for t in group[feature + "_pred_prob"].to_list()])
+            )
+            mcc = matthews_corrcoef(group[feature + "_expect"].to_list(), group[feature + "_pred"].to_list())
+            f1 = f1_score(group[feature + "_expect"].to_list(), group[feature + "_pred"].to_list(), average="weighted")
+            precision = precision_score(group[feature + "_expect"].to_list(), group[feature + "_pred"].to_list(), average="weighted")
+            recall = recall_score(group[feature + "_expect"].to_list(), group[feature + "_pred"].to_list(), average="weighted")
+            row = {
+                "implementation": group["implementation"].iloc[0],
+                "run_num": group["run_num"].iloc[0],
+                "brier_score": brier_score,
+                "mcc" : mcc,
+                "f1_score_weighted" : f1,
+                "precision_weighted" : precision,
+                "recall_weighted" : recall
+            }
+            measure_data.append(row)
+
+        import pandas as pd
+        measure_df = pd.DataFrame(measure_data)
+        print("Measures: ", measure_df.to_string())
+
         # calculate accuracy
         data['accuracy'] = np.divide(data['sum'], data['count'])
+        data = data.merge(measure_df, on=["implementation", "run_num"])
         return data
 
     def _similarity_evaluation(self, data, feature):
@@ -71,11 +108,13 @@ class Evaluator():
             data['suff' + col] = (data[feature + col]
                                   .swifter.progress_bar(False)
                                   .apply(list_to_string))
+
         # measure similarity between pairs
 
         def distance(x, y):
             return (1 - (jf.damerau_levenshtein_distance(x, y) /
                          np.max([len(x), len(y)])))
+
         data['similarity'] = (data[['suff_expect', 'suff_pred']]
                               .swifter.progress_bar(False)
                               .apply(lambda x: distance(x.suff_expect,
@@ -101,9 +140,9 @@ class Evaluator():
                 .rename(columns={'mean': 'mae'}))
         return data
 
-# =============================================================================
-# Timed string distance
-# =============================================================================
+    # =============================================================================
+    # Timed string distance
+    # =============================================================================
     def _els_metric_evaluation(self, data, feature):
         data = self.add_calculated_times(data)
         data = self.scaling_data(data)
@@ -115,7 +154,7 @@ class Evaluator():
                                         'task',
                                         alias)
         variants = data[['run_num', 'implementation']].drop_duplicates()
-        variants = variants[variants.implementation!='log'].to_dict('records')
+        variants = variants[variants.implementation != 'log'].to_dict('records')
         similarity = list()
         for var in variants:
             pred_data = data[(data.implementation == var['implementation']) &
@@ -130,11 +169,11 @@ class Evaluator():
             for i in range(0, mx_len):
                 for j in range(0, mx_len):
                     comp_sec = self.create_comparison_elements(pred_data,
-                                                                log_data, i, j)
+                                                               log_data, i, j)
                     length = np.max([len(comp_sec['seqs']['s_1']),
                                      len(comp_sec['seqs']['s_2'])])
                     distance = self.tsd_alpha(comp_sec,
-                                              alpha_concurrency.oracle)/length
+                                              alpha_concurrency.oracle) / length
                     cost_matrix[i][j] = distance
             # end = timer()
             # print(end - start)
@@ -145,9 +184,9 @@ class Evaluator():
                 similarity.append(dict(caseid=pred_data[idx]['caseid'],
                                        sim_order=pred_data[idx]['profile'],
                                        log_order=log_data[idy]['profile'],
-                                       sim_score=(1-(cost_matrix[idx][idy])),
+                                       sim_score=(1 - (cost_matrix[idx][idy])),
                                        implementation=var['implementation'],
-                                       run_num = var['run_num']))
+                                       run_num=var['run_num']))
         data = pd.DataFrame(similarity)
         data = (data.groupby(['implementation', 'run_num'])['sim_score']
                 .agg(['mean'])
@@ -166,7 +205,7 @@ class Evaluator():
                                         'task',
                                         alias)
         variants = data[['run_num', 'implementation']].drop_duplicates()
-        variants = variants[variants.implementation!='log'].to_dict('records')
+        variants = variants[variants.implementation != 'log'].to_dict('records')
         similarity = list()
         for var in variants:
             pred_data = data[(data.implementation == var['implementation']) &
@@ -192,9 +231,9 @@ class Evaluator():
                 similarity.append(dict(caseid=pred_data[i]['caseid'],
                                        sim_order=pred_data[i]['profile'],
                                        log_order=temp_log_data[min_idx]['profile'],
-                                       sim_score=(1-(min_dist/length)),
+                                       sim_score=(1 - (min_dist / length)),
                                        implementation=var['implementation'],
-                                       run_num = var['run_num']))
+                                       run_num=var['run_num']))
                 del temp_log_data[min_idx]
         data = pd.DataFrame(similarity)
         data = (data.groupby(['implementation', 'run_num'])['sim_score']
@@ -245,10 +284,10 @@ class Evaluator():
         dist = {}
         lenstr1 = len(s_1)
         lenstr2 = len(s_2)
-        for i in range(-1, lenstr1+1):
-            dist[(i, -1)] = i+1
-        for j in range(-1, lenstr2+1):
-            dist[(-1, j)] = j+1
+        for i in range(-1, lenstr1 + 1):
+            dist[(i, -1)] = i + 1
+        for j in range(-1, lenstr2 + 1):
+            dist[(-1, j)] = j + 1
         for i in range(0, lenstr1):
             for j in range(0, lenstr2):
                 if s_1[i] == s_2[j]:
@@ -256,15 +295,15 @@ class Evaluator():
                 else:
                     cost = 1
                 dist[(i, j)] = min(
-                    dist[(i-1, j)] + 1, # deletion
-                    dist[(i, j-1)] + 1, # insertion
-                    dist[(i-1, j-1)] + cost # substitution
-                    )
-                if i and j and s_1[i] == s_2[j-1] and s_1[i-1] == s_2[j]:
+                    dist[(i - 1, j)] + 1,  # deletion
+                    dist[(i, j - 1)] + 1,  # insertion
+                    dist[(i - 1, j - 1)] + cost  # substitution
+                )
+                if i and j and s_1[i] == s_2[j - 1] and s_1[i - 1] == s_2[j]:
                     if alpha_concurrency[(s_1[i], s_2[j])] == Rel.PARALLEL:
-                        cost = self.calculate_cost(comp_sec['times'], i, j-1)
-                    dist[(i, j)] = min(dist[(i, j)], dist[i-2, j-2] + cost)  # transposition
-        return dist[lenstr1-1, lenstr2-1]
+                        cost = self.calculate_cost(comp_sec['times'], i, j - 1)
+                    dist[(i, j)] = min(dist[(i, j)], dist[i - 2, j - 2] + cost)  # transposition
+        return dist[lenstr1 - 1, lenstr2 - 1]
 
     def calculate_cost(self, times, s1_idx, s2_idx):
         """
@@ -282,12 +321,12 @@ class Evaluator():
         """
         p_1 = times['p_1']
         p_2 = times['p_2']
-        cost = np.abs(p_2[s2_idx]-p_1[s1_idx]) if p_1[s1_idx] > 0 else 0
+        cost = np.abs(p_2[s2_idx] - p_1[s1_idx]) if p_1[s1_idx] > 0 else 0
         return cost
 
-# =============================================================================
-# dl distance
-# =============================================================================
+    # =============================================================================
+    # dl distance
+    # =============================================================================
     def _dl_distance_evaluation(self, data, feature):
         """
         similarity score
@@ -312,7 +351,7 @@ class Evaluator():
                                         'task',
                                         alias)
         variants = data[['run_num', 'implementation']].drop_duplicates()
-        variants = variants[variants.implementation!='log'].to_dict('records')
+        variants = variants[variants.implementation != 'log'].to_dict('records')
         similarity = list()
         for var in variants:
             pred_data = data[(data.implementation == var['implementation']) &
@@ -338,9 +377,9 @@ class Evaluator():
                 similarity.append(dict(caseid=pred_data[idx]['caseid'],
                                        sim_order=pred_data[idx]['profile'],
                                        log_order=log_data[idy]['profile'],
-                                       sim_score=(1-(dl_matrix[idx][idy])),
+                                       sim_score=(1 - (dl_matrix[idx][idy])),
                                        implementation=var['implementation'],
-                                       run_num = var['run_num']))
+                                       run_num=var['run_num']))
         data = pd.DataFrame(similarity)
         data = (data.groupby(['implementation', 'run_num'])['sim_score']
                 .agg(['mean'])
@@ -364,15 +403,15 @@ class Evaluator():
         ae : absolute error value
         """
         length = np.max([len(serie1[id1]['profile']),
-                          len(serie2[id2]['profile'])])
+                         len(serie2[id2]['profile'])])
         d_l = jf.damerau_levenshtein_distance(
             ''.join(serie1[id1]['profile']),
-            ''.join(serie2[id2]['profile']))/length
+            ''.join(serie2[id2]['profile'])) / length
         return d_l
 
-# =============================================================================
-# mae distance
-# =============================================================================
+    # =============================================================================
+    # mae distance
+    # =============================================================================
 
     def _mae_metric_evaluation(self, data, feature):
         """
@@ -398,7 +437,7 @@ class Evaluator():
                                         'task',
                                         alias)
         variants = data[['run_num', 'implementation']].drop_duplicates()
-        variants = variants[variants.implementation!='log'].to_dict('records')
+        variants = variants[variants.implementation != 'log'].to_dict('records')
         similarity = list()
         for var in variants:
             pred_data = data[(data.implementation == var['implementation']) &
@@ -430,7 +469,7 @@ class Evaluator():
                                        log_order=log_data[idy]['profile'],
                                        sim_score=(ae_matrix[idx][idy]),
                                        implementation=var['implementation'],
-                                       run_num = var['run_num']))
+                                       run_num=var['run_num']))
         data = pd.DataFrame(similarity)
         data = (data.groupby(['implementation', 'run_num'])['sim_score']
                 .agg(['mean'])
@@ -438,9 +477,9 @@ class Evaluator():
                 .rename(columns={'mean': 'mae_log'}))
         return data
 
-# =============================================================================
-# Support methods
-# =============================================================================
+    # =============================================================================
+    # Support methods
+    # =============================================================================
     @staticmethod
     def create_task_alias(categories):
         """
@@ -485,7 +524,7 @@ class Evaluator():
                     events[i]['duration'] = 0
                 else:
                     dur = (events[i]['end_timestamp'] -
-                           events[i-1]['end_timestamp']).total_seconds()
+                           events[i - 1]['end_timestamp']).total_seconds()
                     events[i]['duration'] = dur
         return pd.DataFrame.from_dict(log)
 
@@ -506,8 +545,8 @@ class Evaluator():
         df_modif = data.copy()
         np.seterr(divide='ignore')
         summ = data.groupby(['task'])['duration'].max().to_dict()
-        dur_act_norm = (lambda x: x['duration']/summ[x['task']]
-                        if summ[x['task']] > 0 else 0)
+        dur_act_norm = (lambda x: x['duration'] / summ[x['task']]
+        if summ[x['task']] > 0 else 0)
         df_modif['dur_act_norm'] = df_modif.apply(dur_act_norm, axis=1)
         return df_modif
 
@@ -544,14 +583,12 @@ class Evaluator():
                 temp_dict = {**{col: serie}, **temp_dict}
             temp_dict = {**{'caseid': key, 'start_time': trace[0][sort_key],
                             'end_time': trace[-1][sort_key]},
-                          **temp_dict}
+                         **temp_dict}
             temp_data.append(temp_dict)
         return sorted(temp_data, key=itemgetter('start_time'))
-
 
 # results = pd.read_csv('C:/Users/Manuel Camargo/Documents/Repositorio/experiments/sc_lstm_dev/test_data.csv')
 # results['end_timestamp'] =  pd.to_datetime(results['end_timestamp'], format='%Y-%m-%dT%H:%M:%S.%f')
 
 # evaluator = Evaluator()
 # print(evaluator.measure('mae_log', results))
-

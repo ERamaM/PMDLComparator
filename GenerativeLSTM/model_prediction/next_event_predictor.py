@@ -86,8 +86,10 @@ class NextEventPredictor():
                 'ac_prefix': self.examples['prefixes']['activities'][i],
                 'ac_expect': self.examples['next_evt']['activities'][i],
                 'ac_pred': pos,
+                "ac_len_pred" : len(predictions[0][0]),
+                "ac_pred_prob": predictions[0][0],
                 'rl_prefix': self.examples['prefixes']['roles'][i],
                 'rl_expect': self.examples['next_evt']['roles'][i],
-                'rl_pred': pos1})
+                'rl_pred': pos1, "rl_pred_prob": predictions[1][0], "rl_len_pred" : len(predictions[1][0])})
         sup.print_done_task()
         return results
