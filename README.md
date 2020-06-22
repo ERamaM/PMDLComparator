@@ -55,29 +55,69 @@ Examples:
 
 Run the experiments with the following command:
 
-    python run.py --dataset dataset/LOG_CSV_FILE
+    python run.py --dataset dataset/[DATASET] --train --test
     
-Where LOG_CSV_FILE are one log inside the "dataset" folder. 
+Where DATASET is one log inside the "dataset" folder. 
 
-The results of the testing are outputted inside the "results" folder.
+The results of the testing are outputted inside the "results" folder. There are two types of results:
+
+- raw_\[DATASET\]: contains the next activity results for each prefix tested.
+- \[DATASET\]: contains the next activity metrics.
 
 The best model is inside the "models" folder.
 
-# Mauro (nnpm)
+## Mauro (nnpm)
 
-Run the experiments with the following command
+Run the experiments with the following command:
 
-    python deeppm_act.py data/Helpdesk.csv ACT results/helpdesk_results.log
+    python deeppm_act.py --dataset data/[DATASET] --train --test
     
-Do NOT run the experiments with "BOTH" instead of ACT since the neural network is not programmed for that.
+The preprocessed datasets are placed inside the "data" folder. The models are placed inside the "results" folder. The approach also generates the following files:
 
-# Tax
+- \[DATASET\]: it contains multiple information, such as the validation loss of each of the Hyperopt trials and the next activity metrics, such as accuracy or brier score.
 
-Run the training procedure and next event prediction with the following command (inside the "code" folder)
+## Tax (tax)
 
-    python train.py --dataset ../data/Helpdesk.csv
+Run the training procedure and next event prediction with the following command (inside the "code" folder). Each "--option" indicates the task to perform.
+
+    python train.py --dataset ../data/[DATASET] --train --test --test_suffix
     
-# Hinkka
+The preprocessed datasets are placed inside the "data" folder. The trained models are placed inside './code/models' and the result files are placed inside './code/results'. For each dataset, it generates 4 files:
+    
+- raw_suffix_and_remaining_time_\[DATASET\]: it contains a list of all ground truth and predicted suffixes used to calculate remaining time and damerau levenshtein distance.
+- suffix_\[DATASET\]: it contains the metrics Damerau-Levenshtein distance and Remaining time:
+- raw_\[DATASET\]: it contains a list of all ground truth and predicted next activities.
+- \[DATASET\]_next_event: it contains the next activity metrics: accuracy, brier score and next timestamp MAE.
+
+## Evermann (evermann)
+
+Run the training and testing procedure as follows:
+
+    python train.py --dataset data/[DATASET] --train --test --test_suffix
+    
+Where dataset is one of the xes.gz files from the "data" directory (do NOT use the split files: train_\[DATASET\], val_\[DATASET\] or test_\[DATASET\])
+
+The models are stored inside the "models" folder. The results are stored inside the "results" folder. The results are stored as follows:
+
+- \[DATASET\]: contains the metrics for the next activity prediction problem.
+- raw_\[DATASET\]: contains the results for the next activity prediction for each prefix tested.
+- suffix_results_\[DATASET\]: contains the suffix predictions for each prefix tested.
+
+Additionally, the Damerau Levenshtein metric is not calculated with the previous command. You will need to execute the following command to perform the calculation:
+
+    python train.py --dataset data/[DATASET] --test_suffix_calculus
+    
+The results are print out in stdout.
+
+## Navarin (DALSTM)
+
+Run the experiments with the following command:
+
+    python LSTM_sequence_mae.py --dataset data/$i --train --test
+    
+The models are stored inside the "model" folder. The results are stored inside the "results" folder.
+
+## Hinkka (hinkka)
 
 For this study is better to create a new anaconda environment. Create an environment based on tensorflow-gpu (to install the gpu dependencies) and python3.6
 
@@ -99,7 +139,7 @@ Then, force Theano to use a GPU. For that, edit the file ~/.theanorc (create it 
     device = cuda
     floatX = float32
    
-To run the experiments, you need to specify the json configuration file. That is done like:
+To run the experiments, you need to specify the json configuration file. This json specifies which datasets are going to be tested and with what parameters. The already provided "pmdlcomparator.json" is already configured to test with every dataset available from the paper. The tests are executed with the following command:
 
     python main.py -c config/pmdlcomparator.json
     
@@ -109,4 +149,60 @@ The configuration automatically takes care of the iteration over the datasets us
     
 The results are stored in the directory "output". The code generates a bunch of .txt, .csv, and .json that can be safely removed. The .json MIGHT be a caching procedure so, if the code is behaving strangely, just delete these files generated. The script provided "delete_cache.sh" does precisely just that.
 
-The models parameters are stored inside the "testdata" directory. To remove them use the script "delete_models".
+The models parameters are stored inside the "testdata" directory. To remove them use the script "delete_models". The script "delete_cache.sh" removes every .txt and .csv created on the root of the approach folder. The results for the next activity are stored in the "output" folder.
+
+## Camargo (GenerativeLSTM)
+
+An easy way to run the experiments requires the task-spooler tool installed. Then, run the hyperparameter optimizacion procedure with the following command:
+
+    python experiment_generator.py --log input_files/[DATASET] --execute_inplace --slots [N_SLOTS]
+    
+Where \[DATASET\] is one of the already processed datasets and \[N_SLOTS\] an integer greater than 1 (represents the number of concurrent experimentations done).
+
+The previous command first calculates the embedding matrix from the roles and activities. Then, it trains 20 models using a random search procedure and stores each model validation loss in a file. The bash script "generate_queue_train.sh" performs this procedure for each processed dataset.
+
+After the experiments are done (and this is important, since, otherwise, the information about the loss of the trained models would be incomplete), execute the testing procedure with the following command.
+
+    python evaluation_generator.py --log [DATASET]
+    
+This command loads the model with the lowest validation loss and performs the testing procedures (next activity and suffix). Note that the "input_files" folder is not specified in the command. After the testing is completed, the results are stored in the "output_files" folder. The most important information from this folder is:
+
+- folders \[DATASET\]: each folder contains the trained models from the hyperparameter optimization procedure and a .csv "losses_\[DATASET\]" which records the validation losses for each model.
+- ac_pred_sfx.csv: contains the activity suffix metrics for each sampling procedure and dataset. Each dataset can be recognized for the folder in which the best model is stored.
+- ac_predict_next.csv: contains the next activity metrics for each sampling procedure. Often, you would be interested only in the "Argmax" metrics.
+- tm_pred_sfx.csv: contains the remaining time metrics for each sampling procedure.
+
+## Khan (MAED-TaxIntegration)
+
+Run the experimentation using the "bpi_run.py" script from inside the "busi_task" folder:
+
+    python bpi_run.py --dataset data/[DATASET] --train --test
+    
+Unlike the other approaches, this approach does not contain a "generate_queue.sh" script since it is more convenient to execute the experiments manually since they take a lot of time to complete.
+
+The results are stored inside the "data" directory under a file named "results_\[DATASET\]". The model checkpoints are inside the "checkpoints_data". The information inside the "log_data" directory also seems important.
+
+## Theis (PyDREAM-NAP)
+
+This approach runs in two phases. First, you must mine the process models from the training+validation event log. Then, you must use the process model to run the training and testing procedure.
+
+To run the mining procedure, execute the following command:
+
+    python run_splitminer.py --log ./logs/"train_val_"$i --output_folder output_models --best_model best_models --n_threads $N_THREADS
+    
+This command has the following arguments:
+
+- --log: process log to mine the models for.
+- --output_folder: folder where every mined process model is going to be stored.
+- --best_model: folder where the best process model is going to be stored.
+- --n_threads: maximum number of threads to be used by the mining procedure. Recommended: keep this to a lower value than the maximum number of cores of your machine.
+
+After the mining is complete, you have two options to perform the experimentation:
+
+    python run_dreamnap.py --dataset logs/"$i" --train --test
+    python run_dreamnap_no_resources.py --dataset logs/"$i" --train --test
+    
+The first command runs the version that uses resources and the second command runs the version that uses no resources. 
+
+The results are stored inside the "results" folder. The trained models are stored inside the "model_checkpoints" folder.
+
