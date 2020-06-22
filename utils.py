@@ -17,6 +17,12 @@ import yaml, json
 
 
 def convert_xes_to_csv(file, output_folder):
+    """
+    Load a xes file and convert it to csv.
+    :param file: Full path of the xes file to convert
+    :param output_folder: Output folder where to store the converted csv.
+    :return: Both the csv file name and the full path of the converted csv
+    """
     xes_path = file
     csv_file = Path(file).stem.split(".")[0] + ".csv"
     csv_path = os.path.join(output_folder, csv_file)
@@ -26,6 +32,12 @@ def convert_xes_to_csv(file, output_folder):
 
 
 def augment_xes_end_activity_to_csv(file, output_folder):
+    """
+    Augment a process log stored in xes format with and end of case token ([EOC])
+    :param file: Input xes process log
+    :param output_folder: Output folder where to store the augmented log
+    :return: Both the csv file name and the full path of the converted csv
+    """
     csv_file, csv_path = convert_xes_to_csv(file, output_folder)
 
     dataframe = pd.read_csv(csv_path)
@@ -51,6 +63,13 @@ def augment_xes_end_activity_to_csv(file, output_folder):
 
 
 def convert_csv_to_xes(file, output_folder, extension):
+    """
+    Convert a csv log into a xes formated log.
+    :param file: Full path of the csv file
+    :param output_folder: Output folder where to store the converted process log.
+    :param extension: Extension used to save the file. If the extension is "xes.gz" (EXTENSIONS.XES_COMPRESSED) the log will be compressed into a gz file. If the extension is other, it won't be compressed.
+    :return: Both the converted xes file name and the xes path.
+    """
     csv_path = file
     xes_file = Path(file).stem.split(".")[0] + EXTENSIONS.XES
     xes_path = os.path.join(output_folder, xes_file)
@@ -68,6 +87,15 @@ def convert_csv_to_xes(file, output_folder, extension):
 
 
 def convert_csv_to_json(file, output_folder, attributes, timestamp_format, prettify=False):
+    """
+    Convert a csv process log into a json file readable by the Hinkka et al. appoach.
+    :param file: Full path to the csv log file
+    :param output_folder: Output folder where to store the converted json
+    :param attributes: List of attributes to add to the converted log.
+    :param timestamp_format: Timestamp format of the input csv log (one of the "Timestamp_Format")
+    :param prettify: Whether to prettify the log. A value of True padds the output json so as to it is readable.
+    :return: Full path of the json file
+    """
     csv_path = file
     json_log = {}
     log_df = pd.read_csv(csv_path)
@@ -116,16 +144,27 @@ def convert_csv_to_json(file, output_folder, attributes, timestamp_format, prett
 
 
 def create_tmp():
+    """
+    Create a temporal directory to store the temporal converted logs
+    :return:
+    """
     if not os.path.exists("tmp"):
         os.mkdir("tmp")
 
 
 def delete_tmp():
+    """
+    Delete the temporal directory and all its contents
+    :return:
+    """
     if os.path.exists("tmp"):
         shutil.rmtree("tmp")
 
 
 class Timestamp_Formats:
+    """
+    Timestamp formats supported by the approaches. This timestamp formats are used whenever a timestamp format is required.
+    """
     TIMESTAMP_FORMAT_YMDHMS_DASH = "%Y-%m-%d %H:%M:%S"
     TIMESTAMP_FORMAT_DAYS = "d"  # Used by: pasquadibisceglie
     TIMESTAMP_FORMAT_YMDHMS_SLASH = "%Y/%m/%d %H:%M:%S.%f"  # Used by: mauro"
@@ -133,6 +172,9 @@ class Timestamp_Formats:
 
 
 class XES_Fields:
+    """
+    Supported xes fields that may be present in a xes log.
+    """
     CASE_COLUMN = "case:concept:name"
     ACTIVITY_COLUMN = "concept:name"
     TIMESTAMP_COLUMN = "time:timestamp"
@@ -141,6 +183,9 @@ class XES_Fields:
 
 
 class EXTENSIONS:
+    """
+    Process log extensions
+    """
     CSV = ".csv"
     XES = ".xes"
     XES_COMPRESSED = ".xes.gz"
@@ -204,6 +249,12 @@ def reorder_columns(file, ordered_columns):
 
 
 def load_attributes_from_file(filename, log_name):
+    """
+    Loads the dictionary of attributes from the logs from the file "attributes.yaml"
+    :param filename: Attribute filename
+    :param log_name: Log of which to load the attributes
+    :return: Array of attributes
+    """
     with open(filename) as yaml_file:
         data = yaml.safe_load(yaml_file)
         if log_name.find(".") != -1:
@@ -219,10 +270,10 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
     """
     Split the TRACES of the log in a 64/16/20 fashion (first 80/20 and then again 80/20).
     We assume the input is a csv file.
-    :param file:
-    :param output_directory:
-    :param do_train_val: create an additional partition with the training and validation set together
-    :return:
+    :param file: Input csv path of the process log
+    :param output_directory: Output file where to store the splits.
+    :param do_train_val: True: create an additional partition with the training and validation set together
+    :return: Initial csv path file and paths to each of the created partitions (train, val, test, train_val).
     """
     pandas_init = pd.read_csv(file)
     pd.set_option('display.expand_frame_repr', False)
@@ -264,20 +315,13 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
         return file, train_path, val_path, test_path
 
 
-def copy_file(file, output_directory, extension):
-    base_file = os.path.basename(file)
-    dox_index = base_file.index(".")
-    file_name = base_file[:dox_index]
-    print("Copy file: ", file)
-    shutil.copyfile(file, os.path.join(output_directory, file_name + extension))
-
-
 def move_files(file, output_directory, extension):
     """
     Move the set of files to the output directory.
     This function also moves the train/val/test files automatically.
     :param file: Path of the base file to move
-    :param output_directory:
+    :param output_directory: directory to move the files
+    :param extension: extension of the files to move
     :return:
     """
 
@@ -309,6 +353,12 @@ def make_dir_if_not_exists(directory):
 
 
 def gather_statistics(log, abbreviate_times=True):
+    """
+    Gather useful statistics from a process log.
+    :param log: Path to Xes formatted process log.
+    :param abbreviate_times: True: convert the time related measures to days and round the values to two decimals.
+    :return: Dataframe of gathered statistics.
+    """
     pd.set_option('display.expand_frame_repr', False)
     csv_file, csv_path = convert_xes_to_csv(log, "./tmp")
     log_df = pd.read_csv(csv_path)
@@ -317,7 +367,7 @@ def gather_statistics(log, abbreviate_times=True):
 
     group_by_case = log_df.groupby(XES_Fields.CASE_COLUMN)
 
-    # WTF: it does not match with https://arxiv.org/pdf/1805.02896.pdf
+    # It does not match with https://arxiv.org/pdf/1805.02896.pdf
     # It matches https://kodu.ut.ee/~dumas/pubs/bpm2019lstm.pdf
     n_cases = len(group_by_case)
     n_activities = len(log_df.groupby(XES_Fields.ACTIVITY_COLUMN))
