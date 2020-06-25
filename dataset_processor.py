@@ -267,6 +267,19 @@ if arguments.net:
 
             move_files(csv_path, "hinkka/src/testdata", EXTENSIONS.CSV)
 
+    elif arguments.net == "rama":
+        for xes in dataset_list:
+            print("Process: ", xes)
+            make_dir_if_not_exists("rama")
+            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+            csv_path, train_path, val_path, test_path, train_val_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=True)
+            xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            train_file, train_path = convert_csv_to_xes(train_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            train_val_file, train_val_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            move_files(xes_path, "rama", EXTENSIONS.XES_COMPRESSED)
+
     else:
         print("Unrecognized approach")
 
