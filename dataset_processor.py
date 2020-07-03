@@ -213,7 +213,7 @@ if arguments.net:
             # so there is no need to perform it here
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
 
-            _ , _, _, _, train_val_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=True)
+            _ , _, val, _, train_val_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=True)
             # Select the fields for the declare miner files.
             # This avoids nan error importing in prom.
             select_columns(
@@ -221,10 +221,19 @@ if arguments.net:
                 input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
                 category_columns=None,
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
-                output_columns=None
+                output_columns=None, francescomarino_fix=True
+            )
+            select_columns(
+                val,
+                input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
+                category_columns=None,
+                timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                output_columns=None, francescomarino_fix=True
             )
             xes_file, xes_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+            xes_file_val, xes_path_val = convert_csv_to_xes(val, "./tmp", EXTENSIONS.XES_COMPRESSED)
             move_files(xes_path, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files", EXTENSIONS.XES_COMPRESSED)
+            move_files(xes_path_val, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files", EXTENSIONS.XES_COMPRESSED)
 
             output_columns = {
                 XES_Fields.CASE_COLUMN: "CaseID",
@@ -236,7 +245,7 @@ if arguments.net:
                 input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
                 category_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN],
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
-                output_columns=output_columns, categorize=True
+                output_columns=output_columns, categorize=True, francescomarino_fix=True
             )
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
             move_files(csv_path, "Process-Sequence-Prediction-with-A-priori-knowledge/data", EXTENSIONS.CSV)

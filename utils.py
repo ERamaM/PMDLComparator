@@ -193,13 +193,14 @@ class EXTENSIONS:
 
 
 def select_columns(file, input_columns, category_columns, timestamp_format, output_columns, categorize=False,
-                   fill_na=None):
+                   fill_na=None, francescomarino_fix=None):
     """
     Select columns from CSV converted from XES
     :param file: csv file
     :param input_columns: array with the columns to be selected. If none selects every column
     :param timestamp_format: timestamp format to be converted
     :param output_columns: dictionary with the assignment of renaming the columns. If none, no renaming is done
+    :param francescomarino_fix: perform a fix over the case identifiers to allow the usage of the partitions in RuM (Declare Miner in ProM)
     :return: overwrites the csv file with the subselected csv
     """
     dataset = pd.read_csv(file)
@@ -223,6 +224,12 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
     if categorize:
         for category_column in category_columns:
             dataset[category_column] = dataset[category_column].astype("category").cat.codes
+
+    # For reasons unknown, using this scheme of partitioning is not good for RuM and, in general, for loading xes Java based systems.
+    # The cause of failure is that the case identifiers are integers and it fails in doing some casting.
+    # To fix that append a fixed string to the case identifiers and convert the field to a string.
+    if francescomarino_fix:
+        dataset[XES_Fields.CASE_COLUMN] = "FIX" + dataset[XES_Fields.CASE_COLUMN].astype(str)
 
     if output_columns is not None:
         dataset.rename(
