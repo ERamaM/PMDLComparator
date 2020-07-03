@@ -28,6 +28,15 @@ def convert_xes_to_csv(file, output_folder):
     csv_path = os.path.join(output_folder, csv_file)
     log = xes_import_factory.apply(xes_path, parameters={"timestamp_sort": True})
     csv_exporter.export(log, csv_path)
+
+    pd_log = pd.read_csv(csv_path)
+    unique_lifecycle = pd_log[XES_Fields.LIFECYCLE_COLUMN].unique()
+    print("Unique lifecycle: ", unique_lifecycle, ". For log: ", file)
+    if len(unique_lifecycle) > 1:
+        pd_log[XES_Fields.ACTIVITY_COLUMN] = pd_log[XES_Fields.ACTIVITY_COLUMN].astype(str) + "+" + pd_log[XES_Fields.LIFECYCLE_COLUMN]
+        print("HEAD: ", pd_log.head(10))
+        pd_log.to_csv(csv_path, encoding="utf-8")
+
     return csv_file, csv_path
 
 
