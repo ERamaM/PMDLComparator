@@ -137,7 +137,7 @@ if arguments.net:
             make_dir_if_not_exists("PyDREAM-NAP/model_checkpoints")
             make_dir_if_not_exists("PyDREAM-NAP/results")
 
-            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp", perform_lifecycle_trick=False)
             csv_path, train_path, val_path, test_path, train_val_path = split_train_val_test(csv_path, "./tmp",
                                                                              XES_Fields.CASE_COLUMN, do_train_val=True)
             xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)

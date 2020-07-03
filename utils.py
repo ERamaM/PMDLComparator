@@ -16,7 +16,7 @@ import shutil
 import yaml, json
 
 
-def convert_xes_to_csv(file, output_folder):
+def convert_xes_to_csv(file, output_folder, perform_lifecycle_trick=True):
     """
     Load a xes file and convert it to csv.
     :param file: Full path of the xes file to convert
@@ -32,7 +32,7 @@ def convert_xes_to_csv(file, output_folder):
     pd_log = pd.read_csv(csv_path)
     unique_lifecycle = pd_log[XES_Fields.LIFECYCLE_COLUMN].unique()
     print("Unique lifecycle: ", unique_lifecycle, ". For log: ", file)
-    if len(unique_lifecycle) > 1:
+    if len(unique_lifecycle) > 1 and perform_lifecycle_trick:
         pd_log[XES_Fields.ACTIVITY_COLUMN] = pd_log[XES_Fields.ACTIVITY_COLUMN].astype(str) + "+" + pd_log[XES_Fields.LIFECYCLE_COLUMN]
         print("HEAD: ", pd_log.head(10))
         pd_log.to_csv(csv_path, encoding="utf-8")
