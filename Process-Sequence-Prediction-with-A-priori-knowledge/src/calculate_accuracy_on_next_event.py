@@ -13,9 +13,6 @@ import unicodecsv
 from jellyfish._jellyfish import damerau_levenshtein_distance
 import nltk
 
-
-
-
 averageTraceLengths = []
 
 resss = [[]]

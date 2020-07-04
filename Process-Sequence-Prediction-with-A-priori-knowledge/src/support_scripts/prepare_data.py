@@ -13,12 +13,11 @@ import re
 import time
 from collections import Counter
 from datetime import datetime
-from itertools import izip
 
 import numpy as np
 
-from src.formula_verificator import  verify_formula_as_compliant
-from src.shared_variables import getUnicode_fromInt
+from formula_verificator import  verify_formula_as_compliant
+from shared_variables import getUnicode_fromInt
 
 
 def prepare_testing_data(eventlog):
@@ -131,7 +130,7 @@ def selectFormulaVerifiedTraces(lines, lines_t, lines_t2, lines_t3, formula,  pr
     lines_t_v = []
     lines_t2_v = []
     lines_t3_v = []
-    for line, times, times2, times3 in izip(lines, lines_t, lines_t2, lines_t3):
+    for line, times, times2, times3 in zip(lines, lines_t, lines_t2, lines_t3):
         if verify_formula_as_compliant(line,formula,prefix):
             lines_v.append(line)
             lines_t_v.append(times)
