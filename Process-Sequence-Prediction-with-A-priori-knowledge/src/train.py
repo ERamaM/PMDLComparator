@@ -169,7 +169,6 @@ indices_char = dict((i, c) for i, c in enumerate(chars))
 target_char_indices = dict((c, i) for i, c in enumerate(target_chars))
 target_indices_char = dict((i, c) for i, c in enumerate(target_chars))
 
-
 def vectorize_fold(fold1, fold1_t, fold1_t2, fold1_t3, fold1_t4, divisor, divisor2):
     lines = fold1
     lines_t = fold1_t
@@ -499,7 +498,13 @@ if args.test_suffix:
     path_to_model_file = best_model
     formulaType = "STRONG"
     # TODO: load formula from file
-    formula = ""
+    import yaml
+    with open("formulas.yaml", "r") as formula_file:
+        formulas = yaml.safe_load(formula_file)
+        formula = formulas[eventlog_name.lower()]
+        print("Formula: ", formula)
+
+    #formula = ""
 
     # eventlog, path_to_model_file, beam_size, prefix_size_pred_from, prefix_size_pred_to, formula = activateSettings(logIdentificator, formulaType)
 

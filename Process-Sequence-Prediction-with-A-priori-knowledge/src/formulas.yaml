@@ -1,0 +1,8 @@
+# Helpdesk:
+# "[](Assign seriousness -> <> Take in charge ticket) ^ <> Assign seriousness"
+# "[](Resolve ticket -> <> Closed) ^ <> Resolve ticket"
+# Activity assignment:  {'Assign seriousness': 0, 'Closed': 1, 'Create SW anomaly': 2, 'DUPLICATE': 3, 'INVALID': 4, 'Insert ticket': 5, 'RESOLVED': 6, 'Require upgrade': 7, 'Resolve SW anomaly': 8, 'Resolve ticket': 9, 'Schedule intervention': 10, 'Take in charge ticket': 11, 'VERIFIED': 12, 'Wait': 13}
+# TODO: these id may not correspond with the assigment done in the proper code
+"helpdesk" : "[]( ( \"0\" ) -> <>( \"11\" ) )  /\\ <>\"0\"  /\\ []( ( \"9\" ) -> <>( \"1\" ) )  /\\ <>\"9\""
+#"helpdesk" : "[]( ( \"0\" ) -> <>( \"11\" ) )  /\\ <>\"0\"  /\\ []( ( \"9\" ) -> <>( \"1\" ) )  /\\ <>\"9\""
+#
