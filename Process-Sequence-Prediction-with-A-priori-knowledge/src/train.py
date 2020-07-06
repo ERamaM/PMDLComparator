@@ -311,7 +311,7 @@ if args.test:
     def calculate_brier_score(y_pred, y_true):
         # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
         return np.mean(np.sum((y_true - y_pred)**2, axis=1))
-    with open("results/" + eventlog_name +"_next_event.log", "w") as file:
+    with open("../results/" + eventlog_name +"_next_event.log", "w") as file:
         for metric, name in zip(metrics, model.metrics_names):
             if name == "time_output_mae":
                 # Undo the standarization done in the line y_t[i] = next_t / divisor
@@ -536,134 +536,191 @@ if args.test_suffix:
         spamwriter.writerow(["Prefix length", "Groud truth", "Predicted", "Levenshtein", "Damerau", "Jaccard", "Ground truth times", "Predicted times", "RMSE", "MAE", "Median AE"])
         for prefix_size in range(1, maxlen):
             #here we checkout the prefixes with formulas verified only on the suffix phase
-            lines_s, lines_t_s, lines_t2_s, lines_t3_s = selectFormulaVerifiedTraces(lines, lines_t, lines_t2, lines_t3, formula,prefix_size)
+            # Check the traces completed and not only a partial suffix (thus, the 0).
+            lines_s, lines_t_s, lines_t2_s, lines_t3_s = selectFormulaVerifiedTraces(lines, lines_t, lines_t2, lines_t3, formula, 0)
             print("prefix size: " + str(prefix_size))
             print("formulas verifited: " + str(len(lines_s)) + " out of : " + str(len(lines)))
-            for line, times, times2, times3 in zip(lines_s, lines_t_s, lines_t2_s, lines_t3_s):
-                prediction_end_reached = False
-                times.append(0)
-                cropped_line = ''.join(line[:prefix_size])
-                cropped_times = times[:prefix_size]
-                cropped_times3 = times3[:prefix_size]
-                if len(times2)<prefix_size:
-                    continue # make no prediction for this case, since this case has ended already
+            for line, times, times2, times3 in zip(lines, lines_t, lines_t2, lines_t3):
+                # If the trace is compliant with the formula, perform the LTL approach
+                if line in lines_s:
+                    prediction_end_reached = False
+                    times.append(0)
+                    cropped_line = ''.join(line[:prefix_size])
+                    cropped_times = times[:prefix_size]
+                    cropped_times3 = times3[:prefix_size]
+                    if len(times2)<prefix_size:
+                        continue # make no prediction for this case, since this case has ended already
 
-                # initialize root of the tree for beam search
-                total_predicted_time_initialization = 0
-                search_tree_root = MultileafTree(beam_size, encode(cropped_line, cropped_times, cropped_times3, maxlen),
-                                                 cropped_line, total_predicted_time_initialization)
+                    # initialize root of the tree for beam search
+                    total_predicted_time_initialization = 0
+                    search_tree_root = MultileafTree(beam_size, encode(cropped_line, cropped_times, cropped_times3, maxlen),
+                                                     cropped_line, total_predicted_time_initialization)
 
-                prediction_end_reached = False
-
-
-                ground_truth = ''.join(line[prefix_size:prefix_size+predict_size])
-                ground_truth_t = times2[prefix_size-1]
-                case_end_time = times2[len(times2)-1]
-                ground_truth_t = case_end_time-ground_truth_t
-                predicted = ''
-
-                for i in range(predict_size):
-                    #here we will take data from the node in the tree used to prun
-                    enc = search_tree_root.data#encode(cropped_line, cropped_times, cropped_times3)
-                    y = model.predict(enc, verbose=0) # make predictions
-                    # split predictions into seperate activity and time predictions
-                    y_char = y[0][0]
-                    y_t = y[1][0][0]
-
-                    stop_symbol_probability_amplifier_current, start_of_the_cycle_symbol = amplify(search_tree_root.cropped_line)
+                    prediction_end_reached = False
 
 
-                    #cropped_line += prediction
-                    if y_t<0:
-                        y_t=0
-                    #TOO not normalizing here seems like a bug
-                    cropped_times.append(y_t)
+                    ground_truth = ''.join(line[prefix_size:prefix_size+predict_size])
+                    ground_truth_t = times2[prefix_size-1]
+                    case_end_time = times2[len(times2)-1]
+                    ground_truth_t = case_end_time-ground_truth_t
+                    predicted = ''
 
-                    ma = False
-                    for i in range(beam_size):
-                        prediction = getSymbolAmpl(y_char, target_indices_char,target_char_indices,start_of_the_cycle_symbol,
-                                                   stop_symbol_probability_amplifier_current,i)  # undo one-hot encoding
+                    for i in range(predict_size):
+                        #here we will take data from the node in the tree used to prun
+                        enc = search_tree_root.data#encode(cropped_line, cropped_times, cropped_times3)
+                        y = model.predict(enc, verbose=0) # make predictions
+                        # split predictions into seperate activity and time predictions
+                        y_char = y[0][0]
+                        y_t = y[1][0][0]
 
-                        if prediction == '!': # end of case was just predicted, therefore, stop predicting further into the future
-                            if verify_formula_as_compliant(search_tree_root.cropped_line, formula, prefix_size) == True:
-                                one_ahead_pred.append(search_tree_root.total_predicted_time)
-                                one_ahead_gt.append(ground_truth_t)
-                                print('! predicted, end case')
-                                ma = True
-                                break
+                        stop_symbol_probability_amplifier_current, start_of_the_cycle_symbol = amplify(search_tree_root.cropped_line)
 
-                            # else:
-                            #     prediction_end_reached = True;
-                    if ma:
-                        break
-                    #if the end of prediction was not reached we continue as always, and then function :choose_next_top_descendant: will
-                    #search for future prediction
 
-                    #in not reached, function :choose_next_top_descendant: will backtrack
-                    y_t = y_t * divisor3
-                    if prediction_end_reached == False:
-                        cropped_times3.append(cropped_times3[-1] + timedelta(seconds=y_t))
+                        #cropped_line += prediction
+                        if y_t<0:
+                            y_t=0
+                        #TOO not normalizing here seems like a bug
+                        cropped_times.append(y_t)
 
+                        ma = False
                         for i in range(beam_size):
+                            prediction = getSymbolAmpl(y_char, target_indices_char,target_char_indices,start_of_the_cycle_symbol,
+                                                       stop_symbol_probability_amplifier_current,i)  # undo one-hot encoding
 
-                            temp_prediction = getSymbolAmpl(y_char, target_indices_char,
-                                                            target_char_indices,
-                                                            start_of_the_cycle_symbol,
-                                                            stop_symbol_probability_amplifier_current, i)
-                            if temp_prediction == '!':
-                                continue
-                            temp_cropped_line = search_tree_root.cropped_line + temp_prediction
+                            if prediction == '!': # end of case was just predicted, therefore, stop predicting further into the future
+                                if verify_formula_as_compliant(search_tree_root.cropped_line, formula, prefix_size) == True:
+                                    one_ahead_pred.append(search_tree_root.total_predicted_time)
+                                    one_ahead_gt.append(ground_truth_t)
+                                    print('! predicted, end case')
+                                    ma = True
+                                    break
 
-                            #this means that we found the end in one of the alternatives.
+                                # else:
+                                #     prediction_end_reached = True;
+                        if ma:
+                            break
+                        #if the end of prediction was not reached we continue as always, and then function :choose_next_top_descendant: will
+                        #search for future prediction
+
+                        #in not reached, function :choose_next_top_descendant: will backtrack
+                        y_t = y_t * divisor3
+                        if prediction_end_reached == False:
+                            cropped_times3.append(cropped_times3[-1] + timedelta(seconds=y_t))
+
+                            for i in range(beam_size):
+
+                                temp_prediction = getSymbolAmpl(y_char, target_indices_char,
+                                                                target_char_indices,
+                                                                start_of_the_cycle_symbol,
+                                                                stop_symbol_probability_amplifier_current, i)
+                                if temp_prediction == '!':
+                                    continue
+                                temp_cropped_line = search_tree_root.cropped_line + temp_prediction
+
+                                #this means that we found the end in one of the alternatives.
 
 
-                            temp_total_predicted_time = search_tree_root.total_predicted_time + y_t
+                                temp_total_predicted_time = search_tree_root.total_predicted_time + y_t
 
-                            temp_state_data = encode(temp_cropped_line, cropped_times, cropped_times3, maxlen)
-                            search_tree_root.descendants[i] = MultileafTree(beam_size, temp_state_data,
-                                                                            temp_cropped_line, temp_total_predicted_time, search_tree_root)
+                                temp_state_data = encode(temp_cropped_line, cropped_times, cropped_times3, maxlen)
+                                search_tree_root.descendants[i] = MultileafTree(beam_size, temp_state_data,
+                                                                                temp_cropped_line, temp_total_predicted_time, search_tree_root)
 
-                    search_tree_root = search_tree_root.choose_next_top_descendant()
-                    if prediction_end_reached:
-                        prediction_end_reached = False;
+                        search_tree_root = search_tree_root.choose_next_top_descendant()
+                        if prediction_end_reached:
+                            prediction_end_reached = False;
+                        if search_tree_root == None:
+                            print("Cannot find any trace that is compliant with formula given current beam size")
+                            break
+
+                    output = []
+
                     if search_tree_root == None:
-                        print("Cannot find any trace that is compliant with formula given current beam size")
-                        break
+                        predicted = u""
+                        total_predicted_time = 0
+                    else:
+                        predicted = (search_tree_root.cropped_line[prefix_size:])
+                        total_predicted_time = search_tree_root.total_predicted_time
 
-                output = []
-
-                if search_tree_root == None:
-                    predicted = u""
-                    total_predicted_time = 0
+                    if len(ground_truth) > 0:
+                        #output.append(caseid)
+                        output.append(prefix_size)
+                        output.append(str(ground_truth).encode("utf-8"))
+                        output.append(str(predicted).encode("utf-8"))
+                        output.append(1 - distance.nlevenshtein(predicted, ground_truth))
+                        dls = 1 - (damerau_levenshtein_distance(str(predicted), str(ground_truth)) / max(
+                            len(predicted), len(ground_truth)))
+                        if dls < 0:
+                            dls = 0  # we encountered problems with Damerau-Levenshtein Similarity on some linux machines where the default character encoding of the operating system caused it to be negative, this should never be the case
+                        output.append(dls)
+                        output.append(1 - distance.jaccard(predicted, ground_truth))
+                        output.append(ground_truth_t)
+                        output.append(total_predicted_time)
+                        output.append('')
+                        output.append(metrics.mean_absolute_error([ground_truth_t], [total_predicted_time]) / 86400)
+                        # output.append(metrics.median_absolute_error([ground_truth_t], [total_predicted_time]))
+                        spamwriter.writerow(output)
+                # Otherwise, perform the argmax approach
                 else:
-                    predicted = (search_tree_root.cropped_line[prefix_size:])
-                    total_predicted_time = search_tree_root.total_predicted_time
-
-                if len(ground_truth) > 0:
-                    #output.append(caseid)
-                    output.append(prefix_size)
-                    output.append(str(ground_truth).encode("utf-8"))
-                    output.append(str(predicted).encode("utf-8"))
-                    output.append(1 - distance.nlevenshtein(predicted, ground_truth))
-                    dls = 1 - (damerau_levenshtein_distance(str(predicted), str(ground_truth)) / max(
-                        len(predicted), len(ground_truth)))
-                    if dls < 0:
-                        dls = 0  # we encountered problems with Damerau-Levenshtein Similarity on some linux machines where the default character encoding of the operating system caused it to be negative, this should never be the case
-                    output.append(dls)
-                    output.append(1 - distance.jaccard(predicted, ground_truth))
-                    output.append(ground_truth_t)
-                    output.append(total_predicted_time)
-                    output.append('')
-                    output.append(metrics.mean_absolute_error([ground_truth_t], [total_predicted_time]) / 86400)
-                    # output.append(metrics.median_absolute_error([ground_truth_t], [total_predicted_time]))
+                    times.append(0)
+                    cropped_line = ''.join(line[:prefix_size])
+                    cropped_times = times[:prefix_size]
+                    cropped_times3 = times3[:prefix_size]
+                    if len(times2) < prefix_size:
+                        continue  # make no prediction for this case, since this case has ended already
+                    ground_truth = ''.join(line[prefix_size:prefix_size + predict_size])
+                    ground_truth_t = times2[prefix_size - 1]
+                    case_end_time = times2[len(times2) - 1]
+                    ground_truth_t = case_end_time - ground_truth_t
+                    predicted = ''
+                    total_predicted_time = 0
+                    for i in range(predict_size):
+                        enc = encode(cropped_line, cropped_times, cropped_times3)
+                        y = model.predict(enc, verbose=0)  # make predictions
+                        # split predictions into seperate activity and time predictions
+                        y_char = y[0][0]
+                        y_t = y[1][0][0]
+                        prediction = getSymbol(y_char)  # undo one-hot encoding
+                        cropped_line += prediction
+                        if y_t < 0:
+                            y_t = 0
+                        cropped_times.append(y_t)
+                        if prediction == '!':  # end of case was just predicted, therefore, stop predicting further into the future
+                            one_ahead_pred.append(total_predicted_time)
+                            one_ahead_gt.append(ground_truth_t)
+                            # print('! predicted, end case. Predicted: ', predicted)
+                            break
+                        # for unknown reasons, the denormalization is different from training and from testing
+                        y_t = y_t * divisor3
+                        cropped_times3.append(cropped_times3[-1] + timedelta(seconds=y_t))
+                        total_predicted_time = total_predicted_time + y_t
+                        predicted += prediction
+                    output = []
+                    if len(ground_truth) > 0:
+                        #output.append(caseid)
+                        output.append(prefix_size)
+                        output.append(str(ground_truth).encode("utf-8"))
+                        output.append(str(predicted).encode("utf-8"))
+                        output.append(1 - distance.nlevenshtein(predicted, ground_truth))
+                        dls = 1 - (damerau_levenshtein_distance(str(predicted), str(ground_truth)) / max(
+                            len(predicted), len(ground_truth)))
+                        if dls < 0:
+                            dls = 0  # we encountered problems with Damerau-Levenshtein Similarity on some linux machines where the default character encoding of the operating system caused it to be negative, this should never be the case
+                        output.append(dls)
+                        output.append(1 - distance.jaccard(predicted, ground_truth))
+                        output.append(ground_truth_t)
+                        output.append(total_predicted_time)
+                        output.append('')
+                        output.append(metrics.mean_absolute_error([ground_truth_t], [total_predicted_time]) / 86400)
+                        # output.append(metrics.median_absolute_error([ground_truth_t], [total_predicted_time]))
                     spamwriter.writerow(output)
     print("TIME TO FINISH --- %s seconds ---" % (time.time() - start_time))
 
 if args.test_suffix_calculus:
     import pandas as pd
-    df = pd.read_csv(os.path.join("results", "raw_suffix_and_remaining_time_" + eventlog_name + ".csv"))
-    with open(os.path.join("results", "suffix_" + eventlog_name + ".csv"), "w") as result_f:
-        result_f.write("Mean MAE per prefix: " + str(df.groupby("Prefix length")["MAE (days)"].mean()) + "\n")
+    df = pd.read_csv(os.path.join("../results", "raw_suffix_and_remaining_time_" + eventlog_name + ".csv"))
+    with open(os.path.join("../results", "suffix_" + eventlog_name + ".csv"), "w") as result_f:
+        result_f.write("Mean MAE per prefix: " + str(df.groupby("Prefix length")["MAE"].mean()) + "\n")
         result_f.write("Mean DL per prefix: " + str(df.groupby("Prefix length")["Damerau"].mean()) + "\n")
-        result_f.write("Mean MAE: " + str(df["MAE (days)"].mean()) + "\n")
+        result_f.write("Mean MAE: " + str(df["MAE"].mean()) + "\n")
         result_f.write("Mean DL: " + str(df["Damerau"].mean()) + "\n")

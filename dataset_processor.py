@@ -217,13 +217,6 @@ if arguments.net:
             # Select the fields for the declare miner files.
             # This avoids nan error importing in prom.
             select_columns(
-                train_val_path,
-                input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
-                category_columns=None,
-                timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
-                output_columns=None, francescomarino_fix=True
-            )
-            select_columns(
                 val,
                 input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
                 category_columns=None,

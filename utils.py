@@ -243,6 +243,12 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
     # To fix that append a fixed string to the case identifiers and convert the field to a string.
     if francescomarino_fix:
         dataset[XES_Fields.CASE_COLUMN] = "FIX" + dataset[XES_Fields.CASE_COLUMN].astype(str)
+        # Furthermore, the LTL checker from rum does not work correctly with lifecycle transitions.
+        # in fact, it may happen that the LTL checker detects every trace as non-conformant if the
+        # pair of activities involucrated have different lifecycle:transitions
+        # If we switch every lifecycle:transition to complete and make artificial activities as
+        # each pair of concept:name and lifecycle:transition we can circunvent this.
+        dataset[XES_Fields.LIFECYCLE_COLUMN] = "Complete"
 
     if output_columns is not None:
         dataset.rename(

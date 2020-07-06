@@ -161,6 +161,7 @@ def verify_formula_as_compliant(trace, formula, prefix=0):
         trace_new.append(str(getInt_fromUnicode(trace[i])))
     if not trace_new:
         return False
+    #print("Checking for trace: ", trace_new)
     ver = verificator_app.isTraceViolated(formula, trace_new) == False
     #   print str(ver)
     return ver
