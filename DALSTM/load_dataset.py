@@ -32,13 +32,18 @@ def buildOHE(index, n):
 def load_dataset(filename, prev_values=None):
     dataframe = pandas.read_csv(filename, header=0)
     dataframe = dataframe.replace(r's+', 'empty', regex=True)
+    dataframe = dataframe.replace("-", "UNK")
     dataframe = dataframe.fillna(0)
 
     dataset = dataframe.values
     if prev_values is None:
         values = []
         for i in range(dataset.shape[1]):
-            values.append(len(np.unique(dataset[:, i])))  # +1
+            try:
+                values.append(len(np.unique(dataset[:, i])))  # +1
+            except:
+                dataset[:, i] = dataset[:, i].astype(str)
+                values.append(len(np.unique(dataset[:, i])))  # +1
     else:
         values = prev_values
 
@@ -113,6 +118,13 @@ def load_dataset(filename, prev_values=None):
                 for i in line[3:]:
                     if not np.issubdtype(dataframe.dtypes[field], np.number):
                         # print "object", field
+                        #print("------")
+                        #print("OH: ", one_hot(str(i), values[field], split="|"))
+                        #print("Values field: ", values[field])
+                        #print("Field: ", field)
+                        #print("str(i): ", str(i))
+                        #print("OH2",  one_hot(str(i), values[field], split="|")[0])
+                        #print("------")
                         a.extend(buildOHE(one_hot(str(i), values[field], split="|")[0], values[field]))
                     else:
                         a.append(i)
