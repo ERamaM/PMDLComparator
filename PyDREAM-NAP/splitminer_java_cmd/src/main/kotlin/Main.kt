@@ -10,14 +10,10 @@ import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.DefaultHelpFormatter
 import com.xenomachina.argparser.default
 import com.xenomachina.argparser.mainBody
+import edu.uic.prominent.processmining.decaypns.log.util.XLogReader
 import edu.uic.prominent.processmining.decaypns.prom.model.ModelUtils
-import gal.usc.citius.processmining.datasources.log.XESFileParser
-import gal.usc.citius.processmining.datasources.log.common.Mappings
-import gal.usc.citius.processmining.datasources.log.common.Producers
-import gal.usc.citius.processmining.model.log.Lifecycle
-import gal.usc.citius.processmining.model.log.ProcessLog
-import gal.usc.citius.processmining.utils.translators.toXLog
 import org.deckfour.xes.classification.XEventNameClassifier
+import org.deckfour.xes.model.XLog
 import org.processmining.models.graphbased.directed.bpmn.BPMNDiagram
 import java.io.FileDescriptor
 import java.io.FileOutputStream
@@ -120,7 +116,7 @@ private fun mine_and_save(log_name: String, model_folder: String, e: Double, et:
     // do some dark magic to access rafaelle conforti code and use prom code without ui
     // use the same parameters as DREAM-NAP
     val bpmn = miner.mineBPMNModel(
-        log.toXLog(),
+        log,
         classifier,
         e,
         et,
@@ -147,11 +143,8 @@ private fun get_filename(bestmodel: String): String {
     return filename
 }
 
-fun load_log(log_name : String) : ProcessLog{
-    val mappings = Mappings<String>(activity = "concept:name", start = null, end = "time:timestamp", lifecycle = null, process = null, case = null)
-    val producer = Producers(process = { "log" }, case = {"case"}, start = { Instant.now()}, lifecycle = { Lifecycle.COMPLETE})
-    val log = XESFileParser(log_name, mapping = mappings, producers = producer).read()
-    return log
+fun load_log(log_name : String) : XLog {
+    return XLogReader.openLog(log_name)
 }
 
 fun convertToPetrinet(
