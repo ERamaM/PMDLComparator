@@ -35,6 +35,7 @@ dependencies {
     implementation group: "dom4j", name: "dom4j", version: "1.6.1"
 
     implementation name: "decaypns" //DREAM jar
+    implementation name: "openxes-2.16"
 }
 
 compileKotlin {
