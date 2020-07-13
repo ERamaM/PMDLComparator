@@ -64,6 +64,8 @@ dataset = args.dataset
 dataset_name = Path(dataset).name
 dataset_directory = Path(dataset).parent
 
+print("Dataset name: ", dataset_name)
+
 # fix random seed for reproducibility
 np.random.seed(42)
 tf.compat.v1.set_random_seed(42)
@@ -104,19 +106,28 @@ for a1 in X_test:
                 s[i] = s[i] / max[i]
 
 X_train = np.asarray(X_train)
-y_train = np.asarray(y_train)
 X_val = np.asarray(X_val)
-y_val = np.asarray(y_val)
 X_test = np.asarray(X_test)
+y_train = np.asarray(y_train)
+y_val = np.asarray(y_val)
 y_test = np.asarray(y_test)
 
-X_train = sequence.pad_sequences(X_train)
-print("X_train: ", X_train[0])
-print("DEBUG: training shape", X_train.shape)
-maxlen = X_train.shape[1]
-X_test = sequence.pad_sequences(X_test, maxlen=X_train.shape[1])
-X_val = sequence.pad_sequences(X_val, maxlen=X_train.shape[1])
-print("DEBUG: test shape", X_test.shape)
+if dataset_name.lower() == "bpi_challenge_2013_incidents.csv":
+    X_train = sequence.pad_sequences(X_train, dtype="int16")
+    print("X_train: ", X_train[0])
+    print("DEBUG: training shape", X_train.shape)
+    maxlen = X_train.shape[1]
+    X_test = sequence.pad_sequences(X_test, maxlen=X_train.shape[1], dtype="int16")
+    X_val = sequence.pad_sequences(X_val, maxlen=X_train.shape[1], dtype="int16")
+    print("DEBUG: test shape", X_test.shape)
+else:
+    X_train = sequence.pad_sequences(X_train)
+    print("X_train: ", X_train[0])
+    print("DEBUG: training shape", X_train.shape)
+    maxlen = X_train.shape[1]
+    X_test = sequence.pad_sequences(X_test, maxlen=X_train.shape[1])
+    X_val = sequence.pad_sequences(X_val, maxlen=X_train.shape[1])
+    print("DEBUG: test shape", X_test.shape)
 
 # create the model
 model = Sequential()
