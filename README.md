@@ -1,4 +1,10 @@
-# Installation
+# Deep Learning for Predictive Busines Process Monitoring: Review and Benchmark
+
+## Additional materials
+
+Results of the experimentation are available in [this link](https://nextcloud.citius.usc.es/index.php/s/aejzKPSF7xPgYKi)
+
+## Installation
 
 Use anaconda to install some dependencies and activate the environment:
 
@@ -10,7 +16,6 @@ If you want to use a GPU (recommended) install this instead:;
     conda create -n "tf_2.0_ppm" python=3.6 tensorflow-gpu=2.1.0
     conda activate tf_2.0_ppm
 
-
 Install additional dependencies:
 
     python -m pip install pm4py==1.2.12 hyperopt==0.2.3 jellyfish==0.7.2 distance==0.1.3 strsim==0.0.3 pyyaml==5.3.1 nltk==3.5 swifter==0.304 py4j==0.10.9
@@ -21,7 +26,7 @@ If you want to use the task spooler, install, in debian based systems:
     
 For every approach, a bash script named "generate_queue.sh" is provided that adds a series of jobs to train the neural networks in the datasets.
     
-# Prepare the datasets
+## Prepare the datasets
 
 There are two modes to prepare the datasets for training and testing: 
 
@@ -42,6 +47,14 @@ Where AUTHOR is one of above:
 
 - pascuadibisceglie
 - mauro
+- evermann
+- navarin
+- camargo
+- hinkka
+- thai
+- francescomarino
+- theis
+- tax
 
 Examples:
 
@@ -49,9 +62,9 @@ Examples:
     
     python dataset_processor.py --net mauro --batch raw_datasets
     
-# Run the experiments
+## Run the experiments
 
-## Pasquadibisceglie (ImagePPMiner)
+### Pasquadibisceglie (ImagePPMiner)
 
 Run the experiments with the following command:
 
@@ -66,7 +79,7 @@ The results of the testing are outputted inside the "results" folder. There are 
 
 The best model is inside the "models" folder.
 
-## Mauro (nnpm)
+### Mauro (nnpm)
 
 Run the experiments with the following command:
 
@@ -76,7 +89,7 @@ The preprocessed datasets are placed inside the "data" folder. The models are pl
 
 - \[DATASET\]: it contains multiple information, such as the validation loss of each of the Hyperopt trials and the next activity metrics, such as accuracy or brier score.
 
-## Tax (tax)
+### Tax (tax)
 
 Run the training procedure and next event prediction with the following command (inside the "code" folder). Each "--option" indicates the task to perform.
 
@@ -89,7 +102,7 @@ The preprocessed datasets are placed inside the "data" folder. The trained model
 - raw_\[DATASET\]: it contains a list of all ground truth and predicted next activities.
 - \[DATASET\]_next_event: it contains the next activity metrics: accuracy, brier score and next timestamp MAE.
 
-## Evermann (evermann)
+### Evermann (evermann)
 
 Run the training and testing procedure as follows:
 
@@ -109,7 +122,7 @@ Additionally, the Damerau Levenshtein metric is not calculated with the previous
     
 The results are print out in stdout.
 
-## Navarin (DALSTM)
+### Navarin (DALSTM)
 
 Run the experiments with the following command:
 
@@ -117,7 +130,7 @@ Run the experiments with the following command:
     
 The models are stored inside the "model" folder. The results are stored inside the "results" folder.
 
-## Hinkka (hinkka)
+### Hinkka (hinkka)
 
 For this study is better to create a new anaconda environment. Create an environment based on tensorflow-gpu (to install the gpu dependencies) and python3.6
 
@@ -151,7 +164,7 @@ The results are stored in the directory "output". The code generates a bunch of 
 
 The models parameters are stored inside the "testdata" directory. To remove them use the script "delete_models". The script "delete_cache.sh" removes every .txt and .csv created on the root of the approach folder. The results for the next activity are stored in the "output" folder.
 
-## Camargo (GenerativeLSTM)
+### Camargo (GenerativeLSTM)
 
 An easy way to run the experiments requires the task-spooler tool installed. Then, run the hyperparameter optimizacion procedure with the following command:
 
@@ -172,7 +185,7 @@ This command loads the model with the lowest validation loss and performs the te
 - ac_predict_next.csv: contains the next activity metrics for each sampling procedure. Often, you would be interested only in the "Argmax" metrics.
 - tm_pred_sfx.csv: contains the remaining time metrics for each sampling procedure.
 
-## Khan (MAED-TaxIntegration)
+### Khan (MAED-TaxIntegration)
 
 Run the experimentation using the "bpi_run.py" script from inside the "busi_task" folder:
 
@@ -182,7 +195,7 @@ Unlike the other approaches, this approach does not contain a "generate_queue.sh
 
 The results are stored inside the "data" directory under a file named "results_\[DATASET\]". The model checkpoints are inside the "checkpoints_data". The information inside the "log_data" directory also seems important.
 
-## Theis (PyDREAM-NAP)
+### Theis (PyDREAM-NAP)
 
 This approach runs in two phases. First, you must mine the process models from the training+validation event log. Then, you must use the process model to run the training and testing procedure.
 
@@ -205,4 +218,40 @@ After the mining is complete, you have two options to perform the experimentatio
 The first command runs the version that uses resources and the second command runs the version that uses no resources. 
 
 The results are stored inside the "results" folder. The trained models are stored inside the "model_checkpoints" folder.
+
+### Francescomarino (Process-Sequence-Prediction-with-A-priori-knowledge)
+
+First, download the RuM tool from: https://sep.cs.ut.ee/Main/RuM
+
+Then, execute the tool with the following command:
+
+```
+java -jar rum-0.5.3.jar
+```
+
+Then, in the tab "Discovery" load the "train_val" split of the XES log.
+
+Set the following parameters in the window:
+
+- Templates
+	- Existence[A]
+	- Response[A,B]
+- General parameters:
+	- Min Constraint Support: 10%
+	- Vacuity detection: enabled.
+
+Save the model using the .decl extension.
+
+Then, in the tab "Conformance checking", load the same log and the previously saved model, and press "Check".
+
+Group the list by "Constraints" and sort the groups by "Fullfillments". Then, select up to 3 rules of each type (response and existence) that have a number of 50% of fullfillments more than activations sorted by the number of fullfillments.
+
+These rules must be added in the file "formulas.yaml" using the same format as indicated in the comments.
+
+Finally, to run the experiments, execute the training procedure as follows:
+
+```
+python train.py --dataset DATASET --train --test --test_suffix --test_suffix_calculus
+```
+
 
