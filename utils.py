@@ -373,7 +373,6 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
             val_paths.append(val_path)
             test_paths.append(test_path)
 
-    raise ValueError
     if do_train_val:
         return file, train_paths, val_paths, test_paths, train_val_paths
     else:
@@ -392,9 +391,9 @@ def move_files(files_to_move, output_directory):
 
     # name = Path(file).stem + extension
     def _move_if_exists(input, output_dir):
-        stem = os.path.basename(input)
+        head, tail = os.path.split(input)
         if os.path.exists(input):
-            os.replace(input, os.path.join(output_directory, stem))
+            os.replace(input, os.path.join(output_directory, tail))
 
     for file in files_to_move:
         _move_if_exists(file, output_directory)

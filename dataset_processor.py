@@ -39,10 +39,11 @@ if arguments.net:
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_DAYS,
                 output_columns=output_columns, categorize=True
             )
-            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
+            csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", "CaseID")
             make_dir_if_not_exists("ImagePPMiner/dataset")
             # Move from tmp to the corresponding folder
-            move_files(csv_path, "ImagePPMiner/dataset", EXTENSIONS.CSV)
+            files_to_move = [csv_path] + train_paths + val_paths + test_paths
+            move_files(files_to_move, "ImagePPMiner/dataset")
 
     elif arguments.net == "mauro":
         for xes in dataset_list:
@@ -62,10 +63,11 @@ if arguments.net:
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_SLASH,
                 output_columns=output_columns
             )
-            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
+            csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", "CaseID")
             make_dir_if_not_exists("nnpm/data")
             make_dir_if_not_exists("nnpm/results")
-            move_files(csv_path, "nnpm/data", EXTENSIONS.CSV)
+            files_to_move = [csv_path] + train_paths + val_paths + test_paths
+            move_files(files_to_move, "nnpm/data")
 
     elif arguments.net == "tax":
         for xes in dataset_list:
@@ -85,11 +87,12 @@ if arguments.net:
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
                 output_columns=output_columns, categorize=True
             )
-            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
+            csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", "CaseID")
             make_dir_if_not_exists("tax/data")
             make_dir_if_not_exists("tax/code/results")
             make_dir_if_not_exists("tax/code/models")
-            move_files(csv_path, "tax/data", EXTENSIONS.CSV)
+            files_to_move = [csv_path] + train_paths + val_paths + test_paths
+            move_files(files_to_move, "tax/data")
     elif arguments.net == "evermann":
         for xes in dataset_list:
             print("Process: ", xes)
@@ -97,12 +100,19 @@ if arguments.net:
             make_dir_if_not_exists("evermann/models")
             make_dir_if_not_exists("evermann/results")
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
-            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
+            csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
             xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            train_file, train_path = convert_csv_to_xes(train_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            move_files(xes_path, "evermann/data", EXTENSIONS.XES_COMPRESSED)
+            files_to_move = [xes_path]
+            for train_path in train_paths:
+                train_file, train_path = convert_csv_to_xes(train_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                files_to_move.append(train_path)
+            for val_path in val_paths:
+                val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                files_to_move.append(val_path)
+            for test_path in test_paths:
+                test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                files_to_move.append(test_path)
+            move_files(files_to_move, "evermann/data")
     elif arguments.net == "thai":
             for xes in dataset_list:
                 print("Process: ", xes)
@@ -125,8 +135,9 @@ if arguments.net:
                     timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
                     output_columns=output_columns, categorize=True
                 )
-                csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
-                move_files(csv_path, "MAED-TaxIntegration/busi_task/data", EXTENSIONS.CSV)
+                csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", "CaseID")
+                files_to_move = [csv_path] + train_paths + val_paths + test_paths
+                move_files(files_to_move, "MAED-TaxIntegration/busi_task/data")
     elif arguments.net == "theis":
         for xes in dataset_list:
             print("Process: ", xes)
@@ -138,14 +149,23 @@ if arguments.net:
             make_dir_if_not_exists("PyDREAM-NAP/results")
 
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp", perform_lifecycle_trick=False, fill_na="UNK")
-            csv_path, train_path, val_path, test_path, train_val_path = split_train_val_test(csv_path, "./tmp",
+            csv_path, train_paths, val_paths, test_paths, train_val_paths = split_train_val_test(csv_path, "./tmp",
                                                                              XES_Fields.CASE_COLUMN, do_train_val=True)
             xes_file, xes_path = convert_csv_to_xes(csv_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            train_file, train_path = convert_csv_to_xes(train_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            train_val_file, train_val_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            move_files(xes_path, "PyDREAM-NAP/logs", EXTENSIONS.XES_COMPRESSED)
+            files_to_move = [xes_path]
+            for train_path in train_paths:
+                train_file, train_path = convert_csv_to_xes(train_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                files_to_move.append(train_path)
+            for val_path in val_paths:
+                val_file, val_path = convert_csv_to_xes(val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                files_to_move.append(val_path)
+            for test_path in test_paths:
+                test_file, test_path = convert_csv_to_xes(test_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                files_to_move.append(test_path)
+            for train_val_path in train_val_paths:
+                train_val_file, train_val_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                files_to_move.append(train_val_path)
+            move_files(files_to_move, "PyDREAM-NAP/logs")
     elif arguments.net == "navarin":
         for xes in dataset_list:
             print("Process: ", xes)
@@ -167,7 +187,8 @@ if arguments.net:
             # Reorder columns
             reorder_columns(csv_path, [XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN])
             csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=False)
-            move_files(csv_path, "DALSTM/data", EXTENSIONS.CSV)
+            files_to_move = [csv_path] + train_path + val_path + test_path
+            move_files(files_to_move, "DALSTM/data")
     elif arguments.net == "camargo":
         for xes in dataset_list:
             print("Process: ", xes)
@@ -196,8 +217,9 @@ if arguments.net:
                 )
                 # Reorder columns
                 reorder_columns(csv_path, ["caseid", "task", "user", "end_timestamp"])
-                # Do not split in train-val-test. The code already does that in the same manner as here.
-                move_files(csv_path, "GenerativeLSTM/input_files", EXTENSIONS.CSV)
+                csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", "caseid")
+                files_to_move = [csv_path] + train_paths + val_paths + test_paths
+                move_files(files_to_move, "GenerativeLSTM/input_files")
             else:
                 print(xes + " does not have resources.")
 
@@ -213,20 +235,27 @@ if arguments.net:
             # so there is no need to perform it here
             csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
 
-            _ , _, val, _, train_val_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=True)
+            xes_vals = []
+            xes_train_vals = []
+            _ , _, vals, _, train_val_paths = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=True)
             # Select the fields for the declare miner files.
             # This avoids nan error importing in prom.
-            select_columns(
-                val,
-                input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
-                category_columns=None,
-                timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
-                output_columns=None, francescomarino_fix=True
-            )
-            xes_file, xes_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            xes_file_val, xes_path_val = convert_csv_to_xes(val, "./tmp", EXTENSIONS.XES_COMPRESSED)
-            move_files(xes_path, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files", EXTENSIONS.XES_COMPRESSED)
-            move_files(xes_path_val, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files", EXTENSIONS.XES_COMPRESSED)
+            for val in vals:
+                select_columns(
+                    val,
+                    input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
+                    category_columns=None,
+                    timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                    output_columns=None, francescomarino_fix=True
+                )
+            for train_val_path in train_val_paths:
+                xes_file, xes_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                xes_train_vals.append(xes_path)
+            for val in vals:
+                xes_file_val, xes_path_val = convert_csv_to_xes(val, "./tmp", EXTENSIONS.XES_COMPRESSED)
+                xes_vals.append(xes_path_val)
+            move_files(xes_train_vals, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files")
+            move_files(xes_vals, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files")
 
             output_columns = {
                 XES_Fields.CASE_COLUMN: "CaseID",
@@ -240,8 +269,9 @@ if arguments.net:
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
                 output_columns=output_columns, categorize=True, francescomarino_fix=True
             )
-            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", "CaseID")
-            move_files(csv_path, "Process-Sequence-Prediction-with-A-priori-knowledge/data", EXTENSIONS.CSV)
+            csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", "CaseID")
+            files_to_move = [csv_path] + train_paths + val_paths + test_paths
+            move_files(files_to_move, "Process-Sequence-Prediction-with-A-priori-knowledge/data")
 
     elif arguments.net == "hinkka":
         for xes in dataset_list:
@@ -265,9 +295,9 @@ if arguments.net:
             make_dir_if_not_exists("hinkka/src/testdata")
             make_dir_if_not_exists("hinkka/src/output")
             json_path = convert_csv_to_json(csv_path, "hinkka/src/testdata", attributes, Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH, prettify=True)
-            csv_path, train_path, val_path, test_path = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
-
-            move_files(csv_path, "hinkka/src/testdata", EXTENSIONS.CSV)
+            csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN)
+            files_to_move = train_paths + val_paths + test_paths
+            move_files(files_to_move, "hinkka/src/testdata")
 
     elif arguments.net == "rama":
         for xes in dataset_list:
