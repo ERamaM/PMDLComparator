@@ -14,6 +14,7 @@ import glob
 import datetime
 import shutil
 import yaml, json
+import random
 
 
 def convert_xes_to_csv(file, output_folder, perform_lifecycle_trick=True, fill_na=None):
@@ -36,6 +37,11 @@ def convert_xes_to_csv(file, output_folder, perform_lifecycle_trick=True, fill_n
         pd_log.replace("-", fill_na, inplace=True)
         import numpy as np
         pd_log.replace(np.nan, fill_na)
+
+    # Use integers always for case identifiers.
+    # We need this to make a split that is equal for every dataset
+    pd_log["case:concept:name"] = pd.Categorical(pd_log["case:concept:name"])
+    pd_log["case:concept:name"] = pd_log["case:concept:name"].cat.codes
 
     unique_lifecycle = pd_log[XES_Fields.LIFECYCLE_COLUMN].unique()
     print("Unique lifecycle: ", unique_lifecycle, ". For log: ", file)
@@ -302,54 +308,79 @@ def load_attributes_from_file(filename, log_name):
 
 def split_train_val_test(file, output_directory, case_column, do_train_val=False):
     """
-    Split the TRACES of the log in a 64/16/20 fashion (first 80/20 and then again 80/20).
-    We assume the input is a csv file.
-    :param file: Input csv path of the process log
-    :param output_directory: Output file where to store the splits.
-    :param do_train_val: True: create an additional partition with the training and validation set together
-    :return: Initial csv path file and paths to each of the created partitions (train, val, test, train_val).
+    Perform the splits for a 5x2cv with validation set
+    :param file:
+    :param output_directory:
+    :param do_train_val:
+    :return:
     """
     pandas_init = pd.read_csv(file)
     pd.set_option('display.expand_frame_repr', False)
     # print(str(pandas_init.head(50)))
 
     # Disable the sorting. Otherwise it would mess with the order of the timestamps
-    groups = [pandas_df for _, pandas_df in pandas_init.groupby(case_column, sort=False)]
+    unique_case_ids = list(pandas_init[case_column].unique())
+    seeds = [42, 69, 420, 777, 137]
 
-    train_size = round(len(groups) * 0.64)
-    val_size = round(len(groups) * 0.8)
+    train_paths = []
+    val_paths = []
+    test_paths = []
+    train_val_paths = []
 
-    train_groups = groups[:train_size]
-    val_groups = groups[train_size:val_size]
-    test_groups = groups[val_size:]
+    for repetition in range(5):
+        for variation in range(2):
+            indexes = sorted(unique_case_ids)
+            # Select which traces are we going to use for this split
+            random.Random(seeds[repetition]).shuffle(indexes)
+            # If it is the second time on the same repetition, reverse the index array to get test-train, instead of train-test
+            if variation == 1:
+                indexes = list(reversed(indexes))
 
-    # Disable the sorting. Otherwise it would mess with the order of the timestamps
-    train = pd.concat(train_groups, sort=False).reset_index(drop=True)
-    val = pd.concat(val_groups, sort=False).reset_index(drop=True)
-    test = pd.concat(test_groups, sort=False).reset_index(drop=True)
+            # From the train size, select the 20% of the train size (10% of the total) as the validation set
+            train_size = round(len(indexes) * 0.4)
+            val_size = round(len(indexes) * 0.5)
 
-    train_path = os.path.join(output_directory, "train_" + Path(file).stem + ".csv")
-    val_path = os.path.join(output_directory, "val_" + Path(file).stem + ".csv")
-    test_path = os.path.join(output_directory, "test_" + Path(file).stem + ".csv")
+            train_groups = indexes[:train_size]
+            val_groups = indexes[train_size:val_size]
+            test_groups = indexes[val_size:]
 
-    train_val_path = None
+            train_list = [pandas_init[pandas_init[case_column] == train_g] for train_g in train_groups]
+            val_list = [pandas_init[pandas_init[case_column] == val_g] for val_g in val_groups]
+            test_list = [pandas_init[pandas_init[case_column] == test_g] for test_g in test_groups]
+
+            # Disable the sorting. Otherwise it would mess with the order of the timestamps
+            train = pd.concat(train_list, sort=False).reset_index(drop=True)
+            val = pd.concat(val_list, sort=False).reset_index(drop=True)
+            test = pd.concat(test_list, sort=False).reset_index(drop=True)
+
+            train_path = os.path.join(output_directory, "train_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
+            val_path = os.path.join(output_directory, "val_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
+            test_path = os.path.join(output_directory, "test_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
+
+            train_val_path = None
+            if do_train_val:
+                train_val_groups = indexes[:val_size]
+                train_val_list = [pandas_init[pandas_init[case_column] == train_val_g] for train_val_g in train_val_groups]
+                train_val = pd.concat(train_val_list, sort=False).reset_index(drop=True)
+                train_val_path = os.path.join(output_directory, "train_val_fold_" + str(repetition) + "_variation_" + str(variation) + "_" + Path(file).stem + ".csv")
+                train_val.to_csv(train_val_path, index=False)
+                train_val_paths.append(train_val_path)
+
+            train.to_csv(train_path, index=False)
+            val.to_csv(val_path, index=False)
+            test.to_csv(test_path, index=False)
+            train_paths.append(train_path)
+            val_paths.append(val_path)
+            test_paths.append(test_path)
+
+    raise ValueError
     if do_train_val:
-        train_val_groups = groups[:val_size]
-        train_val = pd.concat(train_val_groups, sort=False).reset_index(drop=True)
-        train_val_path = os.path.join(output_directory, "train_val_" + Path(file).stem + ".csv")
-        train_val.to_csv(train_val_path, index=False)
-
-    train.to_csv(train_path, index=False)
-    val.to_csv(val_path, index=False)
-    test.to_csv(test_path, index=False)
-
-    if do_train_val:
-        return file, train_path, val_path, test_path, train_val_path
+        return file, train_paths, val_paths, test_paths, train_val_paths
     else:
-        return file, train_path, val_path, test_path
+        return file, train_paths, val_paths, test_paths
 
 
-def move_files(file, output_directory, extension):
+def move_files(files_to_move, output_directory):
     """
     Move the set of files to the output directory.
     This function also moves the train/val/test files automatically.
@@ -360,26 +391,13 @@ def move_files(file, output_directory, extension):
     """
 
     # name = Path(file).stem + extension
-    basename = os.path.basename(file)
-    dot_index = basename.index(".")
-    name = basename[:dot_index] + extension
-    input_directory = Path(file).parent
-    input_train = os.path.join(input_directory, "train_" + name)
-    input_train_val = os.path.join(input_directory, "train_val_" + name)
-    input_val = os.path.join(input_directory, "val_" + name)
-    input_test = os.path.join(input_directory, "test_" + name)
-
     def _move_if_exists(input, output_dir):
         stem = os.path.basename(input)
         if os.path.exists(input):
             os.replace(input, os.path.join(output_directory, stem))
 
-    _move_if_exists(input_train, output_directory)
-    _move_if_exists(input_val, output_directory)
-    _move_if_exists(input_test, output_directory)
-    _move_if_exists(input_train_val, output_directory)
-    _move_if_exists(file, output_directory)
-
+    for file in files_to_move:
+        _move_if_exists(file, output_directory)
 
 def make_dir_if_not_exists(directory):
     if not os.path.exists(directory):
