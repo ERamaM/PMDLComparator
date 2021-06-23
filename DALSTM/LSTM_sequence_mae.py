@@ -56,11 +56,12 @@ n_layers = 2
 import argparse
 from pathlib import Path
 parser = argparse.ArgumentParser(description="Run the neural net")
-parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument("--fold_dataset", type=str, required=True)
+parser.add_argument("--full_dataset", type=str, required=True)
 parser.add_argument("--train", help="Start training the neural network", action="store_true")
 parser.add_argument("--test", help="Start testing next event of the neural network", action="store_true")
 args = parser.parse_args()
-dataset = args.dataset
+dataset = args.fold_dataset
 dataset_name = Path(dataset).name
 dataset_directory = Path(dataset).parent
 
@@ -70,7 +71,7 @@ print("Dataset name: ", dataset_name)
 np.random.seed(42)
 tf.compat.v1.set_random_seed(42)
 
-(X, y), values = load_dataset(dataset)
+(X, y), values = load_dataset(args.full_dataset)
 (X_train, y_train), _ = load_dataset(os.path.join(dataset_directory, "train_" + dataset_name), values)
 (X_val, y_val), _ = load_dataset(os.path.join(dataset_directory, "val_" + dataset_name), values)
 (X_test, y_test), _ = load_dataset(os.path.join(dataset_directory, "test_" + dataset_name), values)

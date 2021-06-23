@@ -142,7 +142,13 @@ The results are print out in stdout.
 
 Run the experiments with the following command:
 
-    python LSTM_sequence_mae.py --dataset data/$i --train --test
+    python LSTM_sequence_mae.py --full_dataset data/[FULL_DATASET] --fold_dataset data/[FOLD_DATASET] --train --test
+
+Where FOLD_DATASET is the fold you are testing and FULL_DATASET is the whole dataset.
+
+Example: 
+
+	python LSTM_sequence_mae.py --full_dataset data/BPI_Challenge_2012_A.csv --fold_dataset data/fold0_variation0_BPI_Challenge_2012_A.csv --train --test
     
 The models are stored inside the "model" folder. The results are stored inside the "results" folder.
 
