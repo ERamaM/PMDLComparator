@@ -97,8 +97,12 @@ The preprocessed datasets are placed inside the "data" folder. The models are pl
 
 Run the training procedure and next event prediction with the following command (inside the "code" folder). Each "--option" indicates the task to perform.
 
-    python train.py --dataset ../data/[DATASET] --train --test --test_suffix
+    python train.py --fold_dataset ../data/[FOLD_DATASET] --full_dataset ../data/[FULL_DATASET] --train --test --test_suffix
     
+Example:
+
+	python train.py --fold_dataset ../data/fold0_variation0_BPI_Challenge_2012_A.csv --full_dataset ../data/BPI_Challenge_2012_A.csv --test --test_suffix --train
+
 The preprocessed datasets are placed inside the "data" folder. The trained models are placed inside './code/models' and the result files are placed inside './code/results'. For each dataset, it generates 4 files:
     
 - raw_suffix_and_remaining_time_\[DATASET\]: it contains a list of all ground truth and predicted suffixes used to calculate remaining time and damerau levenshtein distance.

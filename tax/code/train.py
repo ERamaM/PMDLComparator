@@ -51,7 +51,8 @@ np.random.seed(42)
 import argparse
 
 parser = argparse.ArgumentParser(description="Run the neural net")
-parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument("--fold_dataset", type=str, required=True)
+parser.add_argument("--full_dataset", type=str, required=True)
 parser.add_argument("--train", help="Start the training of the neural network", action="store_true")
 parser.add_argument("--test", help="Start the testing of next event", action="store_true")
 parser.add_argument("--test_suffix", help="Start the testing of suffix", action="store_true")
@@ -62,8 +63,8 @@ args = parser.parse_args()
     #print("You must specify an operation to perform")
     #sys.exit(-3)
 
-eventlog = args.dataset
-
+fold_eventlog = args.fold_dataset
+full_eventlog = args.full_dataset
 
 def load_file(eventlog):
     ascii_offset = 161
@@ -131,11 +132,11 @@ def load_file(eventlog):
 
 from pathlib import Path
 import os
-eventlog_name = Path(eventlog).stem
+eventlog_name = Path(fold_eventlog).stem
 extension = ".csv"
-folders = Path(eventlog).parent
+folders = Path(fold_eventlog).parent
 
-lines, timeseqs, timeseqs2, timeseqs3, timeseqs4, caseids = load_file(eventlog)
+lines, timeseqs, timeseqs2, timeseqs3, timeseqs4, caseids = load_file(full_eventlog)
 lines_train, timeseqs_train, timeseqs2_train, timeseqs3_train, timeseqs4_train, caseids_train = load_file(os.path.join(folders, "train_" + eventlog_name + extension))
 lines_val, timeseqs_val, timeseqs2_val, timeseqs3_val, timeseqs4_val, caseids_val = load_file(os.path.join(folders, "val_" + eventlog_name + extension))
 lines_test, timeseqs_test, timeseqs2_test, timeseqs3_test, timeseqs4_test, caseids_test = load_file(os.path.join(folders, "test_" + eventlog_name + extension))
@@ -278,7 +279,7 @@ opt = Nadam(lr=0.002, beta_1=0.9, beta_2=0.999, epsilon=1e-08, schedule_decay=0.
 import distutils.dir_util
 import os
 
-distutils.dir_util.mkpath("output_files/models/" + eventlog)
+distutils.dir_util.mkpath("output_files/models/" + fold_eventlog)
 
 model.compile(loss={'act_output': 'categorical_crossentropy', 'time_output': 'mae'}, optimizer=opt, metrics={"act_output" : "acc", "time_output" : "mae"})
 early_stopping = EarlyStopping(monitor='val_loss', patience=42)
@@ -307,7 +308,9 @@ if args.test:
     #print("Y_T: ", y_t_pred_probs)
     y_a_pred = np.argmax(y_a_pred_probs, axis=1)
     y_true = np.argmax(y_a_test, axis=1)
-    from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score, accuracy_score
+    from sklearn.metrics import matthews_corrcoef, precision_score, recall_score, f1_score, accuracy_score, \
+        roc_auc_score
+
 
     def calculate_brier_score(y_pred, y_true):
         # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
@@ -403,7 +406,7 @@ if args.test_suffix:
         numlines += 1
         return lines, timeseqs, timeseqs2, timeseqs3, caseids
 
-    lines, timeseqs, timeseqs2, timeseqs3, caseids = load_file_suffix(eventlog)
+    lines, timeseqs, timeseqs2, timeseqs3, caseids = load_file_suffix(full_eventlog)
     lines_train, timeseqs_train, timeseqs2_train, timeseqs3_train, caseids_train = load_file_suffix(
         os.path.join(folders, "train_" + eventlog_name + extension))
     lines_val, timeseqs_val, timeseqs2_val, timeseqs3_val, caseids_val = load_file_suffix(
