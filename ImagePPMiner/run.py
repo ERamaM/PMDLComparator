@@ -23,7 +23,8 @@ import argparse
 from pathlib import Path
 
 parser = argparse.ArgumentParser(description="Run the neural net")
-parser.add_argument("--dataset", help="Raw dataset to prepare", required=True)
+parser.add_argument("--fold_dataset", help="Raw dataset to prepare", required=True)
+parser.add_argument("--full_dataset", help="Full dataset to count", required=True)
 parser.add_argument("--train", help="Start training the neural network", action="store_true")
 parser.add_argument("--test", help="Start testing next event of the neural network", action="store_true")
 arguments = parser.parse_args()
@@ -32,7 +33,7 @@ if not (arguments.train or arguments.test):
     print("--train or --test (or both) are required")
     sys.exit(-3)
 
-dataset_name = Path(arguments.dataset).stem.split(".")[0].lower()
+dataset_name = Path(arguments.fold_dataset).stem.split(".")[0].lower()
 
 import tensorflow as tf
 
@@ -173,7 +174,7 @@ def get_image(act_val, time_val, max_trace, n_activity):
 
 
 # import dataset
-df, max_trace, n_caseid, n_activity = dataset_summary(arguments.dataset)
+df, max_trace, n_caseid, n_activity = dataset_summary(arguments.full_dataset)
 
 # group by activity and timestamp by caseid
 act = df.groupby('CaseID').agg({'Activity': lambda x: list(x)})
@@ -184,8 +185,8 @@ le.fit(l_total)
 
 # Load the splits
 # Perform the same operations as above
-dataset_directory = Path(arguments.dataset).parent
-dataset_filename = Path(arguments.dataset).stem
+dataset_directory = Path(arguments.fold_dataset).parent
+dataset_filename = Path(arguments.fold_dataset).stem
 df_train, _, _, _ = dataset_summary(os.path.join(dataset_directory, "train_" + dataset_filename + ".csv"))
 df_val, _, _, _ = dataset_summary(os.path.join(dataset_directory, "val_" + dataset_filename + ".csv"))
 
