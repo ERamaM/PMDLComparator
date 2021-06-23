@@ -13,6 +13,7 @@ import numpy as np
 from support_modules.readers import log_reader as lr
 from support_modules import nn_support as nsup
 from support_modules import support as sup
+from support_modules import role_discovery as rl
 
 
 from model_training import examples_creator as exc
@@ -30,8 +31,9 @@ class ModelTrainer():
         self.log = self.load_log(params)
         self.output_folder = os.path.join('output_files', params["file_name"], sup.folder_id())
         # Split validation partitions
-        self.log_train = pd.DataFrame()
-        self.log_test = pd.DataFrame()
+        self.log_train = self.load_log(params, "train")
+        self.log_val = self.load_log(params, "val")
+        self.log_test = self.load_log(params, "test")
         # Activities and roles indexes
         self.ac_index = dict()
         self.index_ac = dict()
@@ -59,11 +61,21 @@ class ModelTrainer():
         # Features treatement
         inp = feat.FeaturesMannager(params)
         print("WHAT IS LOG: ", self.log)
-        self.log = inp.calculate(params, self.log)
-        # indexes creation
+        #self.split_train_test(params["file_name"], params['one_timestamp'])
+
+        # Discover the roles using the whole log
+        # Resource pool discovery
+        res_analyzer = rl.ResourcePoolAnalyser(self.log, sim_threshold=params["rp_sim"])
+        # Role discovery
+        resources = pd.DataFrame.from_records(res_analyzer.resource_table)
+        resources = resources.rename(index=str, columns={"resource": "user"})
+
+        self.log = inp.calculate(params, self.log, resources)
+        self.log_train = inp.calculate(params, self.log_train, resources)
+        self.log_val = inp.calculate(params, self.log_val, resources)
+        self.log_test = inp.calculate(params, self.log_test, resources)
+
         self.indexing()
-        # split validation
-        self.split_train_test(0.2, params['one_timestamp'])
         # create examples
         seq_creator = exc.SequencesCreator(self.log_train,
                                            self.ac_index,
@@ -75,16 +87,20 @@ class ModelTrainer():
         print("Val examples: ", self.examples_val["prefixes"]["activities"].shape)
         # Load embedded matrix
         self.ac_weights = self.load_embedded(
-            self.index_ac, 'ac_' + params['file_name'].split('.')[0]+'.emb')
+            self.index_ac, 'ac_' + params['full_log'].split('.')[0]+'.emb')
         self.rl_weights = self.load_embedded(
-            self.index_rl, 'rl_' + params['file_name'].split('.')[0]+'.emb')
+            self.index_rl, 'rl_' + params['full_log'].split('.')[0]+'.emb')
         # Export parameters
         self.export_parms(params)
 
     @staticmethod
-    def load_log(params):
-        loader = LogLoader(os.path.join('input_files', params['file_name']),
-                           params['read_options'])
+    def load_log(params, mode=None):
+        if mode == None:
+            loader = LogLoader(os.path.join('input_files', params['full_log']),
+                               params['read_options'])
+        else:
+            loader = LogLoader(os.path.join('input_files', mode + "_" + params['file_name']),
+                               params['read_options'])
         return loader.load(params['model_type'])
 
     def indexing(self):
@@ -104,6 +120,23 @@ class ModelTrainer():
         rl_idx = lambda x: self.rl_index[x['role']]
         self.log['rl_index'] = self.log.apply(rl_idx, axis=1)
 
+        # Apply indexes to the other logs also
+        # == Train ==
+        ac_idx = lambda x: self.ac_index[x['task']]
+        self.log_train['ac_index'] = self.log_train.apply(ac_idx, axis=1)
+        rl_idx = lambda x: self.rl_index[x['role']]
+        self.log_train['rl_index'] = self.log_train.apply(rl_idx, axis=1)
+        # == Val ==
+        ac_idx = lambda x: self.ac_index[x['task']]
+        self.log_val['ac_index'] = self.log_val.apply(ac_idx, axis=1)
+        rl_idx = lambda x: self.rl_index[x['role']]
+        self.log_val['rl_index'] = self.log_val.apply(rl_idx, axis=1)
+        # == Test ==
+        ac_idx = lambda x: self.ac_index[x['task']]
+        self.log_test['ac_index'] = self.log_test.apply(ac_idx, axis=1)
+        rl_idx = lambda x: self.rl_index[x['role']]
+        self.log_test['rl_index'] = self.log_test.apply(rl_idx, axis=1)
+
     @staticmethod
     def create_index(log_df, column):
         """Creates an idx for a categorical attribute.
@@ -121,13 +154,13 @@ class ModelTrainer():
             alias[subsec_set[i]] = i + 1
         return alias
 
-    def split_train_test(self, percentage: float, one_timestamp: bool) -> None:
+    def split_train_test(self, filename: str, one_timestamp: bool) -> None:
         """
         Split an event log dataframe to peform split-validation
 
         Parameters
         ----------
-        percentage : float, validation percentage.
+        percentage : str, base filename to load the splits
         one_timestamp : bool, Support only one timestamp.
         """
         """
@@ -149,21 +182,11 @@ class ModelTrainer():
         # Disable the sorting. Otherwise it would mess with the order of the timestamps
         # The percentage is ignored and we use the ones from the original preprocessing
         key = 'end_timestamp' if one_timestamp else 'start_timestamp'
-        log = self.log
-        log = log.sort_values(key, ascending=True)
-        groups = [pandas_df for _, pandas_df in log.groupby("caseid", sort=False)]
-
-        train_size = round(len(groups) * 0.64)
-        val_size = round(len(groups) * 0.8)
-
-        train_groups = groups[:train_size]
-        val_groups = groups[train_size:val_size]
-        test_groups = groups[val_size:]
 
         # Disable the sorting. Otherwise it would mess with the order of the timestamps
-        self.log_train = pd.concat(train_groups, sort=False).reset_index(drop=True)
-        self.log_val = pd.concat(val_groups, sort=False).reset_index(drop=True)
-        self.log_test = pd.concat(test_groups, sort=False).reset_index(drop=True)
+        self.log_train = pd.read_csv("input_files/train_" + filename)
+        self.log_val = pd.read_csv("input_files/val_" + filename)
+        self.log_test = pd.read_csv("input_files/test_" + filename)
 
 
     @staticmethod

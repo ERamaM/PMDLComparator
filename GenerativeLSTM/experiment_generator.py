@@ -150,7 +150,7 @@ def tsp_creator(configs, tsp="ts"):
                     if configs[i][parm] is None
                     else ' -'+short+' '+str(configs[i][parm]))
 
-        options = 'python lstm.py -f ' + log + ' -i ' + str(imp)
+        options = 'python lstm.py -f ' + log_name + " -w " + full_log_name + ' -i ' + str(imp)
         options += ' -a training'
         options += ' -o True'
         options += format_option('l', 'lstm_act')
@@ -206,14 +206,18 @@ arch = 'sh'
 import argparse, gzip, shutil, os
 from pathlib import Path
 parser = argparse.ArgumentParser(description="Generate training script")
-parser.add_argument("--log", help="Log to generate the script", required=True)
+parser.add_argument("--fold_log", help="Fold log to process", required=True)
+parser.add_argument("--full_log", help="Full log to use", required=True)
 parser.add_argument("--execute_inplace", help="Do not write the commands to a file. Instead, execute them directly", action="store_true")
 parser.add_argument("--slots", help="Number of parallel training procedures (TS_SLOTS)", default=5, type=int)
 args = parser.parse_args()
-log_path = args.log
+log_path = args.fold_log
 log_name = Path(log_path).name
 log_dir = Path(log_path).parent
 
+full_log_path = args.full_log
+full_log_name = Path(full_log_path).name
+full_log_dir = Path(full_log_path).parent
 
 if ".gz" in log_path:
     log_name = log_name.replace(".gz", "")
@@ -252,14 +256,14 @@ commands = tsp_creator(configs, tsp=tsp_executable)
 
 # Set the number of concurrent jobs
 if not args.execute_inplace:
-    commands = ["cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + log + " -o True"] + commands
+    commands = ["cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + full_log_name + " -o True"] + commands
     with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh"), "w") as f:
         f.write("#!/bin/bash\n")
         for command in commands:
             f.write(tsp_executable + " " + command + "\n")
 else:
     # Wait for the training of the embeddings
-    emb_command = "python lstm.py -a emb_training -f " + log + " -o True"
+    emb_command = "python lstm.py -a emb_training -f " + full_log_name + " -o True"
     os.system(emb_command)
     # Send all to tsp
     for command in commands:

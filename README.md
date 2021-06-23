@@ -168,19 +168,31 @@ The models parameters are stored inside the "testdata" directory. To remove them
 
 An easy way to run the experiments requires the task-spooler tool installed. Then, run the hyperparameter optimizacion procedure with the following command:
 
-    python experiment_generator.py --log input_files/[DATASET] --execute_inplace --slots [N_SLOTS]
+    python experiment_generator.py --fold_log input_files/[FOLD_DATASET] --full_log input_files/[FULL_DATASET] --slots [N_SLOTS]
+
+Example:
+
+	python experiment_generator.py --fold_log input_files/fold0_variation0_BPI_Challenge_2012_A.csv --full_log input_files/BPI_Challenge_2012_A.csv --slots 1
     
-Where \[DATASET\] is one of the already processed datasets and \[N_SLOTS\] an integer greater than 1 (represents the number of concurrent experimentations done).
+Where \[FOLD_DATASET\] is one of the fold datasets of the crossvalidation, \[FULL_DATASET\] is the full dataset, and \[N_SLOTS\] an integer greater than 1 (represents the number of concurrent experimentations done).
+
+Executing the previous command generates a script that performs the embedding training and the hyperparameter search. This script is located inside the "training_scripts" directory.
 
 The previous command first calculates the embedding matrix from the roles and activities. Then, it trains 20 models using a random search procedure and stores each model validation loss in a file. The bash script "generate_queue_train.sh" performs this procedure for each processed dataset.
 
+Generally, first we calculate the embeddings on the whole log and then we train in the fold dataset.
+
 After the experiments are done (and this is important, since, otherwise, the information about the loss of the trained models would be incomplete), execute the testing procedure with the following command.
 
-    python evaluation_generator.py --log [DATASET]
+    python evaluation_generator.py --log [FOLD_DATASET]
+
+Example:
+
+    python evaluation_generator.py --log fold0_variation0_BPI_Challenge_2012_A.csv
     
 This command loads the model with the lowest validation loss and performs the testing procedures (next activity and suffix). Note that the "input_files" folder is not specified in the command. After the testing is completed, the results are stored in the "output_files" folder. The most important information from this folder is:
 
-- folders \[DATASET\]: each folder contains the trained models from the hyperparameter optimization procedure and a .csv "losses_\[DATASET\]" which records the validation losses for each model.
+- folders \[FOLD_DATASET\]: each folder contains the trained models from the hyperparameter optimization procedure and a .csv "losses_\[DATASET\]" which records the validation losses for each model.
 - ac_pred_sfx.csv: contains the activity suffix metrics for each sampling procedure and dataset. Each dataset can be recognized for the folder in which the best model is stored.
 - ac_predict_next.csv: contains the next activity metrics for each sampling procedure. Often, you would be interested only in the "Argmax" metrics.
 - tm_pred_sfx.csv: contains the remaining time metrics for each sampling procedure.

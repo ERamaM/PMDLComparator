@@ -22,21 +22,17 @@ class FeaturesMannager():
         self.one_timestamp = params['one_timestamp']
         self.resources = pd.DataFrame
 
-    def calculate(self, params, log):
-        log = self.add_resources(log)
+    def calculate(self, params, log, resources):
+        log = self.add_resources(log, resources)
         log = self.add_intercases(log, params)
         log = self.add_calculated_times(log)
         return log
 
-    def add_resources(self, log):
-        # Resource pool discovery
-        res_analyzer = rl.ResourcePoolAnalyser(log, sim_threshold=self.rp_sim)
-        # Role discovery
-        self.resources = pd.DataFrame.from_records(res_analyzer.resource_table)
-        self.resources = self.resources.rename(index=str,
-                                               columns={"resource": "user"})
+    def add_resources(self, log, resources):
+        # TODO: estos recursos deben ser comunes para todas las particiones.
+
         # Add roles information
-        log = log.merge(self.resources, on='user', how='left')
+        log = log.merge(resources, on='user', how='left')
         log = log[~log.task.isin(['Start', 'End'])]
         log = log.reset_index(drop=True)
         return log

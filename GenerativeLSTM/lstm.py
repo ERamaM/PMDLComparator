@@ -24,7 +24,7 @@ def catch_parameter(opt):
               '-d': 'dense_act', '-p': 'optim', '-n': 'norm_method',
               '-m': 'model_type', '-z': 'n_size', '-y': 'l_size',
               '-c': 'folder', '-b': 'model_file', '-x': 'is_single_exec',
-              '-t': 'max_trace_size'}
+              '-t': 'max_trace_size', '-w' : 'full_log'}
     try:
         return switch[opt]
     except:
@@ -84,13 +84,13 @@ def main(argv):
         try:
             opts, _ = getopt.getopt(
                 argv,
-                "ho:a:f:i:l:d:p:n:m:z:y:c:b:x:t:",
+                "ho:a:f:i:l:d:p:n:m:z:y:c:b:x:t:w:",
                 ['one_timestamp=', 'activity=',
                  'file_name=', 'imp=', 'lstm_act=',
                  'dense_act=', 'optim=', 'norm_method=',
                  'model_type=', 'n_size=', 'l_size=',
                  'folder=', 'model_file=', 'is_single_exec=',
-                 'max_trace_size='])
+                 'max_trace_size=', 'full_log='])
             for opt, arg in opts:
                 key = catch_parameter(opt)
                 if arg in ['None', 'none']:
