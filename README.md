@@ -116,7 +116,13 @@ If you want to test the suffix, first, execute the script with the --test_suffix
 
 Run the training and testing procedure as follows:
 
-    python train.py --dataset data/[DATASET] --train --test --test_suffix
+    python train.py --fold_dataset data/[FOLD_DATASET] --full_dataset data/[FULL_DATASET] --train --test --test_suffix
+
+Where FOLD_DATASET is the fold you are testing and full_dataset is the full file.
+
+Example:
+
+	python train.py --fold_dataset data/fold0_variation0_BPI_Challenge_2012_A.xes.gz --full_dataset data/BPI_Challenge_2012_A.xes.gz --train --test
     
 Where dataset is one of the xes.gz files from the "data" directory (do NOT use the split files: train_\[DATASET\], val_\[DATASET\] or test_\[DATASET\])
 

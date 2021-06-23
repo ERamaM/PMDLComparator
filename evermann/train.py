@@ -24,7 +24,8 @@ set_session(sess)
 import argparse
 from pathlib import Path
 parser = argparse.ArgumentParser(description="Run the neural net")
-parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument("--fold_dataset", type=str, required=True)
+parser.add_argument("--full_dataset", type=str, required=True)
 parser.add_argument("--train", help="Start the training of the neural network", action="store_true")
 parser.add_argument("--test", help="Start the testing of next event", action="store_true")
 parser.add_argument("--test_suffix", help="Test suffix prediction performance", action="store_true")
@@ -35,8 +36,7 @@ if not (args.train or args.test or args.test_suffix or args.test_suffix_calculus
     print("Argument --train or --test (or both) are required")
     sys.exit(-3)
 
-file = args.dataset
-file_name = Path(file).stem
+file_name = Path(args.fold_dataset).stem
 
 model_file_name = file_name + ".h5"
 
@@ -91,12 +91,13 @@ def to_dataset(vectorized_log):
     dataset = dataset.shuffle(BUFFER_SIZE).batch(BATCH_SIZE, drop_remainder=True)
     return dataset
 
-parent = Path(file).parent
-filename = os.path.basename(file)
-log = xes_import_factory.apply(file, parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
-train_log = xes_import_factory.apply(os.path.join(parent, "train_" + filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
-val_log = xes_import_factory.apply(os.path.join(parent, "val_" + filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
-test_log = xes_import_factory.apply(os.path.join(parent, "test_" + filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
+parent = Path(args.fold_dataset).parent
+fold_filename = os.path.basename(args.fold_dataset)
+full_filename = os.path.basename(args.full_dataset)
+log = xes_import_factory.apply(args.full_dataset, parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
+train_log = xes_import_factory.apply(os.path.join(parent, "train_" + fold_filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
+val_log = xes_import_factory.apply(os.path.join(parent, "val_" + fold_filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
+test_log = xes_import_factory.apply(os.path.join(parent, "test_" + fold_filename), parameters={"timestamp_sort": True, "timestamp_key": "time:timestamp"} )
 vectorized_log, current_idx = vectorize_log(log)
 X_train, _ = vectorize_log(train_log)
 X_validation, _ = vectorize_log(val_log)
