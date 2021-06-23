@@ -110,6 +110,8 @@ The preprocessed datasets are placed inside the "data" folder. The trained model
 - raw_\[DATASET\]: it contains a list of all ground truth and predicted next activities.
 - \[DATASET\]_next_event: it contains the next activity metrics: accuracy, brier score and next timestamp MAE.
 
+If you want to test the suffix, first, execute the script with the --test_suffix option. Then, execute the script again using only the option --test_suffix_calculus (you'll need to specify also both logs).
+
 ### Evermann (evermann)
 
 Run the training and testing procedure as follows:
