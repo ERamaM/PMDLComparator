@@ -83,11 +83,15 @@ The best model is inside the "models" folder.
 
 Run the experiments with the following command:
 
-    python deeppm_act.py --dataset data/[DATASET] --train --test
+    python deeppm_act.py --fold_dataset data/[FOLD_DATASET] --full_dataset data/[FULL_DATASET] --train --test
+
+Where fold_dataset refers to the split dataset and full dataset refers to the whole dataset. Example:
+
+	python deeppm_act.py --fold_dataset data/fold0_variation0_BPI_Challenge_2012_A.csv --full_dataset data/BPI_Challenge_2012_A.csv --test --train
     
 The preprocessed datasets are placed inside the "data" folder. The models are placed inside the "results" folder. The approach also generates the following files:
 
-- \[DATASET\]: it contains multiple information, such as the validation loss of each of the Hyperopt trials and the next activity metrics, such as accuracy or brier score.
+- \[FOLD_DATASET\]: it contains multiple information, such as the validation loss of each of the Hyperopt trials and the next activity metrics, such as accuracy or brier score.
 
 ### Tax (tax)
 

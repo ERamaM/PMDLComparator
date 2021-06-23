@@ -198,7 +198,8 @@ def fit_and_score(params):
 import argparse, os
 from pathlib import Path
 parser = argparse.ArgumentParser(description="Run the neural net")
-parser.add_argument("--dataset", help="Raw dataset to prepare", required=True)
+parser.add_argument("--fold_dataset", help="Raw dataset to prepare", required=True)
+parser.add_argument("--full_dataset", help="Raw dataset to prepare", required=True)
 parser.add_argument("--train", help="Start training the neural network", action="store_true")
 parser.add_argument("--test", help="Start testing next event of the neural network", action="store_true")
 arguments = parser.parse_args()
@@ -207,7 +208,7 @@ if not (arguments.train or arguments.test):
     print("--train or --test (or both) are required")
     sys.exit(-3)
 
-logfile = arguments.dataset
+logfile = arguments.fold_dataset
 log_filename = Path(logfile).stem
 model_type = "ACT"
 output_file = os.path.join("results", log_filename + ".txt")
@@ -222,6 +223,7 @@ import os
 
 directory = Path(logfile).parent
 filename = Path(logfile).stem
+full_filename = Path(arguments.full_dataset).stem
 extension = ".csv"
 
 # We need the full dataset to get the metrics
@@ -230,25 +232,25 @@ extension = ".csv"
  vocab_size,
  max_length,
  n_classes,
- divisor,
- prefix_sizes, vocabulary, y_dict) = load_data(os.path.join(directory, filename + extension))
+ _,
+ prefix_sizes, vocabulary, y_dict) = load_data(os.path.join(directory, full_filename + extension))
 
 # Load the splits from the folder
 ((X_a_train, X_t_train),
  (y_a_train, y_t_train),
- _, _, _, _, prefix_sizes_train, _, _) = load_data(
+ _, _, _, divisor, prefix_sizes_train, _, _) = load_data(
     os.path.join(os.path.join(directory, "train_" + filename + extension)), max_len=max_length,
     parsed_vocabulary=vocabulary, y_dict=y_dict)
 
 ((X_a_val, X_t_val),
  (y_a_val, y_t_val),
  _, _, _, _, prefix_sizes_val, _, _) = load_data(os.path.join(os.path.join(directory, "val_" + filename + extension)),
-                                                 max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
+                                                 max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict, divisor=divisor)
 
 ((X_a_test, X_t_test),
  (y_a_test, y_t_test),
  _, _, _, _, prefix_sizes_test, _, _) = load_data(os.path.join(os.path.join(directory, "test_" + filename + extension)),
-                                                  max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict)
+                                                  max_len=max_length, parsed_vocabulary=vocabulary, y_dict=y_dict, divisor=divisor)
 
 
 emb_size = (vocab_size + 1) // 2  # --> ceil(vocab_size/2)
@@ -261,6 +263,7 @@ print("X_A: ", len(X_a))
 print("Train len: ", train_len)
 print("Val len: ", val_len)
 print("Test len: ", len(X_a) - val_len)
+"""
 X_a_train = X_a[:train_len]
 X_t_train = X_t[:train_len]
 y_a_train = y_a[:train_len]
@@ -273,6 +276,7 @@ X_a_test = X_a[val_len:]
 X_t_test = X_t[val_len:]
 y_a_test = y_a[val_len:]
 y_t_test = y_t[val_len:]
+"""
 
 print("SHAPES: ")
 print("Shape x_a_train", X_a_train.shape)
@@ -283,9 +287,10 @@ print("Shape X_t_val: ", X_t_val.shape)
 print("Shape y_a_val: ", y_a_val.shape)
 
 # normalizing times
-X_t_train = X_t_train / np.max(X_t)
-X_t_val = X_t_val / np.max(X_t)
-X_t_test = X_t_test / np.max(X_t)
+maximum = max(np.max(X_t_train), np.max(X_t_val))
+X_t_train = X_t_train / maximum
+X_t_val = X_t_val / maximum
+X_t_test = X_t_test / maximum
 # categorical output
 y_a_train = to_categorical(y_a_train, num_classes=n_classes)
 y_a_val = to_categorical(y_a_val, num_classes=n_classes)
@@ -346,13 +351,19 @@ if arguments.test:
     json_params = {}
     with open(os.path.join("results", log_filename + "_parameters.json"), "r") as f:
         json_params = json.load(f)
+
     # TODO: for some reason we cannot save the model since loading it will
     # give random predictions.
     # When testing we have to retrain the model using the best hyperaparams saved
+    best_model = get_model(input_length=json_params['input_length'], vocab_size=json_params['vocab_size'],
+                      n_classes=json_params['n_classes'], model_type=json_params['model_type'],
+                      learning_rate=json_params['learning_rate'], embedding_size=json_params['embedding_size'],
+                      n_modules=json_params['n_modules'])
 
-    fit_and_score(json_params)
+    best_model.load_weights(os.path.join("results", log_filename + "_model.h5"))
 
-    #loaded_model = tf.keras.models.load_model(os.path.join("results", log_filename + "/model"))
+    #fit_and_score(json_params)
+
 
     # evaluate
     print('Evaluating final model...')
