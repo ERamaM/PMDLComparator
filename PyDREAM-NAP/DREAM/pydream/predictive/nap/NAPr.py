@@ -6,7 +6,7 @@ import tensorflow as tf
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.externals import joblib
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, matthews_corrcoef
 from tensorflow.keras.callbacks import Callback, ModelCheckpoint

@@ -6,7 +6,7 @@ np.seterr(divide='ignore', invalid='ignore')
 from sklearn.preprocessing import MinMaxScaler, LabelBinarizer
 from sklearn.preprocessing import LabelEncoder
 from sklearn.preprocessing import OneHotEncoder
-from sklearn.externals import joblib
+import joblib
 import json, os
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support, roc_auc_score, matthews_corrcoef

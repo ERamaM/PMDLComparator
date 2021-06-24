@@ -254,10 +254,19 @@ This command has the following arguments:
 - --best_model: folder where the best process model is going to be stored.
 - --n_threads: maximum number of threads to be used by the mining procedure. Recommended: keep this to a lower value than the maximum number of cores of your machine.
 
+Example:
+
+	python run_splitminer.py --log ./logs/train_val_fold_0_variation_0_BPI_Challenge_2012_A.xes.gz --output_folder output_models --best_model best_models --n_threads 8 
+
 After the mining is complete, you have two options to perform the experimentation:
 
-    python run_dreamnap.py --dataset logs/"$i" --train --test
-    python run_dreamnap_no_resources.py --dataset logs/"$i" --train --test
+    python run_dreamnap.py --fold_dataset ./logs/[FOLD_DATASET] --full_dataset ./logs/[FULL_DATASET] --train --test
+    python run_dreamnap_no_resources.py --fold_dataset ./logs/[FOLD_DATASET] --full_dataset ./logs/[FULL_DATASET] --train --test
+
+Examples:
+
+	python run_dreamnap.py --fold_dataset ./logs/fold0_variation0_BPI_Challenge_2012_A.xes.gz --full_dataset ./logs/BPI_Challenge_2012_A.xes.gz --train --test
+	python run_dreamnap_no_resources.py --fold_dataset ./logs/fold0_variation0_BPI_Challenge_2012_A.xes.gz --full_dataset ./logs/BPI_Challenge_2012_A.xes.gz --train --test
     
 The first command runs the version that uses resources and the second command runs the version that uses no resources. 
 

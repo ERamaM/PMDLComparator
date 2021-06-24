@@ -40,23 +40,29 @@ tf.random.set_seed(42)
 np.random.seed(42)
 
 parser = argparse.ArgumentParser(description="Run the neural net")
-parser.add_argument("--dataset", type=str, required=True)
+parser.add_argument("--fold_dataset", type=str, required=True)
+parser.add_argument("--full_dataset", type=str, required=True)
 parser.add_argument("--train", help="Start training the neural network", action="store_true")
 parser.add_argument("--test", help="Start testing next event of the neural network", action="store_true")
 args = parser.parse_args()
 
-dataset_path = args.dataset
+dataset_path = args.fold_dataset
 dataset_directory = Path(dataset_path).parent
 log_name = Path(dataset_path).name
 
-model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.pnml"
+if "fold" not in log_name :
+    model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.pnml"
+else:
+    base_name = log_name
+    base_name = re.sub("(fold)(\\d_variation)(\\d_)", "\\1_\\2_\\3", base_name)
+    model_regex = "train_val_" + base_name + "_\d\.\d_\d\.\d\.pnml"
 model_regex_logs = "logs_" + model_regex
 train_log_file = "./logs/train_" + log_name
 val_log_file = "./logs/val_" + log_name
 test_log_file = "./logs/test_" + log_name
 total_log_file = "./logs/" + log_name
 
-main_log = xes_import_factory.apply(dataset_path)
+main_log = xes_import_factory.apply(args.full_dataset)
 main_log = LogWrapper(main_log)
 
 model_file = None
@@ -95,7 +101,7 @@ def load_and_process(log_file, type):
 if not os.path.isdir(enhanced_pn_folder):
     os.mkdir(enhanced_pn_folder)
 
-full_file = load_and_process(dataset_path, "")
+full_file = load_and_process(args.full_dataset, "")
 train_file = load_and_process(train_log_file, "train_")
 val_file = load_and_process(val_log_file, "val_")
 test_file = load_and_process(test_log_file, "test_")
