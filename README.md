@@ -68,9 +68,13 @@ Examples:
 
 Run the experiments with the following command:
 
-    python run.py --dataset dataset/[DATASET] --train --test
+	python run.py --full_dataset dataset/[FULL_DATASET].csv --fold_dataset dataset/[FOLD_DATASET].csv --train --test
+
+Example:
+
+	python run.py --full_dataset dataset/BPI_Challenge_2012_A.csv --fold_dataset dataset/fold0_variation0_BPI_Challenge_2012_A.csv --train --test
     
-Where DATASET is one log inside the "dataset" folder. 
+Where FOLD_DATASET is one of the folds and FULL_DATASET is the whole log.
 
 The results of the testing are outputted inside the "results" folder. There are two types of results:
 
@@ -223,8 +227,14 @@ This command loads the model with the lowest validation loss and performs the te
 
 Run the experimentation using the "bpi_run.py" script from inside the "busi_task" folder:
 
-    python bpi_run.py --dataset data/[DATASET] --train --test
-    
+    python bpi_run.py --fold_dataset data/[FOLD_DATASET] --full_dataset data/[FULL_DATASET] --train 
+
+Example:
+
+	python bpi_run.py --fold_dataset data/fold0_variation0_BPI_Challenge_2012_A.csv --full_dataset data/BPI_Challenge_2012_A.csv --train
+
+After training, run the testing procedure using the flag --test instead of --train.
+
 Unlike the other approaches, this approach does not contain a "generate_queue.sh" script since it is more convenient to execute the experiments manually since they take a lot of time to complete.
 
 The results are stored inside the "data" directory under a file named "results_\[DATASET\]". The model checkpoints are inside the "checkpoints_data". The information inside the "log_data" directory also seems important.

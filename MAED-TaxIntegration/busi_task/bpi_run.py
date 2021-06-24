@@ -890,7 +890,8 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(description="Run the neural net")
-    parser.add_argument("--dataset", type=str, required=True)
+    parser.add_argument("--full_dataset", type=str, required=True)
+    parser.add_argument("--fold_dataset", type=str, required=True)
     parser.add_argument("--train", help="Start the training of the neural network", action="store_true")
     parser.add_argument("--test", help="Start the testing of next event", action="store_true")
     args = parser.parse_args()
@@ -903,7 +904,8 @@ if __name__ == '__main__':
         sys.exit(-3)
 
 
-    eventlog = args.dataset
+    fold_eventlog = args.fold_dataset
+    full_eventlog = args.full_dataset
 
 
     def load_file(eventlog):
@@ -973,11 +975,11 @@ if __name__ == '__main__':
     from pathlib import Path
     import os
 
-    eventlog_name = Path(eventlog).stem
+    eventlog_name = Path(fold_eventlog).stem
     extension = ".csv"
-    folders = Path(eventlog).parent
+    folders = Path(fold_eventlog).parent
 
-    lines, timeseqs, timeseqs2, timeseqs3, timeseqs4 = load_file(eventlog)
+    lines, timeseqs, timeseqs2, timeseqs3, timeseqs4 = load_file(full_eventlog)
     lines_train, timeseqs_train, timeseqs2_train, timeseqs3_train, timeseqs4_train = load_file(
         os.path.join(folders, "train_" + eventlog_name + extension))
     lines_val, timeseqs_val, timeseqs2_val, timeseqs3_val, timeseqs4_val = load_file(
@@ -1106,7 +1108,7 @@ if __name__ == '__main__':
                                                    timeseqs4_test, divisor, divisor2)
     if args.train:
         # Execute training
-        bpi_task_mix(X_train, y_a_train, y_t_train, X_val, y_a_val, y_t_val, eventlog)
+        bpi_task_mix(X_train, y_a_train, y_t_train, X_val, y_a_val, y_t_val, fold_eventlog)
     if args.test:
         # Execute testing
         exact_bpi_test_mix(chars, char_indices, target_indices_char, target_char_indices, target_chars, maxlen, divisor, divisor2, lines_test,
