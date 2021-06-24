@@ -5,10 +5,6 @@ Created on Tue Feb 12 14:08:16 2019
 @author: Manuel Camargo
 """
 import datetime
-from support_modules import support as sup
-import os
-import time
-
 
 def create_file_list(path):
     file_list = list()
@@ -72,6 +68,6 @@ model = os.path.join(split[-1])
 
 command_next = tsp_executable + " python lstm.py -a predict_next -c " + folder + " -b \"" + model + "\" -x False -ho True"
 command_sfx = tsp_executable + " python lstm.py -a pred_sfx -c " + folder + " -b \"" + model + "\" -x False -ho True -t 100"
-os.system(command_next)
-os.system(command_sfx)
+os.system("TS_SOCKET=/tmp/camargo " + command_next)
+os.system("TS_SOCKET=/tmp/camargo " + command_sfx)
 
