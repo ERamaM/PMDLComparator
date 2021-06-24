@@ -177,6 +177,13 @@ Then, force Theano to use a GPU. For that, edit the file ~/.theanorc (create it 
     [global]
     device = cuda
     floatX = float32
+
+Then, you'll need to generate the configuration files. You can use the configuration file "pmdlcomparator.json" which already has the datasets for testing in 64/16/20 split fashion. However, if you want to use other datasets or split method, you'll have to generate the configuration file using "generate_configuration_log.py".
+
+There are two modes of generating the file:
+
+- Generate a file to test all logs: thus, when you run the tool, the script will iterate over every single log sequentially: `python generate_configuration_log.py`
+- Generate a file for each dataset group: thus, when you run the tool, the script will iterate over the datasets of the same group (useful for crossvalidation): `python generate_configuration_log.py --dataset BPI_Challenge_2012_A`
    
 To run the experiments, you need to specify the json configuration file. This json specifies which datasets are going to be tested and with what parameters. The already provided "pmdlcomparator.json" is already configured to test with every dataset available from the paper. The tests are executed with the following command:
 

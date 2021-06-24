@@ -34,6 +34,7 @@ from cluster import Clustering
 from pathlib import Path
 import pandas as pd
 import os
+import re
 
 def parse_date(jd):
     sign = jd[-7]
@@ -65,12 +66,12 @@ class EventLog:
         print("PARAMETERS: ", parameters)
         if filename is not None:
             name = Path(filename).stem
-            train_df = pd.read_csv(os.path.join("testdata", "train_" + name + ".csv"))
-            val_df = pd.read_csv(os.path.join("testdata", "val_" + name + ".csv"))
-            test_df = pd.read_csv(os.path.join("testdata", "test_" + name + ".csv"))
-            self.train_cases = len(train_df.groupby("case:concept:name"))
-            self.val_cases = len(val_df.groupby("case:concept:name"))
-            self.test_cases = len(test_df.groupby("case:concept:name"))
+            self.train_df = pd.read_csv(os.path.join("testdata", "train_" + name + ".csv"))
+            self.val_df = pd.read_csv(os.path.join("testdata", "val_" + name + ".csv"))
+            self.test_df = pd.read_csv(os.path.join("testdata", "test_" + name + ".csv"))
+            self.train_cases = len(self.train_df.groupby("case:concept:name"))
+            self.val_cases = len(self.val_df.groupby("case:concept:name"))
+            self.test_cases = len(self.test_df.groupby("case:concept:name"))
             print("Train evn: ", self.train_cases)
             print("Val evn: ", self.val_cases)
             print("Test evn: ", self.test_cases)
@@ -81,6 +82,8 @@ class EventLog:
             self.filename = "unnamed"
             self.filepath = ""
         elif (filename != None):
+            if "fold" in filename:
+                filename = re.sub("fold\\d_variation\\d_", "", filename)
             path = Path(filename)
             if (not path.is_file()):
                 filename = getInputDatasetFilename(filename)
@@ -115,7 +118,7 @@ class EventLog:
 
     def initializeForTesting(self, model):
         self.trainingData = []
-        self.testData = self.data["cases"][self.train_cases + self.val_cases:]
+        #self.testData = self.data["cases"][self.train_cases + self.val_cases:]
         if (model.eventlogActivities != None):
             self.data["activities"] = model.eventlogActivities
         if (model.eventlogAttributes != None):
@@ -150,9 +153,30 @@ class EventLog:
             self.data["cases"] = cases
 
         # Load the splits exactly from the files
-        self.trainingData = cases[:self.train_cases]
-        self.validationData = cases[self.train_cases:self.train_cases + self.val_cases]
-        self.testData = cases[self.train_cases + self.val_cases:]
+        # TODO: PROBLEM HERE
+        self.trainingData = []
+        self.validationData = []
+        self.testData = []
+        try:
+            cases_are_integers = True
+        except:
+            cases_are_integers = False
+        for case in cases:
+            if cases_are_integers:
+                case_id = int(case["id"])
+            else:
+                case_id = case["id"]
+            if len(self.train_df[self.train_df["case:concept:name"] == case_id]) > 0:
+                self.trainingData.append(case)
+            elif len(self.val_df[self.val_df["case:concept:name"] == case_id]) > 0:
+                self.validationData.append(case)
+            elif len(self.test_df[self.test_df["case:concept:name"] == case_id]) > 0:
+                self.testData.append(case)
+            else:
+                raise ValueError("Unalocated event: ", case["id"])
+        #self.trainingData = cases[:self.train_cases]
+        #self.validationData = cases[self.train_cases:self.train_cases + self.val_cases]
+        #self.testData = cases[self.train_cases + self.val_cases:]
         self.initializeDerivedData()
 
     def getActivityOccurrences(self, cases):

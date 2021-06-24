@@ -144,6 +144,7 @@ def convert_csv_to_json(file, output_folder, attributes, timestamp_format, prett
         case = {}
         case["t"] = []
         case["a"] = [] # Empty case attributes
+        case["id"] = str(group.iloc[0][XES_Fields.CASE_COLUMN])
         for idx, event in group.iterrows():
             case["n"] = str(event[XES_Fields.CASE_COLUMN]) # For some reason is a str
             j_event = []
