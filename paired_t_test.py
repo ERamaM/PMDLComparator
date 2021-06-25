@@ -29,20 +29,22 @@ approaches_clean_log_regexes = {
 
 log_regex = "fold(\\d)_variation(\\d)_(.*)"
 
-# Structure: approach -> fold -> variation -> result
+# Structure: approach -> log -> fold -> variation -> result
 results = {}
 
 
-def store_results(result_dict, approach, fold, variation, result):
+def store_results(result_dict, approach, log, fold, variation, result):
     # Store results
     if approach not in results:
         result_dict[approach] = {}
-    if fold not in results[approach]:
-        result_dict[approach][fold] = {}
-    if variation not in results[approach][fold]:
-        result_dict[approach][fold][variation] = result
+    if log not in results[approach]:
+        result_dict[approach][log] = {}
+    if fold not in results[approach][log]:
+        result_dict[approach][log][fold] = {}
+    if variation not in results[approach][log][fold]:
+        result_dict[approach][log][fold][variation] = result
 
-
+available_logs = set()
 for directory in directories:
     approach = directory.split("/")[0]
     results[approach] = {}
@@ -63,32 +65,38 @@ for directory in directories:
                 clean_filename = file.replace(approaches_clean_log_regexes[approach], "")
                 parse_groups = re.match(log_regex, clean_filename)
                 fold, variation, log = parse_groups.groups()
-                store_results(results, approach, fold, variation, accuracy)
+                available_logs.add(log)
+                store_results(results, approach, log, fold, variation, accuracy)
 
+print("Available logs: ", available_logs)
+t_results = {}
 # Perform paired t-test and retrieve results
-print("Results: ", results.keys())
 for approach_A, approach_B in itertools.combinations(results.keys(), 2):
-    s2_list = []
-    # We need to sort to guarantee that the first element is always the same (e.g., fold 0 vs fold 0 and so on)
-    # Calculation from here: http://rasbt.github.io/mlxtend/user_guide/evaluate/paired_ttest_5x2cv/
-    p_mean = 0
-    first_p = 0
-    for fold_A, fold_B in zip(sorted(results[approach_A].keys()), sorted(results[approach_B].keys())):
-        # Error estimates
-        p1 = results[approach_A][fold_A]["0"] - results[approach_B][fold_B]["0"]
-        p2 = results[approach_A][fold_A]["1"] - results[approach_B][fold_B]["1"]
-        p_mean = (p1 + p2) / 2
-        # We need this information to calculate the t-statistic
-        if fold_A == "0":
-            first_p = p1
+    for log in list(available_logs):
+        s2_list = []
+        # We need to sort to guarantee that the first element is always the same (e.g., fold 0 vs fold 0 and so on)
+        # Calculation from here: http://rasbt.github.io/mlxtend/user_guide/evaluate/paired_ttest_5x2cv/
+        p_mean = 0
+        first_p = 0
+        for fold_A, fold_B in zip(sorted(results[approach_A][log].keys()), sorted(results[approach_B][log].keys())):
+            # Error estimates
+            p1 = results[approach_A][log][fold_A]["0"] - results[approach_B][log][fold_B]["0"]
+            p2 = results[approach_A][log][fold_A]["1"] - results[approach_B][log][fold_B]["1"]
+            p_mean = (p1 + p2) / 2
+            # We need this information to calculate the t-statistic
+            if fold_A == "0":
+                first_p = p1
 
-        s2 = (p1 - p_mean) ** 2 + (p2 - p_mean) ** 2 # Variance of the ith replication
-        s2_list.append(s2)
+            s2 = (p1 - p_mean) ** 2 + (p2 - p_mean) ** 2 # Variance of the ith replication
+            s2_list.append(s2)
 
-    t_statistic = first_p / math.sqrt((1 / len(s2_list)) * sum(s2_list))
-    # For some reason you must multiply by 2
-    # I think it is because you are performing a two-sided test
-    # https://github.com/rasbt/mlxtend/blob/7c329e40fab7659c3dd9b77f31a55db6f2400521/mlxtend/evaluate/ttest.py#L335
-    p_value = t.sf(t_statistic, len(s2_list)) * 2
-    print("T statistic: ", t_statistic)
-    print("P value: ", p_value)
+        t_statistic = first_p / math.sqrt((1 / len(s2_list)) * sum(s2_list))
+        # For some reason you must multiply by 2
+        # I think it is because you are performing a two-sided test
+        # https://github.com/rasbt/mlxtend/blob/7c329e40fab7659c3dd9b77f31a55db6f2400521/mlxtend/evaluate/ttest.py#L335
+        p_value = t.sf(t_statistic, len(s2_list)) * 2
+        print("T statistic: ", t_statistic)
+        print("P value: ", p_value)
+        t_results[((approach_A, approach_B), log)] = (t_statistic, p_value)
+
+    print("T results: ", t_results)
