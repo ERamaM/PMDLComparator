@@ -4,6 +4,7 @@ import itertools
 import math
 from scipy.stats import t
 import pandas as pd
+import statistics
 
 dir_to_approach = {
     "ImagePPMiner" : "pasquadibisceglie",
@@ -57,6 +58,9 @@ def store_results(result_dict, approach, log, fold, variation, result):
         result_dict[approach][log][fold][variation] = result
 
 
+############################################
+# Parse the result files for accuracy information
+############################################
 available_logs = set()
 for directory in directories:
     approach = directory.split("/")[0]
@@ -87,9 +91,12 @@ for directory in directories:
 
 print("Results: ", results)
 
-t_results = {}
+############################################
 # Perform paired t-test and retrieve results
-for approach_A, approach_B in itertools.combinations(results.keys(), 2):
+############################################
+t_results = {}
+p_results = {}
+for approach_A, approach_B in itertools.permutations(results.keys(), 2):
     for log in list(available_logs):
         s2_list = []
         # We need to sort to guarantee that the first element is always the same (e.g., fold 0 vs fold 0 and so on)
@@ -115,7 +122,64 @@ for approach_A, approach_B in itertools.combinations(results.keys(), 2):
         p_value = t.sf(t_statistic, len(s2_list)) * 2
         print("T statistic: ", t_statistic)
         print("P value: ", p_value)
-        approach_pair = tuple(sorted((approach_A, approach_B)))
-        t_results[(approach_pair, log)] = (t_statistic, p_value)
+        approach_pair = (approach_A.capitalize(), approach_B.capitalize())
+        log_cap = " ".join([x.capitalize() for x in log.split("_")])
+        t_results[approach_pair] = {log_cap : t_statistic}
+        p_results[approach_pair] = {log_cap : p_value}
 
-    print("T results: ", t_results)
+print("T results: ", t_results)
+print("Available logs: ", available_logs)
+
+def bold_p_value_formatter(x):
+    if x < 0.05:
+        return r"\textbf{" + str(round(x, 4)) + "}"
+    else:
+        return str(round(x, 4))
+
+p_df = pd.DataFrame.from_dict(p_results, orient="index")
+print("P value df")
+print(p_df)
+latex = p_df.to_latex(formatters=[bold_p_value_formatter] * len(available_logs), escape=False, caption="P-values for the pairwise comparison approaches")
+print(latex)
+
+t_df = pd.DataFrame.from_dict(t_results, orient="index")
+print("T statistic df")
+print(t_df)
+latex = p_df.to_latex(escape=False, caption="T value statistic for the pairwise comparison approaches")
+print(latex)
+
+############################################
+# Retrieve accuracy results from cross-validation
+############################################
+accuracy_results = {}
+for approach in results.keys():
+    for log in available_logs:
+        log_values = []
+        for fold in results[approach][log].keys():
+            log_values.append(results[approach][log][fold]["0"])
+            log_values.append(results[approach][log][fold]["1"])
+        mean_val = statistics.mean(log_values)
+        log_cap = " ".join([x.capitalize() for x in log.split("_")])
+        accuracy_results[approach.capitalize()] = {log_cap : mean_val}
+
+acc_df = pd.DataFrame.from_dict(accuracy_results, orient="index")
+print("Accuracy df")
+print(acc_df)
+
+acc_df_latex = acc_df.copy()
+print("ACC DF LATX: ", acc_df_latex)
+
+# Format to select the best three approaches and assign them colors
+for column in acc_df_latex.columns:
+    acc_df_latex[column] = acc_df_latex[column] * 100
+    acc_df_latex[column] = acc_df_latex[column].round(2)
+    best_three = acc_df_latex[column].nlargest(3)
+    acc_df_latex[column] = acc_df_latex[column].astype(str)
+    colors = ["PineGreen", "orange", "red"]
+    for approach, color in zip(best_three.index, colors):
+        acc_df_latex[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + acc_df_latex[column].loc[approach] + "}}"
+
+latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 10-fold 5x2cv")
+print(latex)
+
+
