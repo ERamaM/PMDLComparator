@@ -3,42 +3,47 @@ import re
 import itertools
 import math
 from scipy.stats import t
+import pandas as pd
 
 dir_to_approach = {
-    "ImagePPMiner" : "pasquadibisceglie"
+    "ImagePPMiner" : "pasquadibisceglie",
+    "nnpm" : "mauro"
 }
 directories = [
     "tax/code/results",
     "evermann/results",
-    "ImagePPMiner/results"
+    "ImagePPMiner/results",
+    "nnpm/results"
 ]
 
 # These regexes allow us to find the file that contains the results
 file_approaches_regex = {
     "tax": ".*next_event.log",  # Ends with "next_event.log"
-    "evermann": "^(?!raw).*$",  # Does not start with "raw"
-    "pasquadibisceglie" : "^(?!raw).*"
+    "evermann": "^(?!raw).*$",  # Does not start with "raw" # TODO: what about suffix calculations
+    "pasquadibisceglie" : "^(?!raw).*",
+    "mauro" : "^fold.*.txt"
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
 approaches_accuracy_regexes = {
-    "tax": "ACC Sklearn",
-    "evermann": "Accuracy",
-    "pasquadibisceglie" : "Accuracy"
+    "tax": "ACC Sklearn: (.*)",
+    "evermann": "Accuracy: (.*)",
+    "pasquadibisceglie" : "Accuracy: (.*)",
+    "mauro" : "Final Accuracy score:.*\[(.*)\]"
 }
 
 # These regexes allow us to delete parts of the filename that are not relevant
 approaches_clean_log_regexes = {
     "tax": "_next_event.log",
     "evermann": ".xes.txt",
-    "pasquadibisceglie" : ".txt"
+    "pasquadibisceglie" : ".txt",
+    "mauro" : ".txt"
 }
 
 log_regex = "fold(\\d)_variation(\\d)_(.*)"
 
 # Structure: approach -> log -> fold -> variation -> result
 results = {}
-
 
 def store_results(result_dict, approach, log, fold, variation, result):
     # Store results
@@ -68,18 +73,20 @@ for directory in directories:
                 lines = result_file.readlines()
                 accuracy_line = ""
                 for line in lines:
-                    if re.match(accuracy_regex, line) is not None:
-                        accuracy_line = line
+                    acc_regex_match = re.match(accuracy_regex, line)
+                    if acc_regex_match is not None:
+                        accuracy = float(acc_regex_match.group(1))
                         break
-                accuracy = float(accuracy_line.split(":")[-1])
                 clean_filename = file.replace(approaches_clean_log_regexes[approach], "")
                 parse_groups = re.match(log_regex, clean_filename)
                 fold, variation, log = parse_groups.groups()
                 log = log.lower()
                 available_logs.add(log)
                 store_results(results, approach, log, fold, variation, accuracy)
+    print("Available logs: ", available_logs)
 
-print("Available logs: ", available_logs)
+print("Results: ", results)
+
 t_results = {}
 # Perform paired t-test and retrieve results
 for approach_A, approach_B in itertools.combinations(results.keys(), 2):
@@ -108,6 +115,7 @@ for approach_A, approach_B in itertools.combinations(results.keys(), 2):
         p_value = t.sf(t_statistic, len(s2_list)) * 2
         print("T statistic: ", t_statistic)
         print("P value: ", p_value)
-        t_results[((approach_A, approach_B), log)] = (t_statistic, p_value)
+        approach_pair = tuple(sorted((approach_A, approach_B)))
+        t_results[(approach_pair, log)] = (t_statistic, p_value)
 
     print("T results: ", t_results)
