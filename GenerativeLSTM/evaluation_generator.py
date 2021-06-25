@@ -5,6 +5,7 @@ Created on Tue Feb 12 14:08:16 2019
 @author: Manuel Camargo
 """
 import datetime
+import socket
 
 def create_file_list(path):
     file_list = list()
@@ -65,9 +66,14 @@ for s in split:
 folder = os.path.join(split[1], split[2])
 model = os.path.join(split[-1])
 
+hostname = socket.gethostname()
+dump_f = ""
+if hostname == "ctgpgpu8" or hostname == "ctgpgpu7":
+    dump_f = "TMPDIR=/home/efren.rama/tmp_hot_garbage/ "
+    Path("/home/efren.rama/tmp_hot_garbage/").mkdir(parents=True, exist_ok=True)
 
 command_next = tsp_executable + " python lstm.py -a predict_next -c " + folder + " -b \"" + model + "\" -x False -ho True"
 command_sfx = tsp_executable + " python lstm.py -a pred_sfx -c " + folder + " -b \"" + model + "\" -x False -ho True -t 100"
-os.system("TS_SOCKET=/tmp/camargo " + command_next)
-os.system("TS_SOCKET=/tmp/camargo " + command_sfx)
+os.system(dump_f + "TS_SOCKET=/tmp/camargo " + command_next)
+os.system(dump_f + "TS_SOCKET=/tmp/camargo " + command_sfx)
 

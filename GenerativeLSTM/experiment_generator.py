@@ -10,6 +10,7 @@ import os
 import random
 random.seed(42) # The seed makes the set of explored hyperparameters the same
 import time
+import socket
 
 # =============================================================================
 #  Support
@@ -254,18 +255,22 @@ else:
     tsp_executable = "ts"
 commands = tsp_creator(configs, tsp=tsp_executable)
 
-# Set the number of concurrent jobs
+hostname = socket.gethostname()
+dump_f = ""
+if hostname == "ctgpgpu8" or hostname == "ctgpgpu7":
+    dump_f = "TMPDIR=/home/efren.rama/tmp_hot_garbage/ "
+    Path("/home/efren.rama/tmp_hot_garbage/").mkdir(parents=True, exist_ok=True)
 if not args.execute_inplace:
-    commands = ["cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + full_log_name + " -o True"] + commands
+    commands = [dump_f + "cd .. && " + tsp_executable + " python lstm.py -a emb_training -f " + full_log_name + " -o True"] + commands
     with open(os.path.join(output_folder_scripts, "execute_order_" + log + ".sh"), "w") as f:
         f.write("#!/bin/bash\n")
         for command in commands:
-            f.write(tsp_executable + " " + command + "\n")
+            f.write(dump_f + tsp_executable + " " + command + "\n")
 else:
     # Wait for the training of the embeddings
-    emb_command = "python lstm.py -a emb_training -f " + full_log_name + " -o True"
+    emb_command = dump_f + "python lstm.py -a emb_training -f " + full_log_name + " -o True"
     os.system(emb_command)
     # Send all to tsp
     for command in commands:
-        os.system("TS_SOCKET=/tmp/camargo TS_SLOTS=" + str(args.slots) + " " + tsp_executable + " " +  command)
+        os.system(dump_f + "TS_SOCKET=/tmp/camargo TS_SLOTS=" + str(args.slots) + " " + tsp_executable + " " +  command)
 
