@@ -4,27 +4,34 @@ import itertools
 import math
 from scipy.stats import t
 
+dir_to_approach = {
+    "ImagePPMiner" : "pasquadibisceglie"
+}
 directories = [
     "tax/code/results",
-    "evermann/results"
+    "evermann/results",
+    "ImagePPMiner/results"
 ]
 
 # These regexes allow us to find the file that contains the results
 file_approaches_regex = {
     "tax": ".*next_event.log",  # Ends with "next_event.log"
-    "evermann": "^(?!raw).*$"  # Does not start with "raw"
+    "evermann": "^(?!raw).*$",  # Does not start with "raw"
+    "pasquadibisceglie" : "^(?!raw).*"
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
 approaches_accuracy_regexes = {
     "tax": "ACC Sklearn",
-    "evermann": "Accuracy"
+    "evermann": "Accuracy",
+    "pasquadibisceglie" : "Accuracy"
 }
 
 # These regexes allow us to delete parts of the filename that are not relevant
 approaches_clean_log_regexes = {
     "tax": "_next_event.log",
-    "evermann": ".xes.txt"
+    "evermann": ".xes.txt",
+    "pasquadibisceglie" : ".txt"
 }
 
 log_regex = "fold(\\d)_variation(\\d)_(.*)"
@@ -44,9 +51,12 @@ def store_results(result_dict, approach, log, fold, variation, result):
     if variation not in results[approach][log][fold]:
         result_dict[approach][log][fold][variation] = result
 
+
 available_logs = set()
 for directory in directories:
     approach = directory.split("/")[0]
+    if approach in dir_to_approach.keys():
+        approach = dir_to_approach[approach]
     results[approach] = {}
     print("Approach: ", approach)
     regex = file_approaches_regex[approach]
@@ -65,6 +75,7 @@ for directory in directories:
                 clean_filename = file.replace(approaches_clean_log_regexes[approach], "")
                 parse_groups = re.match(log_regex, clean_filename)
                 fold, variation, log = parse_groups.groups()
+                log = log.lower()
                 available_logs.add(log)
                 store_results(results, approach, log, fold, variation, accuracy)
 
@@ -87,7 +98,7 @@ for approach_A, approach_B in itertools.combinations(results.keys(), 2):
             if fold_A == "0":
                 first_p = p1
 
-            s2 = (p1 - p_mean) ** 2 + (p2 - p_mean) ** 2 # Variance of the ith replication
+            s2 = (p1 - p_mean) ** 2 + (p2 - p_mean) ** 2  # Variance of the ith replication
             s2_list.append(s2)
 
         t_statistic = first_p / math.sqrt((1 / len(s2_list)) * sum(s2_list))
