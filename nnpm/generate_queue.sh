@@ -15,8 +15,6 @@ then
   mkdir -p $DUMP_DIR
 fi
 
-current_host=`hostname`
-DUMP_DIR=/home/efren.rama/tmp_hot_garbage/
 for i in $(ls data | grep "train"); do
 	  log=${i/train_/}
 	  full_log=${i/train_fold[0-9]_variation[0-9]_/}

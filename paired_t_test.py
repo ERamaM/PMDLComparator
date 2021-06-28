@@ -5,6 +5,9 @@ import math
 from scipy.stats import t
 import pandas as pd
 import statistics
+from scipy.stats import friedmanchisquare
+import numpy as np
+import scikit_posthocs as posthocs
 
 dir_to_approach = {
     "ImagePPMiner" : "pasquadibisceglie",
@@ -20,7 +23,7 @@ directories = [
 # These regexes allow us to find the file that contains the results
 file_approaches_regex = {
     "tax": ".*next_event.log",  # Ends with "next_event.log"
-    "evermann": "^(?!raw).*$",  # Does not start with "raw" # TODO: what about suffix calculations
+    "evermann": ".*\.txt$",  # Does not start with "raw" # TODO: what about suffix calculations
     "pasquadibisceglie" : "^(?!raw).*",
     "mauro" : "^fold.*.txt"
 }
@@ -87,9 +90,17 @@ for directory in directories:
                 log = log.lower()
                 available_logs.add(log)
                 store_results(results, approach, log, fold, variation, accuracy)
-    print("Available logs: ", available_logs)
 
 print("Results: ", results)
+print("Available logs: ", available_logs)
+
+# Check for empty approaches
+delete_list = []
+for approach in results.keys():
+    if not results[approach]:
+        delete_list.append(approach)
+for delete in delete_list:
+    results.pop(delete)
 
 ############################################
 # Perform paired t-test and retrieve results
@@ -124,8 +135,12 @@ for approach_A, approach_B in itertools.permutations(results.keys(), 2):
         print("P value: ", p_value)
         approach_pair = (approach_A.capitalize(), approach_B.capitalize())
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
-        t_results[approach_pair] = {log_cap : t_statistic}
-        p_results[approach_pair] = {log_cap : p_value}
+        if approach_pair not in t_results:
+            t_results[approach_pair] = {}
+        t_results[approach_pair][log_cap] = t_statistic
+        if approach_pair not in p_results:
+            p_results[approach_pair] = {}
+        p_results[approach_pair][log_cap] = p_value
 
 print("T results: ", t_results)
 print("Available logs: ", available_logs)
@@ -136,13 +151,13 @@ def bold_p_value_formatter(x):
     else:
         return str(round(x, 4))
 
-p_df = pd.DataFrame.from_dict(p_results, orient="index")
+p_df = pd.DataFrame(p_results).transpose()
 print("P value df")
 print(p_df)
 latex = p_df.to_latex(formatters=[bold_p_value_formatter] * len(available_logs), escape=False, caption="P-values for the pairwise comparison approaches")
 print(latex)
 
-t_df = pd.DataFrame.from_dict(t_results, orient="index")
+t_df = pd.DataFrame.from_dict(t_results).transpose()
 print("T statistic df")
 print(t_df)
 latex = p_df.to_latex(escape=False, caption="T value statistic for the pairwise comparison approaches")
@@ -160,7 +175,9 @@ for approach in results.keys():
             log_values.append(results[approach][log][fold]["1"])
         mean_val = statistics.mean(log_values)
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
-        accuracy_results[approach.capitalize()] = {log_cap : mean_val}
+        if not approach.capitalize() in accuracy_results:
+            accuracy_results[approach.capitalize()] = {}
+        accuracy_results[approach.capitalize()][log_cap] = mean_val
 
 acc_df = pd.DataFrame.from_dict(accuracy_results, orient="index")
 print("Accuracy df")
@@ -181,5 +198,31 @@ for column in acc_df_latex.columns:
 
 latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 10-fold 5x2cv")
 print(latex)
+
+############################################
+# Perform friedman test
+############################################
+acc_df = acc_df.transpose()
+print("acc df: ", acc_df)
+acc_df.to_csv("/tmp/stac_bullshit.csv")
+data = np.asarray(acc_df)
+stat, p = friedmanchisquare(*data)
+
+alpha = 0.05
+reject = p <= alpha
+print("Should we reject H0 (i.e. is there a difference in the means) at the", (1-alpha)*100, "% confidence level?", reject)
+pairwise_scores = posthocs.posthoc_nemenyi_friedman(acc_df, acc_df.columns)
+ranks = acc_df.rank(axis=1, ascending=False)
+print("Nemenyi scores: ")
+print(pairwise_scores)
+print("Ranks: ", ranks)
+print("Avg rank: ", ranks.mean())
+
+############################################
+# Save results
+############################################
+if not os.path.exists("./processed_results"):
+    os.path.mkdir("./processed_results")
+
 
 
