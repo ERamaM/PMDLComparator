@@ -154,17 +154,17 @@ def bold_p_value_formatter(x):
 p_df = pd.DataFrame(p_results).transpose()
 print("P value df")
 print(p_df)
-latex = p_df.to_latex(formatters=[bold_p_value_formatter] * len(available_logs), escape=False, caption="P-values for the pairwise comparison approaches")
-print(latex)
+p_latex = p_df.to_latex(formatters=[bold_p_value_formatter] * len(available_logs), escape=False, caption="P-values for the pairwise comparison approaches")
+print(p_latex)
 
 t_df = pd.DataFrame.from_dict(t_results).transpose()
 print("T statistic df")
 print(t_df)
-latex = p_df.to_latex(escape=False, caption="T value statistic for the pairwise comparison approaches")
-print(latex)
+t_latex = t_df.to_latex(escape=False, caption="T value statistic for the pairwise comparison approaches")
+print(t_latex)
 
 ############################################
-# Retrieve accuracy results from cross-validation
+# Retrieve average accuracy results from cross-validation to build accuracy matrix
 ############################################
 accuracy_results = {}
 for approach in results.keys():
@@ -196,8 +196,8 @@ for column in acc_df_latex.columns:
     for approach, color in zip(best_three.index, colors):
         acc_df_latex[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + acc_df_latex[column].loc[approach] + "}}"
 
-latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 10-fold 5x2cv")
-print(latex)
+acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 10-fold 5x2cv")
+print(acc_latex)
 
 ############################################
 # Perform friedman test
@@ -212,17 +212,35 @@ alpha = 0.05
 reject = p <= alpha
 print("Should we reject H0 (i.e. is there a difference in the means) at the", (1-alpha)*100, "% confidence level?", reject)
 pairwise_scores = posthocs.posthoc_nemenyi_friedman(acc_df, acc_df.columns)
+# WARNING
+# For accuracy problems we need to rank in descending order
+# STAC does it in ascending order even though the p-values are exactly the same
 ranks = acc_df.rank(axis=1, ascending=False)
 print("Nemenyi scores: ")
 print(pairwise_scores)
-print("Ranks: ", ranks)
-print("Avg rank: ", ranks.mean())
+avg_rank = ranks.mean()
 
 ############################################
 # Save results
 ############################################
 if not os.path.exists("./processed_results"):
-    os.path.mkdir("./processed_results")
+    os.mkdir("./processed_results")
+    os.mkdir("./processed_results/csv")
+    os.mkdir("./processed_results/latex")
 
+# Save csvs
+pairwise_scores.round(4).to_csv("./processed_results/csv/friedman_nemenyi_posthoc.csv")
+ranks.round(4).to_csv("./processed_results/csv/raw_ranks.csv")
+avg_rank.round(4).to_csv("./processed_results/csv/avg_rank.csv")
+((acc_df * 100).round(2)).to_csv("./processed_results/csv/acc.csv")
+p_df.to_csv("./processed_results/csv/p_values_t_test.csv")
+t_df.round(4).to_csv("./processed_results/csv/t_statistic_t_test.csv")
 
+# Save latex
+with open("./processed_results/latex/acc_latex.txt", "w") as f:
+    f.write(acc_latex)
+with open("./processed_results/latex/p_latex.txt", "w") as f:
+    f.write(p_latex)
+with open("./processed_results/latex/t_latex.txt", "w") as f:
+    f.write(t_latex)
 
