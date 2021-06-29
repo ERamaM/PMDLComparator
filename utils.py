@@ -344,7 +344,6 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
         # From the train size, select the 20% of the train size (10% of the total) as the validation set
         train_size = round(len(train_index) * 0.8)
 
-
         train_groups = train_index[:train_size]
         val_groups = train_index[train_size:]
         test_groups = test_index
