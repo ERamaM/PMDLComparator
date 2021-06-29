@@ -27,7 +27,7 @@ print(data)
 # are not joined by a line can be regarded as different.
 plotCD(data, alpha=0.05, cex=1.25)
 
-data_bayesian <- bPlackettLuceModel(data, min=FALSE, nsim=2000, nchains=10, parallel=TRUE)
+data_bayesian <- bPlackettLuceModel(data, min=FALSE, nsim=5000, nchains=10, parallel=TRUE)
 print(data_bayesian$expected.win.prob)
 print(data_bayesian$expected.mode.rank)
-plotDensities(data)
+#plotDensities(data)

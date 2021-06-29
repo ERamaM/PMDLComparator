@@ -1,6 +1,7 @@
 from dateutil.tz import tzutc
 import shutil
 
+from sklearn.model_selection import KFold
 from numpy import timedelta64, float64
 from pm4py.objects.log.importer.xes import factory as xes_import_factory
 from pm4py.objects.log.importer.csv import factory as csv_import_factory
@@ -328,51 +329,63 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
     test_paths = []
     train_val_paths = []
 
-    for repetition in range(5):
-        for variation in range(2):
-            indexes = sorted(unique_case_ids)
-            # Select which traces are we going to use for this split
-            random.Random(seeds[repetition]).shuffle(indexes)
-            # If it is the second time on the same repetition, reverse the index array to get test-train, instead of train-test
-            if variation == 1:
-                indexes = list(reversed(indexes))
+    kfold = KFold(n_splits=5, random_state=42, shuffle=True)
+    indexes = sorted(unique_case_ids)
+    variation = 0
+    splits = kfold.split(indexes)
+    repetition = 0
+    for train_index, test_index in splits:
+        # Select which traces are we going to use for this split
+        #random.Random(seeds[repetition]).shuffle(indexes)
+        # If it is the second time on the same repetition, reverse the index array to get test-train, instead of train-test
+        if variation == 1:
+            indexes = list(reversed(indexes))
 
-            # From the train size, select the 20% of the train size (10% of the total) as the validation set
-            train_size = round(len(indexes) * 0.4)
-            val_size = round(len(indexes) * 0.5)
+        # From the train size, select the 20% of the train size (10% of the total) as the validation set
+        train_size = round(len(train_index) * 0.8)
 
-            train_groups = indexes[:train_size]
-            val_groups = indexes[train_size:val_size]
-            test_groups = indexes[val_size:]
 
-            train_list = [pandas_init[pandas_init[case_column] == train_g] for train_g in train_groups]
-            val_list = [pandas_init[pandas_init[case_column] == val_g] for val_g in val_groups]
-            test_list = [pandas_init[pandas_init[case_column] == test_g] for test_g in test_groups]
+        train_groups = train_index[:train_size]
+        val_groups = train_index[train_size:]
+        test_groups = test_index
 
-            # Disable the sorting. Otherwise it would mess with the order of the timestamps
-            train = pd.concat(train_list, sort=False).reset_index(drop=True)
-            val = pd.concat(val_list, sort=False).reset_index(drop=True)
-            test = pd.concat(test_list, sort=False).reset_index(drop=True)
+        print("===============")
+        print("Full train: ", train_index, " Full test: ", test_index)
+        print("Train: ", train_groups)
+        print("Val: ", val_groups)
+        print("Test: ", test_groups)
+        print("===============")
 
-            train_path = os.path.join(output_directory, "train_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
-            val_path = os.path.join(output_directory, "val_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
-            test_path = os.path.join(output_directory, "test_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
+        train_list = [pandas_init[pandas_init[case_column] == train_g] for train_g in train_groups]
+        val_list = [pandas_init[pandas_init[case_column] == val_g] for val_g in val_groups]
+        test_list = [pandas_init[pandas_init[case_column] == test_g] for test_g in test_groups]
 
-            train_val_path = None
-            if do_train_val:
-                train_val_groups = indexes[:val_size]
-                train_val_list = [pandas_init[pandas_init[case_column] == train_val_g] for train_val_g in train_val_groups]
-                train_val = pd.concat(train_val_list, sort=False).reset_index(drop=True)
-                train_val_path = os.path.join(output_directory, "train_val_fold_" + str(repetition) + "_variation_" + str(variation) + "_" + Path(file).stem + ".csv")
-                train_val.to_csv(train_val_path, index=False)
-                train_val_paths.append(train_val_path)
+        # Disable the sorting. Otherwise it would mess with the order of the timestamps
+        train = pd.concat(train_list, sort=False).reset_index(drop=True)
+        val = pd.concat(val_list, sort=False).reset_index(drop=True)
+        test = pd.concat(test_list, sort=False).reset_index(drop=True)
 
-            train.to_csv(train_path, index=False)
-            val.to_csv(val_path, index=False)
-            test.to_csv(test_path, index=False)
-            train_paths.append(train_path)
-            val_paths.append(val_path)
-            test_paths.append(test_path)
+        train_path = os.path.join(output_directory, "train_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
+        val_path = os.path.join(output_directory, "val_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
+        test_path = os.path.join(output_directory, "test_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
+
+        train_val_path = None
+        if do_train_val:
+            train_val_groups = train_index
+            train_val_list = [pandas_init[pandas_init[case_column] == train_val_g] for train_val_g in train_val_groups]
+            train_val = pd.concat(train_val_list, sort=False).reset_index(drop=True)
+            train_val_path = os.path.join(output_directory, "train_val_fold_" + str(repetition) + "_variation_" + str(variation) + "_" + Path(file).stem + ".csv")
+            train_val.to_csv(train_val_path, index=False)
+            train_val_paths.append(train_val_path)
+
+        train.to_csv(train_path, index=False)
+        val.to_csv(val_path, index=False)
+        test.to_csv(test_path, index=False)
+        train_paths.append(train_path)
+        val_paths.append(val_path)
+        test_paths.append(test_path)
+
+        repetition += 1
 
     if do_train_val:
         return file, train_paths, val_paths, test_paths, train_val_paths
