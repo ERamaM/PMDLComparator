@@ -13,7 +13,8 @@ dir_to_approach = {
     "ImagePPMiner" : "pasquadibisceglie",
     "nnpm" : "mauro",
     "PyDREAM-NAP" : "theis",
-    "GenerativeLSTM" : "camargo"
+    "GenerativeLSTM" : "camargo",
+    "MAED-TaxIntegration" : "khan"
 }
 directories = [
     "../tax/code/results",
@@ -22,7 +23,8 @@ directories = [
     "../nnpm/results",
     "../hinkka/src/output",
     "../PyDREAM-NAP/results",
-    "../GenerativeLSTM/output_files/"
+    "../GenerativeLSTM/output_files/",
+    "../MAED-TaxIntegration/busi_task/data"
 ]
 
 # These regexes allow us to find the file that contains the results
@@ -32,7 +34,8 @@ file_approaches_regex = {
     "pasquadibisceglie" : "^(?!raw).*",
     "mauro" : "^fold.*.txt",
     "hinkka" : "results_.*",
-    "theis": ".*\.txt$"
+    "theis": ".*\.txt$",
+    "khan" : "results_.*"
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
@@ -42,7 +45,8 @@ approaches_accuracy_regexes = {
     "pasquadibisceglie" : "Accuracy: (.*)",
     "mauro" : "Final Accuracy score:.*\[(.*)\]",
     "hinkka": "Accuracy sklearn: (.*)",
-    "theis" : "    \"test_acc\": (.*),"
+    "theis" : "    \"test_acc\": (.*),",
+    "khan" : "Accuracy: (.*)"
 }
 
 # These regexes allow us to delete parts of the filename that are not relevant
@@ -52,7 +56,8 @@ approaches_clean_log_regexes = {
     "pasquadibisceglie" : ".txt",
     "mauro" : ".txt",
     "hinkka" : "results_",
-    "theis" : ".xes.gz_results\.txt"
+    "theis" : ".xes.gz_results.txt",
+    "khan" : "results_"
 }
 
 approaches_by_csv = ["camargo"]
@@ -121,7 +126,8 @@ for directory in directories:
     else:
         extract_by_regex(directory, approach, results)
 
-print("Results: ", results)
+for approach in results.keys():
+    print("Results: ", approach, ":", results[approach])
 print("Available logs: ", available_logs)
 
 # Check for empty approaches
