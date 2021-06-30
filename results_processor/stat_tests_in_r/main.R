@@ -17,7 +17,7 @@ if (!require("rstan")){
 library("scmamp")
 library("ggplot2")
 
-data <- read.csv("./processed_results/csv/acc.csv", row.names=1)
+data <- read.csv("processed_results/csv/acc.csv", row.names=1)
 print(data)
 
 # In Demšar (2006) the author proposes a plot to visually check the differences,

@@ -50,6 +50,8 @@ dataset_path = args.fold_dataset
 dataset_directory = Path(dataset_path).parent
 log_name = Path(dataset_path).name
 
+print("Log name: ", log_name)
+
 # Import the yaml and select attributes
 with open("attributes.yaml") as yaml_file:
     data = yaml.safe_load(yaml_file)
@@ -67,7 +69,7 @@ if "fold" not in log_name :
     model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.pnml"
 else:
     base_name = log_name
-    base_name = re.sub("(fold)(\\d_variation)(\\d_)", "\\1_\\2_\\3", base_name)
+    #base_name = re.sub("(fold)(\\d_variation)(\\d_)", "\\1\\2\\3", base_name)
     model_regex = "train_val_" + base_name + "_\d\.\d_\d\.\d\.pnml"
 model_regex_logs = "logs_" + model_regex
 train_log_file = "./logs/train_" + log_name
@@ -78,6 +80,8 @@ main_log = xes_import_factory.apply(args.full_dataset)
 main_log = LogWrapper(main_log, resources=attributes)
 
 model_file = None
+print("Model regex: ", model_regex)
+print("Model regex logs: ", model_regex)
 for file in os.listdir(best_model_folder):
     if re.match(model_regex, file):
         model_file = file

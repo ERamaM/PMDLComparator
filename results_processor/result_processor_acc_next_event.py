@@ -14,10 +14,10 @@ dir_to_approach = {
     "nnpm" : "mauro"
 }
 directories = [
-    "tax/code/results",
-    "evermann/results",
-    "ImagePPMiner/results",
-    "nnpm/results"
+    "../tax/code/results",
+    "../evermann/results",
+    "../ImagePPMiner/results",
+    "../nnpm/results"
 ]
 
 # These regexes allow us to find the file that contains the results
@@ -105,6 +105,7 @@ for delete in delete_list:
 ############################################
 # Perform paired t-test and retrieve results
 ############################################
+"""
 t_results = {}
 p_results = {}
 for approach_A, approach_B in itertools.permutations(results.keys(), 2):
@@ -162,6 +163,7 @@ print("T statistic df")
 print(t_df)
 t_latex = t_df.to_latex(escape=False, caption="T value statistic for the pairwise comparison approaches")
 print(t_latex)
+"""
 
 ############################################
 # Retrieve average accuracy results from cross-validation to build accuracy matrix
@@ -223,24 +225,24 @@ avg_rank = ranks.mean()
 ############################################
 # Save results
 ############################################
-if not os.path.exists("./processed_results"):
-    os.mkdir("./processed_results")
-    os.mkdir("./processed_results/csv")
-    os.mkdir("./processed_results/latex")
+if not os.path.exists("../processed_results"):
+    os.mkdir("../processed_results")
+    os.mkdir("../processed_results/csv")
+    os.mkdir("../processed_results/latex")
 
 # Save csvs
 pairwise_scores.round(4).to_csv("./processed_results/csv/friedman_nemenyi_posthoc.csv")
 ranks.round(4).to_csv("./processed_results/csv/raw_ranks.csv")
 avg_rank.round(4).to_csv("./processed_results/csv/avg_rank.csv")
 ((acc_df * 100).round(2)).to_csv("./processed_results/csv/acc.csv")
-p_df.to_csv("./processed_results/csv/p_values_t_test.csv")
-t_df.round(4).to_csv("./processed_results/csv/t_statistic_t_test.csv")
+
+#p_df.to_csv("./processed_results/csv/p_values_t_test.csv")
+#t_df.round(4).to_csv("./processed_results/csv/t_statistic_t_test.csv")
 
 # Save latex
-with open("./processed_results/latex/acc_latex.txt", "w") as f:
+with open("../processed_results/latex/acc_latex.txt", "w") as f:
     f.write(acc_latex)
-with open("./processed_results/latex/p_latex.txt", "w") as f:
-    f.write(p_latex)
-with open("./processed_results/latex/t_latex.txt", "w") as f:
-    f.write(t_latex)
-
+#with open("../processed_results/latex/p_latex.txt", "w") as f:
+#    f.write(p_latex)
+#with open("../processed_results/latex/t_latex.txt", "w") as f:
+#    f.write(t_latex)

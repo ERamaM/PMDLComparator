@@ -54,7 +54,7 @@ if "fold" not in log_name :
     model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.pnml"
 else:
     base_name = log_name
-    base_name = re.sub("(fold)(\\d_variation)(\\d_)", "\\1_\\2_\\3", base_name)
+    #base_name = re.sub("(fold)(\\d_variation)(\\d_)", "\\1_\\2_\\3", base_name)
     model_regex = "train_val_" + base_name + "_\d\.\d_\d\.\d\.pnml"
 model_regex_logs = "logs_" + model_regex
 train_log_file = "./logs/train_" + log_name

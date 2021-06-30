@@ -373,7 +373,7 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
             train_val_groups = train_index
             train_val_list = [pandas_init[pandas_init[case_column] == train_val_g] for train_val_g in train_val_groups]
             train_val = pd.concat(train_val_list, sort=False).reset_index(drop=True)
-            train_val_path = os.path.join(output_directory, "train_val_fold_" + str(repetition) + "_variation_" + str(variation) + "_" + Path(file).stem + ".csv")
+            train_val_path = os.path.join(output_directory, "train_val_fold" + str(repetition) + "_variation" + str(variation) + "_" + Path(file).stem + ".csv")
             train_val.to_csv(train_val_path, index=False)
             train_val_paths.append(train_val_path)
 
