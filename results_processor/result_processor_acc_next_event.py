@@ -12,15 +12,17 @@ import scikit_posthocs as posthocs
 dir_to_approach = {
     "ImagePPMiner" : "pasquadibisceglie",
     "nnpm" : "mauro",
-    "PyDREAM-NAP" : "theis"
+    "PyDREAM-NAP" : "theis",
+    "GenerativeLSTM" : "camargo"
 }
 directories = [
     "../tax/code/results",
     "../evermann/results",
     "../ImagePPMiner/results",
     "../nnpm/results",
-    "../hinkka/src/output"
-    "../PyDREAM-NAP/results"
+    "../hinkka/src/output",
+    "../PyDREAM-NAP/results",
+    "../GenerativeLSTM/output_files/"
 ]
 
 # These regexes allow us to find the file that contains the results
@@ -30,7 +32,7 @@ file_approaches_regex = {
     "pasquadibisceglie" : "^(?!raw).*",
     "mauro" : "^fold.*.txt",
     "hinkka" : "results_.*",
-    "theis": ".*\.txt$",
+    "theis": ".*\.txt$"
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
@@ -53,6 +55,8 @@ approaches_clean_log_regexes = {
     "theis" : ".xes.gz_results\.txt"
 }
 
+approaches_by_csv = ["camargo"]
+
 log_regex = "fold(\\d)_variation(\\d)_(.*)"
 
 # Structure: approach -> log -> fold -> variation -> result
@@ -69,22 +73,14 @@ def store_results(result_dict, approach, log, fold, variation, result):
     if variation not in results[approach][log][fold]:
         result_dict[approach][log][fold][variation] = result
 
-
-############################################
-# Parse the result files for accuracy information
-############################################
-available_logs = set()
-for directory in directories:
-    approach = directory.split("/")[1]
-    if approach in dir_to_approach.keys():
-        approach = dir_to_approach[approach]
+def extract_by_regex(directory, approach, results):
     results[approach] = {}
-    print("Approach: ", approach)
     regex = file_approaches_regex[approach]
     accuracy_regex = approaches_accuracy_regexes[approach]
     for file in os.listdir(directory):
         z = re.match(regex, file)
         if z is not None:
+
             with open(os.path.join(directory, file), "r") as result_file:
                 lines = result_file.readlines()
                 accuracy_line = ""
@@ -99,6 +95,31 @@ for directory in directories:
                 log = log.lower()
                 available_logs.add(log)
                 store_results(results, approach, log, fold, variation, accuracy)
+
+def extract_by_csv_camargo(directory, approach, results):
+    csv = pd.read_csv(os.path.join(directory, "ac_predict_next.csv"))
+    relevant_rows = csv[["implementation", "accuracy", "file_name"]][csv["implementation"] == "Arg Max"]
+    for idx, row in relevant_rows.iterrows():
+        clean_filename = row["file_name"].replace(".csv", "")
+        parse_groups = re.match(log_regex, clean_filename)
+        fold, variation, log = parse_groups.groups()
+        log = log.lower()
+        available_logs.add(log)
+        store_results(results, approach, log, fold, variation, row["accuracy"])
+
+
+############################################
+# Parse the result files for accuracy information
+############################################
+available_logs = set()
+for directory in directories:
+    approach = directory.split("/")[1]
+    if approach in dir_to_approach.keys():
+        approach = dir_to_approach[approach]
+    if approach == "camargo":
+        extract_by_csv_camargo(directory, approach, results)
+    else:
+        extract_by_regex(directory, approach, results)
 
 print("Results: ", results)
 print("Available logs: ", available_logs)
