@@ -17,7 +17,8 @@ directories = [
     "../tax/code/results",
     "../evermann/results",
     "../ImagePPMiner/results",
-    "../nnpm/results"
+    "../nnpm/results",
+    "../hinkka/src/output"
 ]
 
 # These regexes allow us to find the file that contains the results
@@ -25,7 +26,8 @@ file_approaches_regex = {
     "tax": ".*next_event.log",  # Ends with "next_event.log"
     "evermann": ".*\.txt$",  # Does not start with "raw" # TODO: what about suffix calculations
     "pasquadibisceglie" : "^(?!raw).*",
-    "mauro" : "^fold.*.txt"
+    "mauro" : "^fold.*.txt",
+    "hinkka" : "results_.*"
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
@@ -33,7 +35,8 @@ approaches_accuracy_regexes = {
     "tax": "ACC Sklearn: (.*)",
     "evermann": "Accuracy: (.*)",
     "pasquadibisceglie" : "Accuracy: (.*)",
-    "mauro" : "Final Accuracy score:.*\[(.*)\]"
+    "mauro" : "Final Accuracy score:.*\[(.*)\]",
+    "hinkka": "Accuracy sklearn: (.*)",
 }
 
 # These regexes allow us to delete parts of the filename that are not relevant
@@ -41,7 +44,8 @@ approaches_clean_log_regexes = {
     "tax": "_next_event.log",
     "evermann": ".xes.txt",
     "pasquadibisceglie" : ".txt",
-    "mauro" : ".txt"
+    "mauro" : ".txt",
+    "hinkka" : "results_"
 }
 
 log_regex = "fold(\\d)_variation(\\d)_(.*)"
@@ -66,7 +70,7 @@ def store_results(result_dict, approach, log, fold, variation, result):
 ############################################
 available_logs = set()
 for directory in directories:
-    approach = directory.split("/")[0]
+    approach = directory.split("/")[1]
     if approach in dir_to_approach.keys():
         approach = dir_to_approach[approach]
     results[approach] = {}
@@ -174,7 +178,7 @@ for approach in results.keys():
         log_values = []
         for fold in results[approach][log].keys():
             log_values.append(results[approach][log][fold]["0"])
-            log_values.append(results[approach][log][fold]["1"])
+            #log_values.append(results[approach][log][fold]["1"])
         mean_val = statistics.mean(log_values)
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
         if not approach.capitalize() in accuracy_results:
