@@ -11,7 +11,8 @@ import scikit_posthocs as posthocs
 
 dir_to_approach = {
     "ImagePPMiner" : "pasquadibisceglie",
-    "nnpm" : "mauro"
+    "nnpm" : "mauro",
+    "PyDREAM-NAP" : "theis"
 }
 directories = [
     "../tax/code/results",
@@ -19,6 +20,7 @@ directories = [
     "../ImagePPMiner/results",
     "../nnpm/results",
     "../hinkka/src/output"
+    "../PyDREAM-NAP/results"
 ]
 
 # These regexes allow us to find the file that contains the results
@@ -27,7 +29,8 @@ file_approaches_regex = {
     "evermann": ".*\.txt$",  # Does not start with "raw" # TODO: what about suffix calculations
     "pasquadibisceglie" : "^(?!raw).*",
     "mauro" : "^fold.*.txt",
-    "hinkka" : "results_.*"
+    "hinkka" : "results_.*",
+    "theis": ".*\.txt$",
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
@@ -37,6 +40,7 @@ approaches_accuracy_regexes = {
     "pasquadibisceglie" : "Accuracy: (.*)",
     "mauro" : "Final Accuracy score:.*\[(.*)\]",
     "hinkka": "Accuracy sklearn: (.*)",
+    "theis" : "    \"test_acc\": (.*),"
 }
 
 # These regexes allow us to delete parts of the filename that are not relevant
@@ -45,7 +49,8 @@ approaches_clean_log_regexes = {
     "evermann": ".xes.txt",
     "pasquadibisceglie" : ".txt",
     "mauro" : ".txt",
-    "hinkka" : "results_"
+    "hinkka" : "results_",
+    "theis" : ".xes.gz_results\.txt"
 }
 
 log_regex = "fold(\\d)_variation(\\d)_(.*)"
