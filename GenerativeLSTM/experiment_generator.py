@@ -268,9 +268,9 @@ if not args.execute_inplace:
             f.write(dump_f + tsp_executable + " " + command + "\n")
 else:
     # Wait for the training of the embeddings
-    emb_command = dump_f + "python lstm.py -a emb_training -f " + full_log_name + " -o True"
-    os.system(emb_command)
+    #emb_command = dump_f + "CUDA_VISIBLE_DEVICES=0 python lstm.py -a emb_training -f " + full_log_name + " -o True"
+    #os.system(emb_command)
     # Send all to tsp
     for command in commands:
-        os.system(dump_f + "TS_SOCKET=/tmp/camargo TS_SLOTS=" + str(args.slots) + " " + tsp_executable + " " +  command)
+        os.system(dump_f + "CUDA_VISIBLE_DEVICES=0 TS_SOCKET=/tmp/camargo TS_SLOTS=" + str(args.slots) + " " + tsp_executable + " " +  command)
 
