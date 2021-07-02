@@ -102,6 +102,8 @@ def extract_by_regex(directory, approach, results):
                 store_results(results, approach, log, fold, variation, accuracy)
 
 def extract_by_csv_camargo(directory, approach, results):
+    if not os.path.exists(os.path.join(directory, "ac_predict_next.csv")):
+        return
     csv = pd.read_csv(os.path.join(directory, "ac_predict_next.csv"))
     relevant_rows = csv[["implementation", "accuracy", "file_name"]][csv["implementation"] == "Arg Max"]
     for idx, row in relevant_rows.iterrows():
@@ -205,14 +207,19 @@ print(t_latex)
 # Retrieve average accuracy results from cross-validation to build accuracy matrix
 ############################################
 accuracy_results = {}
+accuracy_fold_results = []
 for approach in results.keys():
     for log in available_logs:
         log_values = []
         for fold in results[approach][log].keys():
             log_values.append(results[approach][log][fold]["0"])
             #log_values.append(results[approach][log][fold]["1"])
+
+
         mean_val = statistics.mean(log_values)
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
+        for fold in results[approach][log].keys():
+            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, "acc" : results[approach][log][fold]["0"]})
         if not approach.capitalize() in accuracy_results:
             accuracy_results[approach.capitalize()] = {}
         accuracy_results[approach.capitalize()][log_cap] = mean_val
@@ -220,6 +227,9 @@ for approach in results.keys():
 acc_df = pd.DataFrame.from_dict(accuracy_results, orient="index")
 print("Accuracy df")
 print(acc_df)
+acc_fold_df = pd.DataFrame.from_dict(accuracy_fold_results)
+print("Accuracy fold df")
+print(acc_fold_df)
 
 acc_df_latex = acc_df.copy()
 print("ACC DF LATX: ", acc_df_latex)
@@ -241,8 +251,6 @@ print(acc_latex)
 # Perform friedman test
 ############################################
 acc_df = acc_df.transpose()
-print("acc df: ", acc_df)
-acc_df.to_csv("/tmp/stac_bullshit.csv")
 data = np.asarray(acc_df)
 stat, p = friedmanchisquare(*data)
 
@@ -261,22 +269,23 @@ avg_rank = ranks.mean()
 ############################################
 # Save results
 ############################################
-if not os.path.exists("../processed_results"):
-    os.mkdir("../processed_results")
-    os.mkdir("../processed_results/csv")
-    os.mkdir("../processed_results/latex")
+if not os.path.exists("./processed_results"):
+    os.mkdir("./processed_results")
+    os.mkdir("./processed_results/csv")
+    os.mkdir("./processed_results/latex")
 
 # Save csvs
 pairwise_scores.round(4).to_csv("./processed_results/csv/friedman_nemenyi_posthoc.csv")
 ranks.round(4).to_csv("./processed_results/csv/raw_ranks.csv")
 avg_rank.round(4).to_csv("./processed_results/csv/avg_rank.csv")
 ((acc_df * 100).round(2)).to_csv("./processed_results/csv/acc.csv")
+acc_fold_df.to_csv("./processed_results/csv/raw_acc.csv")
 
 #p_df.to_csv("./processed_results/csv/p_values_t_test.csv")
 #t_df.round(4).to_csv("./processed_results/csv/t_statistic_t_test.csv")
 
 # Save latex
-with open("../processed_results/latex/acc_latex.txt", "w") as f:
+with open("./processed_results/latex/acc_latex.txt", "w") as f:
     f.write(acc_latex)
 #with open("../processed_results/latex/p_latex.txt", "w") as f:
 #    f.write(p_latex)

@@ -1,0 +1,67 @@
+---
+title: "Demo de test bayesianos"
+author: efren.rama
+date: 2/7/21
+output: html_document
+---
+
+# Importar librearías
+
+```{r}
+if (!require("devtools")) {
+  install.packages("devtools")
+}
+
+if (!require("scmamp")){
+  devtools::install_github("b0rxa/scmamp")
+}
+if (!require("ggplot2")){
+  install.packages("ggplot2")
+}
+if (!require("rstan")){
+  install.packages("rstan")
+}
+
+library("scmamp")
+library("ggplot2")
+library("rstudioapi")
+```
+
+# Importar los datos
+
+```{r}
+data_acc <- read.csv("../processed_results/csv/acc.csv", row.names=1)
+data_acc
+```
+
+# Test Friedman
+
+Comprobamos el p-valor con un test de friedman
+
+```{r}
+friedmanTest(data_acc)
+```
+
+# Test estadístico Friedman con posthoc Nemenyi
+
+```{r}
+test <- nemenyiTest(data_acc, alpha=0.05)
+test
+```
+
+## Matrices de diferencia
+
+```{r}
+test$diff.matrix
+
+```
+```{r}
+abs(test$diff.matrix) > test$statistic
+```
+
+# Plot de diferencia crítica
+```{r}
+plotCD(data_acc, alpha=0.05, cex=1.25)
+```
+
+

@@ -4,4 +4,34 @@
     <option name="languageLevel" value="ES6" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.6 (tf_2.0_ppm)" project-jdk-type="Python SDK" />
+  <component name="RMarkdownSettings">
+    <option name="renderProfiles">
+      <map>
+        <entry key="file://$PROJECT_DIR$/results_processor/stat_tests_in_r/demo.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="lastOutput" value="$PROJECT_DIR$/results_processor/stat_tests_in_r/demo.html" />
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/results_processor/stat_tests_in_r" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/results_processor/stat_tests_in_r/demo_bayesian.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="lastOutput" value="$PROJECT_DIR$/results_processor/stat_tests_in_r/demo_bayesian.html" />
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/results_processor/stat_tests_in_r" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/results_processor/stat_tests_in_r/demo_friedman.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="lastOutput" value="$PROJECT_DIR$/results_processor/stat_tests_in_r/demo_friedman.html" />
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/results_processor/stat_tests_in_r" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
 </project>

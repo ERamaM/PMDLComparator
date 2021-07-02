@@ -1,0 +1,200 @@
+---
+title: "Demo bayesiana"
+author: efren.rama
+date: 2/7/21
+output: html_document
+---
+
+# Importar librerías
+
+```{r}
+if (!require("devtools")) {
+  install.packages("devtools")
+}
+
+if (!require("scmamp")){
+  devtools::install_github("b0rxa/scmamp")
+}
+if (!require("ggplot2")){
+  install.packages("ggplot2", dependencies = TRUE)
+  install.packages("geometry")
+  install.packages("metRology")
+  install.packages("MCMCpack")
+}
+if (!require("rstan")){
+  install.packages("rstan")
+}
+if (!require("here")){
+  install.packages("here")
+}
+
+library("scmamp")
+library("ggplot2")
+library("here")
+
+```
+
+# Carga de los datos
+
+```{r}
+if(dir.exists(file.path(getwd(), "results_processor/stat_tests_in_r"))){
+  setwd(file.path(getwd(), "results_processor/stat_tests_in_r"))
+}
+data_acc <- read.csv("../processed_results/csv/acc.csv", row.names=1)
+data_acc
+```
+
+# Modelo bayesiano Plackett-Luce para ranking de aproximaciones (all-to-all)
+```{r}
+ranking <- bPlackettLuceModel(data_acc, min=FALSE, nsim=2000, nchains=10, parallel=TRUE)
+```
+
+## Probabilidades
+
+```{r}
+ranking$expected.win.prob
+```
+
+## Ranking
+
+```{r}
+ranking$expected.mode.rank
+```
+
+
+## Plot baricentrico
+Seleccionamos los mejores modelos para hacer el plot
+
+```{r}
+index <- which(ranking$expected.mode.rank <= sort(ranking$expected.mode.rank, decreasing=FALSE)[3], arr.ind=TRUE)
+```
+
+Mostramos un "simplex plot" para mostrar la incertidumbre de la predicción
+
+```{r}
+weights <- ranking$posterior.weights[, index]
+weights <- weights / rowSums(weights)
+plotBarycentric(weights)
+```
+
+# Comparaciones a pares usando el signed rank test bayesiano en múltiples datasets.
+
+```{r}
+mauro <- data_acc[, "Mauro"]
+pasqua <- data_acc[, "Pasquadibisceglie"]
+evermann <- data_acc[, "Evermann"]
+```
+
+## Mauro vs Pasquadibisceglie
+```{r}
+signed_test <- bSignedRankTest(mauro, pasqua, rope=c(-0.01, 0.01))
+signed_test$posterior.probabilities
+```
+
+```{r}
+plotSimplex(signed_test, A="Mauro", B="Pasquadibisceglie", plot.density=FALSE, alpha=0.5)
+```
+
+## Pasquadibisceglie vs Evermann
+```{r}
+signed_test <- bSignedRankTest(pasqua, evermann, rope=c(-0.01, 0.01))
+signed_test$posterior.probabilities
+```
+
+```{r}
+plotSimplex(signed_test, A="Pasquadibisceglie", B="Evermann", plot.density=FALSE, alpha=0.5)
+```
+
+
+
+# Comparaciones a pares usando un modelo jerarquico bayesiano
+
+## Leer y procesar la información de cada uno de los folds para cada dataset.
+```{r}
+raw_data_acc <- read.csv("../processed_results/csv/raw_acc.csv", row.names=1)
+```
+
+```{r}
+print(index)
+```
+
+```{r}
+# Number 3 is the best performing one
+subset_1 <- raw_data_acc[raw_data_acc$approach == names(index[1]),][c("log", "fold", "acc")]
+reshaped_1 <- reshape(subset_1, direction="wide", idvar="log", timevar="fold")
+rownames(reshaped_1) <- reshaped_1[,"log"]
+
+subset_2 <- raw_data_acc[raw_data_acc$approach == names(index[2]),][c("log", "fold", "acc")]
+reshaped_2 <- reshape(subset_2, direction="wide", idvar="log", timevar="fold")
+rownames(reshaped_2) <- reshaped_2[,"log"]
+
+subset_3 <- raw_data_acc[raw_data_acc$approach == names(index[3]),][c("log", "fold", "acc")]
+reshaped_3 <- reshape(subset_3, direction="wide", idvar="log", timevar="fold")
+rownames(reshaped_3) <- reshaped_3[,"log"]
+reshaped_3$log <- NULL
+reshaped_2$log <- NULL
+reshaped_1$log <- NULL
+```
+
+## Mejor aproximación
+
+```{r}
+reshaped_3
+```
+
+## Segunda mejor aproximación
+
+```{r}
+reshaped_2
+```
+
+## Tercera mejor aproximación
+```{r}
+reshaped_1
+```
+
+
+## Mejor aproximación vs segunda mejor aproximación
+
+```{r}
+
+matrix_3 <- data.matrix(reshaped_3)
+matrix_2 <- data.matrix(reshaped_2)
+matrix_3
+```
+
+```{r}
+# For some reason we need to switch the parameters to get the plot right
+results <- bHierarchicalTest(matrix_3, matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
+```
+
+```{r}
+plotSimplex(results, A=names(index[3]), B=names(index[2]), posterior.label=TRUE, alpha=0.5)
+```
+
+```{r}
+rownames(results$additional$per.dataset) <- rownames(reshaped_3)
+results$additional$per.dataset
+```
+
+## Segunda mejor aproximación vs tercera mejor aproximación
+
+```{r}
+
+matrix_2 <- data.matrix(reshaped_2)
+matrix_1 <- data.matrix(reshaped_1)
+```
+
+```{r}
+# For some reason we need to switch the parameters to get the plot right ??
+results <- bHierarchicalTest(matrix_2, matrix_1, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
+```
+
+```{r}
+plotSimplex(results, A=names(index[2]), B=names(index[1]), posterior.label=TRUE, alpha=0.5)
+```
+
+```{r}
+rownames(results$additional$per.dataset) <- rownames(reshaped_2)
+results$additional$per.dataset
+```

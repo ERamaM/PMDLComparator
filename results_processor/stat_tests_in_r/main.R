@@ -1,5 +1,5 @@
 #sudo apt install r-base
-#sudo apt install build-essential libcurl4-gnutls-dev libxml2-dev libssl-dev libv8-dev
+#sudo apt install build-essential libcurl5-gnutls-dev libxml2-dev libssl-dev libv8-dev libgeos-dev
 if (!require("devtools")) {
   install.packages("devtools")
 }
@@ -8,7 +8,8 @@ if (!require("scmamp")){
   devtools::install_github("b0rxa/scmamp")
 }
 if (!require("ggplot2")){
-  install.packages("ggplot2")
+  install.packages('ggplot2', dep=TRUE)
+  install.packages("geometry")
 }
 if (!require("rstan")){
   install.packages("rstan")
