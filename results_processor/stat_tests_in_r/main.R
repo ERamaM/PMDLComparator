@@ -8,15 +8,21 @@ if (!require("scmamp")){
   devtools::install_github("b0rxa/scmamp")
 }
 if (!require("ggplot2")){
-  install.packages('ggplot2', dep=TRUE)
+  install.packages("ggplot2", dependencies = TRUE)
   install.packages("geometry")
+  install.packages("metRology")
+  install.packages("MCMCpack")
 }
 if (!require("rstan")){
   install.packages("rstan")
 }
+if (!require("here")){
+  install.packages("here")
+}
 
 library("scmamp")
 library("ggplot2")
+library("here")
 
 data <- read.csv("processed_results/csv/acc.csv", row.names=1)
 print(data)
