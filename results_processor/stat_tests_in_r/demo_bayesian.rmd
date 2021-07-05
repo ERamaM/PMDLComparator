@@ -46,7 +46,7 @@ data_acc
 
 # Modelo bayesiano Plackett-Luce para ranking de aproximaciones (all-to-all)
 ```{r}
-ranking <- bPlackettLuceModel(data_acc, min=FALSE, nsim=2000, nchains=10, parallel=TRUE)
+ranking <- bPlackettLuceModel(data_acc, min=FALSE, nsim=5000, nchains=10, parallel=TRUE)
 ```
 
 ## Probabilidades
