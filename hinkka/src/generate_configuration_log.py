@@ -64,6 +64,10 @@ if arguments.dataset is not None:
 for log in os.listdir("./testdata"):
     if "train" in log and (filter_dataset == "" or filter_dataset in log):
         logname = log.replace("train_", "").replace(".csv", "")
+        print("Logname: ", logname)
+        if filter_dataset == "bpi_challenge_2013_incidents":
+            with open("./config/" + logname, "w") as f:
+                json.dump(base_json, f, indent=4)
         base_json["for_each"].append(
             {
                 "input_filename" : logname,
@@ -77,11 +81,15 @@ for log in os.listdir("./testdata"):
                 "test_filename" : logname
             }
         )
+        if filter_dataset == "bpi_challenge_2013_incidents":
+            with open("./config/" + logname, "w") as f:
+                json.dump(base_json, f, indent=4)
 
     if filter_dataset != "":
         config_file_name = "custom_" + filter_dataset + ".json"
     else:
         config_file_name = "custom_logs.json"
-    with open("./config/" + config_file_name, "w") as f:
-        json.dump(base_json, f, indent=4)
+    if filter_dataset != "bpi_challenge_2013_incidents":
+        with open("./config/" + config_file_name, "w") as f:
+            json.dump(base_json, f, indent=4)
 

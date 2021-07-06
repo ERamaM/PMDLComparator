@@ -26,7 +26,7 @@ conda activate hinkka
 for i in $(ls testdata | grep -v "train" | grep -v "val" | grep -v "test"); do
 	if [ $current_host == "ctgpgpu8" ] || [ $current_host == "ctgpgpu7" ]
 	then
-    TMPDIR=$DUMP_DIR CUDA_VISIBLE_DEVICES=0 TS_SOCKET=/tmp/hinkka $TS_EXECUTABLE python main.py -c config/custom_"$i"
+  TMPDIR=$DUMP_DIR CUDA_VISIBLE_DEVICES=0 TS_SOCKET=/tmp/hinkka $TS_EXECUTABLE python main.py -c config/custom_"$i"
   else
     TS_SOCKET=/tmp/hinkka $TS_EXECUTABLE python main.py -c config/custom_"$i"
   fi
