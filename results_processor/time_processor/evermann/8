@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python train.py --fold_dataset data/fold0_variation0_SEPSIS.xes.gz --full_dataset data/SEPSIS.xes.gz --train --test --test_suffix --test_suffix_calculus
+Slots required: 1
+Enqueue time: Tue Jun 29 12:31:52 2021
+Start time: Tue Jun 29 12:44:37 2021
+End time: Tue Jun 29 12:49:47 2021
+Time run: 309.705322s

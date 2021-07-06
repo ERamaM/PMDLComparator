@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python deeppm_act.py --fold_dataset data/fold4_variation0_Helpdesk.csv --full_dataset data/Helpdesk.csv --train --test
+Slots required: 1
+Enqueue time: Tue Jun 29 18:33:27 2021
+Start time: Wed Jun 30 17:53:43 2021
+End time: Wed Jun 30 17:56:36 2021
+Time run: 172.965347s

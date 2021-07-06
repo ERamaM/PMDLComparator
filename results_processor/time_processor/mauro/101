@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python deeppm_act.py --fold_dataset data/fold3_variation0_BPI_Challenge_2012_W_Complete.csv --full_dataset data/BPI_Challenge_2012_W_Complete.csv --train --test
+Slots required: 1
+Enqueue time: Tue Jun 29 18:33:27 2021
+Start time: Wed Jun 30 12:17:55 2021
+End time: Wed Jun 30 13:11:45 2021
+Time run: 3230.711914s

@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python deeppm_act.py --fold_dataset data/fold0_variation0_nasa.csv --full_dataset data/nasa.csv --train --test
+Slots required: 1
+Enqueue time: Tue Jun 29 18:33:26 2021
+Start time: Tue Jun 29 22:46:10 2021
+End time: Tue Jun 29 23:03:53 2021
+Time run: 1062.645020s

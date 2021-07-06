@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python deeppm_act.py --fold_dataset data/fold1_variation0_env_permit.csv --full_dataset data/env_permit.csv --train --test
+Slots required: 1
+Enqueue time: Tue Jun 29 18:33:26 2021
+Start time: Wed Jun 30 03:30:51 2021
+End time: Wed Jun 30 03:34:19 2021
+Time run: 208.358673s

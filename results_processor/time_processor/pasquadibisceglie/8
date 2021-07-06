@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python run.py --fold_dataset dataset/fold0_variation0_SEPSIS.csv --full_dataset dataset/SEPSIS.csv --train --test
+Slots required: 1
+Enqueue time: Wed Jun 30 20:22:13 2021
+Start time: Wed Jun 30 20:36:42 2021
+End time: Wed Jun 30 20:37:40 2021
+Time run: 58.017288s

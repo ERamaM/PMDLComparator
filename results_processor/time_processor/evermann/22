@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python train.py --fold_dataset data/fold1_variation0_env_permit.xes.gz --full_dataset data/env_permit.xes.gz --train --test --test_suffix --test_suffix_calculus
+Slots required: 1
+Enqueue time: Tue Jun 29 12:31:52 2021
+Start time: Tue Jun 29 13:50:40 2021
+End time: Tue Jun 29 13:52:04 2021
+Time run: 84.266075s

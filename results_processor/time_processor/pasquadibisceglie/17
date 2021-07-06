@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python run.py --fold_dataset dataset/fold1_variation0_BPI_Challenge_2012_W_Complete.csv --full_dataset dataset/BPI_Challenge_2012_W_Complete.csv --train --test
+Slots required: 1
+Enqueue time: Wed Jun 30 20:22:13 2021
+Start time: Wed Jun 30 20:51:36 2021
+End time: Wed Jun 30 20:54:13 2021
+Time run: 156.970840s
