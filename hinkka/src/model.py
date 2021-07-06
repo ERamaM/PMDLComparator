@@ -576,7 +576,12 @@ class Model:
         probs_out = []
         real_probs = []
         index_predictions = []
+        index_predictions_brier_score = []
         predict_next_activity = self.parameters["predict_next_activity"]
+
+        print("==============")
+        print("PREDICT NEXT ACTIVITY: ", predict_next_activity)
+        print("==============")
 
         for i in range(len(batches)):
             x = batches[i]
@@ -584,10 +589,17 @@ class Model:
             probs = self.propabilities(x, mask)
             for prob in enumerate(probs):
                 if predict_next_activity:
+                    real_activity_probs = []
+                    for k, p in enumerate(prob[1]):
+                        if self.is_word_token[k]:
+                            real_activity_probs.append(p)
+                    real_activity_probs = np.asarray(real_activity_probs)
+                    # This array has the probabilities of EVERY single input
                     outcomeProbs = np.asarray([p if self.is_word_token[k] or self.is_outcome[k] else 0 for k, p in enumerate(prob[1])])
                 else:
                     outcomeProbs = np.asarray([p if self.is_outcome[k] else 0 for k, p in enumerate(prob[1])])
-                real_probs.append(outcomeProbs)
+                np.set_printoptions(threshold=10000)
+                real_probs.append(real_activity_probs)
                 sumProb = 0
                 maxProb = 0
                 for t, p in enumerate(outcomeProbs):
@@ -595,16 +607,24 @@ class Model:
                     if (p > maxProb):
                         maxProb = p
                         maxIndex = t
+                sumProb = 0
+                maxProb = 0
+                for t, p in enumerate(real_activity_probs):
+                    sumProb += p
+                    if (p > maxProb):
+                        maxProb = p
+                        maxIndex_brier_score = t
                 probs_out.append(maxProb / sumProb)
                 word = self.index_to_word[maxIndex]
                 index_predictions.append(maxIndex)
+                index_predictions_brier_score.append(maxIndex_brier_score)
                 if predict_next_activity and word.startswith(OUTCOME_SELECTION_TOKEN_PREFIX):
                     word = word[len(OUTCOME_SELECTION_TOKEN_PREFIX):]
                 predictions.append(word)
         if not requireFullProbs:
             return predictions, probs_out
         else:
-            return predictions, probs_out, real_probs, index_predictions
+            return predictions, probs_out, real_probs, index_predictions, index_predictions_brier_score
 
 
     def createModel(self):
@@ -921,7 +941,7 @@ class Model:
         sl = self.prepareTokenizedSentences(self.traces_test, tokenized_sentences_test, None, self.seq_length, True)
         writeLog("Maximum sequence length in the test set is %d tokens." % (sl))
 
-        predictions, probs, real_probs, index_predictions = self.predict_outcome(self.traces_test, tracePercentage, requireFullProbs=True)
+        predictions, probs, real_probs, index_predictions, index_predictions_brier_score = self.predict_outcome(self.traces_test, tracePercentage, requireFullProbs=True)
         numSuccess = 0
         cases = eventlog.data["cases"]
         real_idx = []
@@ -948,5 +968,5 @@ class Model:
         if not fullProbs:
             return self.traces_test, predictions, probs, numSuccess
         else:
-            return self.traces_test, predictions, probs, numSuccess, real_probs, index_predictions, real_idx
+            return self.traces_test, predictions, probs, numSuccess, real_probs, index_predictions, real_idx, index_predictions_brier_score
 

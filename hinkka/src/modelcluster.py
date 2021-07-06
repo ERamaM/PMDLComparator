@@ -256,7 +256,7 @@ class ModelCluster:
         t0 = time()
         for i, model in enumerate(self.models):
             writeLog("Testing model %d of %d" % (i + 1, len(self.eventlogs)))
-            t, pred, prob, ns, real_probs, index_predictions, ground_truth = model.test(self.eventlogs[i], tracePercentage, maxNumTraces, fullProbs=True)
+            t, pred, prob, ns, real_probs, index_predictions, ground_truth, index_predictions_brier_score = model.test(self.eventlogs[i], tracePercentage, maxNumTraces, fullProbs=True)
             traces += t
             predictions += pred
             probs += prob
@@ -269,6 +269,7 @@ class ModelCluster:
         print("Model cluster parameters: ", self.parameters)
         filename = self.parameters["test_filename"] if self.parameters["test_filename"] is not None else self.parameters["dataset_name"]
         prob_shape = np.array(real_probs).shape[1]
+        print("REAL PROB SHAPE: ", prob_shape)
         print("idx SHAPE: ", np.array(index_predictions).shape)
         print("REAL PROBS: ", np.array(real_probs).shape)
         print("GT Shape: ", np.array(ground_truth).shape)
@@ -279,8 +280,8 @@ class ModelCluster:
             return np.mean(np.sum((y_true - y_pred) ** 2, axis=1))
 
         ground_truth_one_hot = []
-        for idx in index_predictions:
-            one_hot = np.eye(np.array(real_probs).shape[1])[idx]
+        for idx in index_predictions_brier_score:
+            one_hot = np.eye(prob_shape, dtype=int)[idx]
             ground_truth_one_hot.append(one_hot)
 
         ground_truth_one_hot = np.array(ground_truth_one_hot)
