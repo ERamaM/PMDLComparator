@@ -82,7 +82,7 @@ for log in os.listdir("./testdata"):
             }
         )
         if filter_dataset == "bpi_challenge_2013_incidents":
-            with open("./config/" + logname, "w") as f:
+            with open("./config/" + logname + ".json", "w") as f:
                 json.dump(base_json, f, indent=4)
 
     if filter_dataset != "":
