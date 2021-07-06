@@ -33,9 +33,10 @@ csv_str = csv_str.decode("utf-8")
 df_ts = pd.read_csv(StringIO(csv_str), sep=",")
 print("TS DF: ", df_ts)
 max_id = df_ts["ID"].max()
+min_id = df_ts["ID"].min()
 if not os.path.exists("./" + approach):
     os.mkdir("./" + approach)
-for i in range(max_id):
+for i in range(min_id, max_id):
     ts_time_command = "TS_SOCKET=/tmp/" + approach + " " + TS_EXECUTABLE + " -i " + str(i)
     time_str = subprocess.check_output(ts_time_command, shell=True)
     if not os.path.isfile("./" + approach + "/" + str(i)):
