@@ -95,7 +95,7 @@ for log in os.listdir("./testdata"):
         config_file_name = "custom_logs.json"
     """
     if filter_dataset != "bpi_challenge_2013_incidents":
-        with open("./config/" + config_file_name, "w") as f:
-            json.dump(base_json, f, indent=4)
     """
+    with open("./config/" + config_file_name, "w") as f:
+        json.dump(base_json, f, indent=4)
 
