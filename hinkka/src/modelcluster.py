@@ -134,7 +134,7 @@ class ModelCluster:
             cases = np.array([c["occ"] for c in self.eventlog.trainingData])
             df = pd.DataFrame(cases, columns=[a["name"] for a in self.eventlog.data["activities"]])
 
-            self.caseClusterVectorizer = DictVectorizer(sparse = False)
+            self.caseClusterVectorizer = DictVectorizer(sparse = False, dtype=np.float32)
             X = self.caseClusterVectorizer.fit_transform(df.to_dict(orient = 'records'))
 
             writeLog("Event log splitting done in %fs" % (time() - t0))

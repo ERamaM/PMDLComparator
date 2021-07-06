@@ -407,7 +407,7 @@ class Clustering:
 
         t0 = time()
 
-        vectorizer = DictVectorizer(sparse = False)
+        vectorizer = DictVectorizer(sparse = False, dtype=np.float32)
         writeLog("Vectorizing data frame of shape: %s" % (str(df.shape)))
         X = vectorizer.fit_transform(df.to_dict(orient = 'records'))
 
