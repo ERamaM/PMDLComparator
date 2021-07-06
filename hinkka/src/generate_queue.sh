@@ -19,7 +19,7 @@ fi
 
 for i in $(ls testdata | grep -v "train" | grep -v "val" | grep -v "test"); do
   log=${i/.json/}
-  python generate_configuration_log.py
+  python generate_configuration_log.py --dataset $i
 done
 
 conda activate hinkka
