@@ -30,7 +30,7 @@ for eta in range(0, 11):
     eta = eta / 10.0
     for epsilon in range(0, 11):
         epsilon = epsilon / 10.0
-        #os.system("java -cp ./split_miner_2.0/sm2.jar:./split_miner_2.0/lib/* au.edu.unimelb.services.ServiceProvider SMD " + str(eta) + " " + str(epsilon) + " true true true " + arguments.log + " " + os.path.join(arguments.output_folder, log_file + "_" + str(eta) + "_" + str(epsilon)))
+        os.system("java -cp ./split_miner_2.0/sm2.jar:./split_miner_2.0/lib/* au.edu.unimelb.services.ServiceProvider SMD " + str(eta) + " " + str(epsilon) + " true true true " + arguments.log + " " + os.path.join(arguments.output_folder, log_file + "_" + str(eta) + "_" + str(epsilon)))
 
 
 model_regex = log_file + "_\d\.\d_\d\.\d\.bpmn"
