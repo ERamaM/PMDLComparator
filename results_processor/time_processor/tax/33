@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python train.py --fold_dataset ../data/fold2_variation0_bpi_challenge_2013_incidents.csv --full_dataset ../data/bpi_challenge_2013_incidents.csv --train --test --test_suffix --test_suffix_calculus
+Slots required: 1
+Enqueue time: Tue Jun 29 12:40:05 2021
+Start time: Fri Jul  2 10:43:03 2021
+End time: Fri Jul  2 16:43:07 2021
+Time run: 21604.164062s
