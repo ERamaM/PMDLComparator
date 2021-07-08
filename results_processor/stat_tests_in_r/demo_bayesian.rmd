@@ -83,6 +83,7 @@ plotBarycentric(weights)
 mauro <- data_acc[, "Mauro"]
 pasqua <- data_acc[, "Pasquadibisceglie"]
 evermann <- data_acc[, "Evermann"]
+print(index)
 ```
 
 ## Mauro vs Pasquadibisceglie

@@ -19,6 +19,8 @@ from pm4py.objects.petri_net.importer import importer as pnml_importer
 from pm4py.objects.log.importer.xes import importer as xes_importer
 from pm4py.algo.evaluation.replay_fitness import algorithm as replay_fitness_evaluator
 from pm4py.objects.conversion.bpmn import converter as bpmn_converter
+from pm4py.objects.log.exporter.xes import exporter as xes_exporter
+import tempfile
 
 parser = argparse.ArgumentParser(description="Run splitminer")
 parser.add_argument("--log", help="Log to process", required=True)
@@ -27,14 +29,30 @@ parser.add_argument("--output_folder", help="Output folder of the mined models",
 parser.add_argument("--n_threads", help="Number of threads to use", type=int, required=True)
 arguments = parser.parse_args()
 
-
+# Load log and delete useless attributes to use split miner
+# Split miner does not fare well with random lifecycle transitions.
+# Change every transition to COMPLETE and forget it.
 log_file = Path(arguments.log).name
+from pm4py.objects.conversion.log import converter as log_converter
+log = xes_importer.apply(arguments.log)
+pd_log = log_converter.apply(log, variant=log_converter.Variants.TO_DATA_FRAME)
+pd_log = pd_log[["case:concept:name", "concept:name", "time:timestamp", "lifecycle:transition"]]
+pd_log["lifecycle:transition"] = "complete"
+log = log_converter.apply(pd_log, variant=log_converter.Variants.TO_EVENT_LOG)
+tmp_file = tempfile.NamedTemporaryFile().name + ".xes"
+xes_exporter.apply(pd_log, tmp_file)
+os.system("gzip " + tmp_file)
+#striped_log = [{ev["conceptfor trace in log for ev in trace]
+
+print("TMP FILE :", tmp_file)
 
 for eta in range(0, 11):
     eta = eta / 10.0
     for epsilon in range(0, 11):
         epsilon = epsilon / 10.0
-        os.system("java -cp ./split_miner_2.0/sm2.jar:./split_miner_2.0/lib/* au.edu.unimelb.services.ServiceProvider SMD " + str(eta) + " " + str(epsilon) + " true true true " + arguments.log + " " + os.path.join(arguments.output_folder, log_file + "_" + str(eta) + "_" + str(epsilon)))
+        print("java -cp ./split_miner_2.0/sm2.jar:./split_miner_2.0/lib/* au.edu.unimelb.services.ServiceProvider SMD " + str(eta) + " " + str(epsilon) + " true true true " + tmp_file + ".gz" + " " + os.path.join(arguments.output_folder, log_file + "_" + str(eta) + "_" + str(epsilon)))
+
+    raise ValueError
 
 
 model_regex = log_file + "_\d\.\d_\d\.\d\.bpmn"
