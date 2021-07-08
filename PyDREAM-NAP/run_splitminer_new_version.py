@@ -44,25 +44,41 @@ xes_exporter.apply(pd_log, tmp_file)
 os.system("gzip " + tmp_file)
 #striped_log = [{ev["conceptfor trace in log for ev in trace]
 
-print("TMP FILE :", tmp_file)
+import multiprocessing as mp
+if arguments.n_threads * 4 <= os.cpu_count():
+    max_workers = arguments.n_threads * 6
+else:
+    max_workers = arguments.n_threads
 
+def launch_splitminer(config):
+    eta = config["eta"]
+    epsilon = config["epsilon"]
+    tmp_file = config["tmp_file"]
+    log_file = config["log_file"]
+    os.system(
+        "java -cp ./split_miner_2.0/sm2.jar:./split_miner_2.0/lib/* au.edu.unimelb.services.ServiceProvider SMD " + str(
+            eta) + " " + str(epsilon) + " true true true " + tmp_file + ".gz" + " " + os.path.join(arguments.output_folder,
+                                                                                                   log_file + "_" + str(
+                                                                                                       eta) + "_" + str(
+                                                                                                       epsilon)))
+
+pool = mp.Pool(processes=max_workers)
+split_miner_configs = []
 for eta in range(0, 11):
     eta = eta / 10.0
     for epsilon in range(0, 11):
         epsilon = epsilon / 10.0
-        print("java -cp ./split_miner_2.0/sm2.jar:./split_miner_2.0/lib/* au.edu.unimelb.services.ServiceProvider SMD " + str(eta) + " " + str(epsilon) + " true true true " + tmp_file + ".gz" + " " + os.path.join(arguments.output_folder, log_file + "_" + str(eta) + "_" + str(epsilon)))
+        split_miner_configs.append({"eta" : eta, "epsilon" : epsilon, "tmp_file" : tmp_file, "log_file" : log_file})
 
-    raise ValueError
-
+pool.imap_unordered(launch_splitminer, split_miner_configs)
+pool.close()
+pool.join()
 
 model_regex = log_file + "_\d\.\d_\d\.\d\.bpmn"
 model_fitnesses = {}
 files_to_process = []
 for file in os.listdir(arguments.output_folder):
-    print("BONO: ", file)
-    print("REGEX: ", model_regex)
     if re.match(model_regex, file):
-        print("XD: ", file)
         files_to_process.append(file)
 
 model_fitnesses = {}
@@ -75,7 +91,7 @@ def process_file(file):
     bpmn_graph = read_bpmn(os.path.join(arguments.output_folder, file))
     net, initial_marking, final_marking = bpmn_converter.apply(bpmn_graph)
     #net, initial_marking, final_marking = pnml_importer.import_net(os.path.join(arguments.output_folder, file))
-    log = xes_importer.apply(arguments.log)
+    log = xes_importer.apply(tmp_file + ".gz")
     fitness = replay_fitness_evaluator.apply(log, net, initial_marking, final_marking, variant=replay_fitness_evaluator.Variants.TOKEN_BASED)
     try:
         fitness = fitness["averageFitness"]
@@ -85,17 +101,14 @@ def process_file(file):
     return fitness, file
 
 
-import multiprocessing as mp
 print("Calculating fitnesses. Please wait.")
 print("CPU count: ", os.cpu_count())
-if arguments.n_threads * 4 <= os.cpu_count():
-    max_workers = arguments.n_threads * 6
-else:
-    max_workers = arguments.n_threads
 pool = mp.Pool(processes=max_workers)
 for fitness, file in tqdm.tqdm(pool.imap_unordered(process_file, files_to_process), total=len(files_to_process)):
     model_fitnesses[file] = fitness
 
+pool.close()
+pool.join()
 print("Model fitnesses: ", model_fitnesses)
 sorted_fitnesses = {k: v for k, v in sorted(model_fitnesses.items(), key=lambda item: item[1], reverse=True)}
 best_model = next(iter(sorted_fitnesses))
