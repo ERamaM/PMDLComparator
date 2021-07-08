@@ -248,6 +248,12 @@ The results are stored inside the "data" directory under a file named "results_\
 
 ### Theis (PyDREAM-NAP)
 
+You'll need to install a conda environment due to Pm4Ppy being an old version that does not support bpmn.
+
+    conda create -n "theis" python=3.6 tensorflow-gpu=2.1.0
+	conda activate theis
+	python -m pip install pm4py==2.2.9 pyyaml==5.4.1
+
 This approach runs in two phases. First, you must mine the process models from the training+validation event log. Then, you must use the process model to run the training and testing procedure.
 
 To run the mining procedure, execute the following command:

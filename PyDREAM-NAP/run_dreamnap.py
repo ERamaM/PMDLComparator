@@ -1,7 +1,3 @@
-from pm4py.objects.log.importer.xes import factory as xes_import_factory
-from pm4py.objects.petri.importer import pnml as pnml_importer
-from pm4py.algo.discovery.heuristics import factory as heuristics_miner
-from pm4py.objects.petri.exporter import pnml as pnml_exporter
 from DREAM.pydream.EnhancedPN import EnhancedPN
 from DREAM.pydream import LogWrapper
 import os
@@ -17,6 +13,10 @@ import numpy as np
 import argparse
 import yaml
 from pathlib import Path
+
+from pm4py.objects.log.importer.xes import importer as xes_importer
+from pm4py.objects.conversion.bpmn import converter as bpmn_converter
+import pm4py
 
 enhanced_pn_folder = "./enhanced_pns/"
 best_model_folder = "./best_models/"
@@ -66,17 +66,17 @@ with open("attributes.yaml") as yaml_file:
     attributes = data[name]
 
 if "fold" not in log_name :
-    model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.pnml"
+    model_regex = "train_val_" + log_name + "_\d\.\d_\d\.\d\.bpmn"
 else:
     base_name = log_name
     #base_name = re.sub("(fold)(\\d_variation)(\\d_)", "\\1\\2\\3", base_name)
-    model_regex = "train_val_" + base_name + "_\d\.\d_\d\.\d\.pnml"
+    model_regex = "train_val_" + base_name + "_\d\.\d_\d\.\d\.bpmn"
 model_regex_logs = "logs_" + model_regex
 train_log_file = "./logs/train_" + log_name
 val_log_file = "./logs/val_" + log_name
 test_log_file = "./logs/test_" + log_name
 
-main_log = xes_import_factory.apply(args.full_dataset)
+main_log = xes_importer.apply(args.full_dataset)
 main_log = LogWrapper(main_log, resources=attributes)
 
 model_file = None
@@ -93,11 +93,12 @@ for file in os.listdir(best_model_folder):
 if model_file is None:
     raise FileNotFoundError("Unable to find mined model. Have you executed the splitminer?. Searching for: " + model_regex)
 
-net, initial_marking, final_marking = pnml_importer.import_net(best_model_folder + model_file)
+bpmn_graph = pm4py.read_bpmn(best_model_folder + model_file)
+net, initial_marking, final_marking = bpmn_converter.apply(bpmn_graph)
 
 
 def load_and_process(log_file, type):
-    log = xes_import_factory.apply(log_file)
+    log = xes_importer.apply(log_file)
 
     log_wrapper = LogWrapper(log, resources=attributes)
     print("Resource keys: ", main_log.getResourceKeys())

@@ -1,12 +1,16 @@
+from copy import copy
+
 import numpy as np
 import json
 
-from pm4py.algo.conformance.tokenreplay.versions.token_replay import *
+from pm4py.algo.conformance.tokenreplay.variants.token_replay import apply_hidden_trans
+#from pm4py.algo.conformance.tokenreplay.versions.token_replay import *
 from pm4py.objects.petri import semantics
 
 from DREAM.pydream.util.DecayFunctions import LinearDecay, REGISTER
 from DREAM.pydream.util.TimedStateSamples import TimedStateSample
 from DREAM.pydream.util.Functions import time_delta_seconds
+from pm4py.objects.petri.utils import get_places_shortest_path_by_hidden
 
 
 class EnhancedPN:
