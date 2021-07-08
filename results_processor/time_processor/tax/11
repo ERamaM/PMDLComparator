@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python train.py --fold_dataset ../data/fold0_variation0_nasa.csv --full_dataset ../data/nasa.csv --train --test --test_suffix --test_suffix_calculus
+Slots required: 1
+Enqueue time: Tue Jun 29 12:40:05 2021
+Start time: Tue Jun 29 21:31:35 2021
+End time: Tue Jun 29 23:33:48 2021
+Time run: 7332.777832s
