@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?><definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://www.omg.org/bpmn20" exporter="ProM. http://www.promtools.org/prom6" exporterVersion="6.3" xsi:schemaLocation="http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd"><process id="proc_644166178">
+<startEvent id="node_b9cd66db-598a-40c8-86d7-41d63ddce73b" name=""/>
+<endEvent id="node_e05b4979-058b-4d1a-8051-5f620dbee507" name=""/>
+<sequenceFlow id="node_5cbdd592-b187-41d3-a660-ade5c233b43b" name="" sourceRef="node_b9cd66db-598a-40c8-86d7-41d63ddce73b" targetRef="node_e05b4979-058b-4d1a-8051-5f620dbee507"/>
+</process>
+<bpmndi:BPMNDiagram id="id_-1108122058">
+<bpmndi:BPMNPlane bpmnElement="proc_644166178">
+<bpmndi:BPMNShape bpmnElement="node_e05b4979-058b-4d1a-8051-5f620dbee507">
+<dc:Bounds x="76.0" y="100.5" width="25.0" height="25.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNShape bpmnElement="node_b9cd66db-598a-40c8-86d7-41d63ddce73b">
+<dc:Bounds x="1.0" y="100.5" width="25.0" height="25.0"/>
+<bpmndi:BPMNLabel/>
+</bpmndi:BPMNShape>
+<bpmndi:BPMNEdge bpmnElement="node_5cbdd592-b187-41d3-a660-ade5c233b43b">
+<di:waypoint x="13.5" y="113.0"/>
+<di:waypoint x="88.5" y="113.0"/>
+</bpmndi:BPMNEdge>
+</bpmndi:BPMNPlane>
+</bpmndi:BPMNDiagram>
+</definitions>
