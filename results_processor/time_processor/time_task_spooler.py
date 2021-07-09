@@ -66,8 +66,20 @@ for approach in os.listdir("."):
             if matches is not None:
                 fold_log = matches.groups()[0].split("/")[-1]
             else:
-                fold_log = re.match(".* --log (.*?) .*", command_line).groups()[0].split("/")[-1].replace("train_val_", "")
-            fold, variation, log = re.match(log_regex, fold_log).groups()
+                matches = re.match(".* --log (.*?) .*", command_line)
+                if matches is not None:
+                    fold_log = matches.groups()[0].split("/")[-1].replace("train_val_", "")
+                else:
+                    fold_log = re.match(".* -c (.*?)\.json$", command_line).groups()[0].split("/")[-1].replace("custom_", "") + ".xes.gz"
+                    print("HINKKA FOLD LOG: ", fold_log)
+
+            matches_fold = re.match(log_regex, fold_log)
+            if matches_fold is not None:
+                fold, variation, log = matches_fold.groups()
+            else:
+                fold = -1
+                variation = -1
+                log = fold_log
             log = log.replace(".csv", "").replace(".json", "").replace(".xes.gz", "").lower()
             information.append({"approach" : approach, "fold" : int(fold), "variation" : int(variation), "log" : log, "time" : float(timesec)})
 
