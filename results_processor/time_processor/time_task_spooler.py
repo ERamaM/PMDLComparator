@@ -62,7 +62,11 @@ for approach in os.listdir("."):
                 if re.match("Time run: .*", line):
                     time_line = line
             timesec = re.match("Time run: (.*)s", time_line).groups()[0]
-            fold_log = re.match(".* --fold_dataset (.*?) .*", command_line).groups()[0].split("/")[-1]
+            matches = re.match(".* --fold_dataset (.*?) .*", command_line)
+            if matches is not None:
+                fold_log = matches.groups()[0].split("/")[-1]
+            else:
+                fold_log = re.match(".* --log (.*?) .*", command_line).groups[0].split("/")[-1]
             fold, variation, log = re.match(log_regex, fold_log).groups()
             log = log.replace(".csv", "").replace(".json", "").replace(".xes.gz", "").lower()
             information.append({"approach" : approach, "fold" : int(fold), "variation" : int(variation), "log" : log, "time" : float(timesec)})
