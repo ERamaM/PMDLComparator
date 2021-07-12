@@ -135,10 +135,10 @@ for directory in directories:
     elif approach == "theis":
         type_exp = directory.split("/")[-1]
         if "resource" not in type_exp:
-            real_approach = "Theis (w/ resource)"
+            real_approach = "Theis_resource"
             extract_by_regex(directory, approach, results, real_approach=real_approach)
         else:
-            real_approach = "Theis (w/o resource)"
+            real_approach = "Theis_no_resource"
             extract_by_regex(directory, approach, results, real_approach=real_approach)
     else:
         extract_by_regex(directory, approach, results)
