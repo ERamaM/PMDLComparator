@@ -23,6 +23,7 @@ directories = [
     "../nnpm/results",
     "../hinkka/src/output",
     "../PyDREAM-NAP/results",
+    "../PyDREAM-NAP/results_no_resources",
     "../GenerativeLSTM/output_files/",
     "../MAED-TaxIntegration/busi_task/data"
 ]
@@ -78,8 +79,11 @@ def store_results(result_dict, approach, log, fold, variation, result):
     if variation not in results[approach][log][fold]:
         result_dict[approach][log][fold][variation] = result
 
-def extract_by_regex(directory, approach, results):
-    results[approach] = {}
+def extract_by_regex(directory, approach, results, real_approach=None):
+    if real_approach is not None:
+        results[real_approach] = {}
+    else:
+        results[approach] = {}
     regex = file_approaches_regex[approach]
     accuracy_regex = approaches_accuracy_regexes[approach]
     for file in os.listdir(directory):
@@ -99,7 +103,10 @@ def extract_by_regex(directory, approach, results):
                 fold, variation, log = parse_groups.groups()
                 log = log.lower()
                 available_logs.add(log)
-                store_results(results, approach, log, fold, variation, accuracy)
+                if real_approach is not None:
+                    store_results(results, real_approach, log, fold, variation, accuracy)
+                else:
+                    store_results(results, approach, log, fold, variation, accuracy)
 
 def extract_by_csv_camargo(directory, approach, results):
     if not os.path.exists(os.path.join(directory, "ac_predict_next.csv")):
@@ -125,6 +132,14 @@ for directory in directories:
         approach = dir_to_approach[approach]
     if approach == "camargo":
         extract_by_csv_camargo(directory, approach, results)
+    elif approach == "theis":
+        type_exp = directory.split("/")[-1]
+        if "resource" not in type_exp:
+            real_approach = "Theis (w/ resource)"
+            extract_by_regex(directory, approach, results, real_approach=real_approach)
+        else:
+            real_approach = "Theis (w/o resource)"
+            extract_by_regex(directory, approach, results, real_approach=real_approach)
     else:
         extract_by_regex(directory, approach, results)
 
