@@ -21,7 +21,7 @@ for i in $(ls data | grep "train"); do
 	full_log=${i/train_fold[0-9]_variation[0-9]_/}
   if [ $current_host == "ctgpgpu8" ] || [ $current_host == "ctgpgpu7" ]
   then
-    TMPDIR=$DUMP_DIR CUDA_VISIBLE_DEVICES=0 TS_SOCKET=/tmp/navarin $TS_EXECUTABLE python LSTM_sequence_mae.py --fold_dataset data/$log --full_dataset data/$full_log --train --test
+    TMPDIR=$DUMP_DIR CUDA_VISIBLE_DEVICES=1 TS_SOCKET=/tmp/navarin $TS_EXECUTABLE python LSTM_sequence_mae.py --fold_dataset data/$log --full_dataset data/$full_log --train --test
   else
     TS_SOCKET=/tmp/navarin $TS_EXECUTABLE python LSTM_sequence_mae.py --fold_dataset data/$log --full_dataset data/$full_log --train --test
   fi
