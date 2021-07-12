@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python run_splitminer_new_version.py --log ./logs/train_val_fold2_variation0_BPI_Challenge_2013_closed_problems.xes.gz --output_folder output_models --best_model best_models --n_threads 8
+Slots required: 1
+Enqueue time: Thu Jul  8 15:26:14 2021
+Start time: Thu Jul  8 17:55:40 2021
+End time: Thu Jul  8 17:56:35 2021
+Time run: 55.271332s

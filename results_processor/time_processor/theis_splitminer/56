@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python run_splitminer_new_version.py --log ./logs/train_val_fold4_variation0_SEPSIS.xes.gz --output_folder output_models --best_model best_models --n_threads 8
+Slots required: 1
+Enqueue time: Thu Jul  8 15:26:15 2021
+Start time: Thu Jul  8 19:50:34 2021
+End time: Thu Jul  8 19:52:22 2021
+Time run: 108.000023s
