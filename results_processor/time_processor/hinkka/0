@@ -1,7 +1,7 @@
 Exit status: died with exit code 0
 Command: python main.py -c config/custom_BPI_Challenge_2012.json
 Slots required: 1
-Enqueue time: Tue Jul  6 18:30:50 2021
-Start time: Tue Jul  6 18:30:50 2021
-End time: Wed Jul  7 10:02:18 2021
-Time run: 55887.664062s
+Enqueue time: Fri Jul  9 09:47:15 2021
+Start time: Fri Jul  9 09:47:15 2021
+End time: Sat Jul 10 09:46:57 2021
+Time run: 86381.757812s

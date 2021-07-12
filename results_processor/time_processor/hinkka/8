@@ -1,7 +1,7 @@
 Exit status: died with exit code 0
 Command: python main.py -c config/custom_SEPSIS.json
 Slots required: 1
-Enqueue time: Tue Jul  6 18:30:50 2021
-Start time: Thu Jul  8 00:03:14 2021
-End time: Thu Jul  8 00:03:19 2021
-Time run: 5.100280s
+Enqueue time: Mon Jul 12 13:23:43 2021
+Start time: Mon Jul 12 13:23:43 2021
+End time: Mon Jul 12 13:52:40 2021
+Time run: 1737.020630s
