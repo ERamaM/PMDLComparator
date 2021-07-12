@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python run_dreamnap_no_resources.py --fold_dataset logs/fold0_variation0_BPI_Challenge_2012_O.xes.gz --full_dataset logs/BPI_Challenge_2012_O.xes.gz --train --test
+Slots required: 1
+Enqueue time: Fri Jul  9 15:52:06 2021
+Start time: Fri Jul  9 16:01:38 2021
+End time: Fri Jul  9 16:04:09 2021
+Time run: 151.046097s

@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python run_dreamnap_no_resources.py --fold_dataset logs/fold0_variation0_nasa.xes.gz --full_dataset logs/nasa.xes.gz --train --test
+Slots required: 1
+Enqueue time: Fri Jul  9 15:52:07 2021
+Start time: Fri Jul  9 16:38:02 2021
+End time: Fri Jul  9 16:46:44 2021
+Time run: 522.196594s

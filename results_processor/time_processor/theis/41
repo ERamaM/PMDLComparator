@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python run_dreamnap_no_resources.py --fold_dataset logs/fold1_variation0_SEPSIS.xes.gz --full_dataset logs/SEPSIS.xes.gz --train --test
+Slots required: 1
+Enqueue time: Fri Jul  9 15:52:07 2021
+Start time: Fri Jul  9 17:30:47 2021
+End time: Fri Jul  9 17:32:35 2021
+Time run: 107.900299s

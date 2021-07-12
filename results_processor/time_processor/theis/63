@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python run_dreamnap_no_resources.py --fold_dataset logs/fold2_variation0_Helpdesk.xes.gz --full_dataset logs/Helpdesk.xes.gz --train --test
+Slots required: 1
+Enqueue time: Fri Jul  9 15:52:07 2021
+Start time: Fri Jul  9 18:22:46 2021
+End time: Fri Jul  9 18:24:51 2021
+Time run: 125.199905s
