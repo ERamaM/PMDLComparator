@@ -146,6 +146,17 @@ def convert_csv_to_json(file, output_folder, attributes, timestamp_format, prett
         case["t"] = []
         case["a"] = [] # Empty case attributes
         case["id"] = str(group.iloc[0][XES_Fields.CASE_COLUMN])
+        # The kfold function returns the indices of the array but not the array contents itself.
+        # Since the case ids are always positive sequential integers this does not matter except in the
+        # SEPSIS log where there is a id = -1. For now, skip it.
+        if case["id"] == "-1":
+            continue
+        """
+        print("=========")
+        print("Case id: ", case["id"])
+        print(group)
+        print("==========")
+        """
         for idx, event in group.iterrows():
             case["n"] = str(event[XES_Fields.CASE_COLUMN]) # For some reason is a str
             j_event = []
@@ -322,7 +333,6 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
 
     # Disable the sorting. Otherwise it would mess with the order of the timestamps
     unique_case_ids = list(pandas_init[case_column].unique())
-    seeds = [42, 69, 420, 777, 137]
 
     train_paths = []
     val_paths = []
@@ -331,6 +341,7 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
 
     kfold = KFold(n_splits=5, random_state=42, shuffle=True)
     indexes = sorted(unique_case_ids)
+    #print("Unique case ids: ", sorted(unique_case_ids))
     variation = 0
     splits = kfold.split(indexes)
     repetition = 0
@@ -348,12 +359,14 @@ def split_train_val_test(file, output_directory, case_column, do_train_val=False
         val_groups = train_index[train_size:]
         test_groups = test_index
 
+        """
         print("===============")
         print("Full train: ", train_index, " Full test: ", test_index)
         print("Train: ", train_groups)
         print("Val: ", val_groups)
         print("Test: ", test_groups)
         print("===============")
+        """
 
         train_list = [pandas_init[pandas_init[case_column] == train_g] for train_g in train_groups]
         val_list = [pandas_init[pandas_init[case_column] == val_g] for val_g in val_groups]
