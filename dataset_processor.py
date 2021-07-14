@@ -225,7 +225,6 @@ if arguments.net:
 
     elif arguments.net == "francescomarino":
         for xes in dataset_list:
-            print("Process: ", xes)
             make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/models")
             make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/results")
             make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/data")
@@ -238,22 +237,34 @@ if arguments.net:
             xes_vals = []
             xes_train_vals = []
             _ , _, vals, _, train_val_paths = split_train_val_test(csv_path, "./tmp", XES_Fields.CASE_COLUMN, do_train_val=True)
+
             # Select the fields for the declare miner files.
             # This avoids nan error importing in prom.
             for val in vals:
                 select_columns(
                     val,
                     input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
-                    category_columns=None,
+                    category_columns=[],
                     timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
                     output_columns=None, francescomarino_fix=True
                 )
+            for train_val in train_val_paths:
+                select_columns(
+                    train_val,
+                    input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN, XES_Fields.LIFECYCLE_COLUMN],
+                    category_columns=[],
+                    timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                    output_columns=None, francescomarino_fix=True
+                )
+
             for train_val_path in train_val_paths:
                 xes_file, xes_path = convert_csv_to_xes(train_val_path, "./tmp", EXTENSIONS.XES_COMPRESSED)
                 xes_train_vals.append(xes_path)
+
             for val in vals:
                 xes_file_val, xes_path_val = convert_csv_to_xes(val, "./tmp", EXTENSIONS.XES_COMPRESSED)
                 xes_vals.append(xes_path_val)
+
             move_files(xes_train_vals, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files")
             move_files(xes_vals, "Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files")
 
@@ -267,7 +278,7 @@ if arguments.net:
                 input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
                 category_columns=[XES_Fields.ACTIVITY_COLUMN],
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
-                output_columns=output_columns, categorize=True, francescomarino_fix=True
+                output_columns=output_columns, categorize=True, francescomarino_fix=False
             )
             csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", "CaseID")
             files_to_move = [csv_path] + train_paths + val_paths + test_paths
