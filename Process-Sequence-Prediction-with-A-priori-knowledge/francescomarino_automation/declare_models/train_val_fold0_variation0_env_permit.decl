@@ -1,0 +1,19 @@
+activity Confirmation of receipt
+activity T02 Check confirmation of receipt
+activity T06 Determine necessity of stop advice
+activity T04 Determine confirmation of receipt
+activity T05 Print and send confirmation of receipt
+activity T10 Determine necessity to stop indication
+Existence[Confirmation of receipt] | |
+Existence[T02 Check confirmation of receipt] | |
+Existence[T06 Determine necessity of stop advice] | |
+Response[T02 Check confirmation of receipt, T04 Determine confirmation of receipt] | | |
+Existence[T04 Determine confirmation of receipt] | |
+Existence[T05 Print and send confirmation of receipt] | |
+Response[Confirmation of receipt, T10 Determine necessity to stop indication] | | |
+Existence[T10 Determine necessity to stop indication] | |
+Response[T02 Check confirmation of receipt, T06 Determine necessity of stop advice] | | |
+Response[T04 Determine confirmation of receipt, T10 Determine necessity to stop indication] | | |
+Response[T05 Print and send confirmation of receipt, T10 Determine necessity to stop indication] | | |
+Response[T06 Determine necessity of stop advice, T05 Print and send confirmation of receipt] | | |
+Response[T10 Determine necessity to stop indication, T02 Check confirmation of receipt] | | |

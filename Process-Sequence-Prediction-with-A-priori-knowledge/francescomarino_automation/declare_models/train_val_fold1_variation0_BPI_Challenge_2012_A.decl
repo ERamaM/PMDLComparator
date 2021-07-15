@@ -1,0 +1,29 @@
+activity A_PARTLYSUBMITTED
+activity A_SUBMITTED
+activity A_DECLINED
+activity A_PREACCEPTED
+activity A_ACCEPTED
+activity A_FINALIZED
+activity A_CANCELLED
+activity A_APPROVED
+activity A_REGISTERED
+activity A_ACTIVATED
+Existence[A_PARTLYSUBMITTED] | |
+Existence[A_SUBMITTED] | |
+Response[A_SUBMITTED, A_PARTLYSUBMITTED] | | |
+Existence[A_DECLINED] | |
+Response[A_PARTLYSUBMITTED, A_PREACCEPTED] | | |
+Existence[A_PREACCEPTED] | |
+Existence[A_ACCEPTED] | |
+Response[A_PREACCEPTED, A_ACCEPTED] | | |
+Response[A_ACCEPTED, A_FINALIZED] | | |
+Existence[A_FINALIZED] | |
+Existence[A_CANCELLED] | |
+Existence[A_APPROVED] | |
+Existence[A_REGISTERED] | |
+Existence[A_ACTIVATED] | |
+Response[A_FINALIZED, A_APPROVED] | | |
+Response[A_PREACCEPTED, A_DECLINED] | | |
+Response[A_FINALIZED, A_CANCELLED] | | |
+Response[A_APPROVED, A_REGISTERED] | | |
+Response[A_REGISTERED, A_ACTIVATED] | | |

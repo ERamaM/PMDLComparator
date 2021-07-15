@@ -1,0 +1,1083 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<savedElements>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_BPI_Challenge_2012.decl</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012.decl</saveName>
+        <saveTimestamp>2021-07-13T19:07:10.659+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_BPI_Challenge_2012_A.decl</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_A.decl</saveName>
+        <saveTimestamp>2021-07-13T19:07:55.883+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_BPI_Challenge_2012_Complete.decl</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:08:46.879+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_BPI_Challenge_2012_O.decl</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_O.decl</saveName>
+        <saveTimestamp>2021-07-13T19:09:23.673+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_BPI_Challenge_2012_W.decl</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_W.decl</saveName>
+        <saveTimestamp>2021-07-13T19:10:09.195+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_BPI_Challenge_2012_W_Complete.decl</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_W_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:10:46.772+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_BPI_Challenge_2013_closed_problems.decl</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2013_closed_problems.decl</saveName>
+        <saveTimestamp>2021-07-13T19:11:22.181+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_bpi_challenge_2013_incidents.decl</file>
+        <saveName>train_val_fold0_variation0_bpi_challenge_2013_incidents.decl</saveName>
+        <saveTimestamp>2021-07-13T19:12:02.362+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_env_permit.decl</file>
+        <saveName>train_val_fold0_variation0_env_permit.decl</saveName>
+        <saveTimestamp>2021-07-13T19:12:38.104+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_Helpdesk.decl</file>
+        <saveName>train_val_fold0_variation0_Helpdesk.decl</saveName>
+        <saveTimestamp>2021-07-13T19:13:15.877+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_nasa.decl</file>
+        <saveName>train_val_fold0_variation0_nasa.decl</saveName>
+        <saveTimestamp>2021-07-13T19:14:03.546+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold0_variation0_SEPSIS.decl</file>
+        <saveName>train_val_fold0_variation0_SEPSIS.decl</saveName>
+        <saveTimestamp>2021-07-13T19:14:39.241+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_BPI_Challenge_2012.decl</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012.decl</saveName>
+        <saveTimestamp>2021-07-13T19:15:41.202+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_BPI_Challenge_2012_A.decl</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_A.decl</saveName>
+        <saveTimestamp>2021-07-13T19:16:25.588+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_BPI_Challenge_2012_Complete.decl</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:17:17.421+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_BPI_Challenge_2012_O.decl</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_O.decl</saveName>
+        <saveTimestamp>2021-07-13T19:17:54.871+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_BPI_Challenge_2012_W.decl</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_W.decl</saveName>
+        <saveTimestamp>2021-07-13T19:18:41.163+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_BPI_Challenge_2012_W_Complete.decl</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_W_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:19:20.769+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_BPI_Challenge_2013_closed_problems.decl</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2013_closed_problems.decl</saveName>
+        <saveTimestamp>2021-07-13T19:19:57.295+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_bpi_challenge_2013_incidents.decl</file>
+        <saveName>train_val_fold1_variation0_bpi_challenge_2013_incidents.decl</saveName>
+        <saveTimestamp>2021-07-13T19:20:36.468+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_env_permit.decl</file>
+        <saveName>train_val_fold1_variation0_env_permit.decl</saveName>
+        <saveTimestamp>2021-07-13T19:21:12.320+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_Helpdesk.decl</file>
+        <saveName>train_val_fold1_variation0_Helpdesk.decl</saveName>
+        <saveTimestamp>2021-07-13T19:21:48.862+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_nasa.decl</file>
+        <saveName>train_val_fold1_variation0_nasa.decl</saveName>
+        <saveTimestamp>2021-07-13T19:22:36.553+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold1_variation0_SEPSIS.decl</file>
+        <saveName>train_val_fold1_variation0_SEPSIS.decl</saveName>
+        <saveTimestamp>2021-07-13T19:23:14.741+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_BPI_Challenge_2012.decl</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012.decl</saveName>
+        <saveTimestamp>2021-07-13T19:24:19.818+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_BPI_Challenge_2012_A.decl</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_A.decl</saveName>
+        <saveTimestamp>2021-07-13T19:25:06.807+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_BPI_Challenge_2012_Complete.decl</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:26:00.436+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_BPI_Challenge_2012_O.decl</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_O.decl</saveName>
+        <saveTimestamp>2021-07-13T19:26:39.708+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_BPI_Challenge_2012_W.decl</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_W.decl</saveName>
+        <saveTimestamp>2021-07-13T19:27:27.673+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_BPI_Challenge_2012_W_Complete.decl</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_W_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:28:08.477+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_BPI_Challenge_2013_closed_problems.decl</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2013_closed_problems.decl</saveName>
+        <saveTimestamp>2021-07-13T19:28:45.312+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_bpi_challenge_2013_incidents.decl</file>
+        <saveName>train_val_fold2_variation0_bpi_challenge_2013_incidents.decl</saveName>
+        <saveTimestamp>2021-07-13T19:29:28.534+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_env_permit.decl</file>
+        <saveName>train_val_fold2_variation0_env_permit.decl</saveName>
+        <saveTimestamp>2021-07-13T19:30:07.706+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_Helpdesk.decl</file>
+        <saveName>train_val_fold2_variation0_Helpdesk.decl</saveName>
+        <saveTimestamp>2021-07-13T19:30:47.672+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_nasa.decl</file>
+        <saveName>train_val_fold2_variation0_nasa.decl</saveName>
+        <saveTimestamp>2021-07-13T19:31:38.962+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold2_variation0_SEPSIS.decl</file>
+        <saveName>train_val_fold2_variation0_SEPSIS.decl</saveName>
+        <saveTimestamp>2021-07-13T19:32:19.680+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_BPI_Challenge_2012.decl</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012.decl</saveName>
+        <saveTimestamp>2021-07-13T19:33:26.191+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_BPI_Challenge_2012_A.decl</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_A.decl</saveName>
+        <saveTimestamp>2021-07-13T19:34:18.687+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_BPI_Challenge_2012_Complete.decl</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:35:18.779+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_BPI_Challenge_2012_O.decl</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_O.decl</saveName>
+        <saveTimestamp>2021-07-13T19:36:01.720+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_BPI_Challenge_2012_W.decl</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_W.decl</saveName>
+        <saveTimestamp>2021-07-13T19:36:55.045+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_BPI_Challenge_2012_W_Complete.decl</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_W_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:37:48.827+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_BPI_Challenge_2013_closed_problems.decl</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2013_closed_problems.decl</saveName>
+        <saveTimestamp>2021-07-13T19:38:29.652+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_bpi_challenge_2013_incidents.decl</file>
+        <saveName>train_val_fold3_variation0_bpi_challenge_2013_incidents.decl</saveName>
+        <saveTimestamp>2021-07-13T19:39:16.448+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_env_permit.decl</file>
+        <saveName>train_val_fold3_variation0_env_permit.decl</saveName>
+        <saveTimestamp>2021-07-13T19:39:59.540+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_Helpdesk.decl</file>
+        <saveName>train_val_fold3_variation0_Helpdesk.decl</saveName>
+        <saveTimestamp>2021-07-13T19:40:42.701+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_nasa.decl</file>
+        <saveName>train_val_fold3_variation0_nasa.decl</saveName>
+        <saveTimestamp>2021-07-13T19:41:38.210+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold3_variation0_SEPSIS.decl</file>
+        <saveName>train_val_fold3_variation0_SEPSIS.decl</saveName>
+        <saveTimestamp>2021-07-13T19:42:24.780+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_BPI_Challenge_2012.decl</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012.decl</saveName>
+        <saveTimestamp>2021-07-13T19:43:37.686+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_BPI_Challenge_2012_A.decl</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_A.decl</saveName>
+        <saveTimestamp>2021-07-13T19:44:32.831+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_BPI_Challenge_2012_Complete.decl</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:45:37.988+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_BPI_Challenge_2012_O.decl</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_O.decl</saveName>
+        <saveTimestamp>2021-07-13T19:46:24.070+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_BPI_Challenge_2012_W.decl</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_W.decl</saveName>
+        <saveTimestamp>2021-07-13T19:47:19.847+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_BPI_Challenge_2012_W_Complete.decl</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_W_Complete.decl</saveName>
+        <saveTimestamp>2021-07-13T19:48:07.197+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_BPI_Challenge_2013_closed_problems.decl</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2013_closed_problems.decl</saveName>
+        <saveTimestamp>2021-07-13T19:48:50.783+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_bpi_challenge_2013_incidents.decl</file>
+        <saveName>train_val_fold4_variation0_bpi_challenge_2013_incidents.decl</saveName>
+        <saveTimestamp>2021-07-13T19:49:38.425+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_env_permit.decl</file>
+        <saveName>train_val_fold4_variation0_env_permit.decl</saveName>
+        <saveTimestamp>2021-07-13T19:50:24.860+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_Helpdesk.decl</file>
+        <saveName>train_val_fold4_variation0_Helpdesk.decl</saveName>
+        <saveTimestamp>2021-07-13T19:51:10.041+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_nasa.decl</file>
+        <saveName>train_val_fold4_variation0_nasa.decl</saveName>
+        <saveTimestamp>2021-07-13T19:52:08.609+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_models\train_val_fold4_variation0_SEPSIS.decl</file>
+        <saveName>train_val_fold4_variation0_SEPSIS.decl</saveName>
+        <saveTimestamp>2021-07-13T19:52:59.654+02:00</saveTimestamp>
+        <typeEnum>PROCESS_MODEL</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:06:17.513+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>val_fold0_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:07:13.824+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:07:28.395+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>val_fold0_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:07:58.563+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:08:09.195+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>val_fold0_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:08:49.537+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:09:01.375+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>val_fold0_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:09:26.342+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:09:36.568+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>val_fold0_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:10:11.939+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:10:22.968+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>val_fold0_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:10:49.457+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>train_val_fold0_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:11:00.131+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>val_fold0_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:11:25.162+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>train_val_fold0_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:11:35.243+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>val_fold0_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:12:04.954+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_env_permit.xes.gz</file>
+        <saveName>train_val_fold0_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:12:15.212+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_env_permit.xes.gz</file>
+        <saveName>val_fold0_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:12:40.647+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_Helpdesk.xes.gz</file>
+        <saveName>train_val_fold0_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:12:50.704+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_Helpdesk.xes.gz</file>
+        <saveName>val_fold0_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:13:18.462+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_nasa.xes.gz</file>
+        <saveName>train_val_fold0_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:13:28.571+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_nasa.xes.gz</file>
+        <saveName>val_fold0_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:14:06.182+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold0_variation0_SEPSIS.xes.gz</file>
+        <saveName>train_val_fold0_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:14:17.918+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold0_variation0_SEPSIS.xes.gz</file>
+        <saveName>val_fold0_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:14:41.840+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:14:52.289+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>val_fold1_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:15:43.802+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:15:56.671+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>val_fold1_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:16:28.154+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:16:38.673+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>val_fold1_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:17:19.991+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:17:31.299+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>val_fold1_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:17:57.438+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:18:08.013+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>val_fold1_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:18:43.795+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:18:55.119+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>val_fold1_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:19:23.794+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>train_val_fold1_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:19:34.549+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>val_fold1_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:19:59.883+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>train_val_fold1_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:20:10.132+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>val_fold1_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:20:39.122+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_env_permit.xes.gz</file>
+        <saveName>train_val_fold1_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:20:49.635+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_env_permit.xes.gz</file>
+        <saveName>val_fold1_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:21:14.920+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_Helpdesk.xes.gz</file>
+        <saveName>train_val_fold1_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:21:25.105+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_Helpdesk.xes.gz</file>
+        <saveName>val_fold1_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:21:51.494+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_nasa.xes.gz</file>
+        <saveName>train_val_fold1_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:22:02.092+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_nasa.xes.gz</file>
+        <saveName>val_fold1_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:22:39.105+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold1_variation0_SEPSIS.xes.gz</file>
+        <saveName>train_val_fold1_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:22:51.057+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold1_variation0_SEPSIS.xes.gz</file>
+        <saveName>val_fold1_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:23:17.534+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:23:27.909+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>val_fold2_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:24:22.790+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:24:36.991+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>val_fold2_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:25:09.392+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:25:20.531+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>val_fold2_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:26:03.044+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:26:15.172+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>val_fold2_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:26:42.253+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:26:53.670+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>val_fold2_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:27:30.247+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:27:42.073+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>val_fold2_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:28:10.783+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>train_val_fold2_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:28:22.652+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>val_fold2_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:28:48.240+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>train_val_fold2_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:28:59.578+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>val_fold2_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:29:30.902+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_env_permit.xes.gz</file>
+        <saveName>train_val_fold2_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:29:42.910+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_env_permit.xes.gz</file>
+        <saveName>val_fold2_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:30:10.332+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_Helpdesk.xes.gz</file>
+        <saveName>train_val_fold2_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:30:22.070+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_Helpdesk.xes.gz</file>
+        <saveName>val_fold2_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:30:50.286+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_nasa.xes.gz</file>
+        <saveName>train_val_fold2_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:31:01.926+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_nasa.xes.gz</file>
+        <saveName>val_fold2_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:31:41.624+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold2_variation0_SEPSIS.xes.gz</file>
+        <saveName>train_val_fold2_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:31:54.482+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold2_variation0_SEPSIS.xes.gz</file>
+        <saveName>val_fold2_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:32:22.430+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:32:34.457+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>val_fold3_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:33:28.805+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:33:46.603+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>val_fold3_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:34:21.771+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:34:33.891+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>val_fold3_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:35:21.833+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:35:35.005+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>val_fold3_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:36:04.316+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:36:16.372+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>val_fold3_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:36:58.130+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:37:11.571+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>val_fold3_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:37:51.451+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>train_val_fold3_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:38:03.324+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>val_fold3_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:38:32.252+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>train_val_fold3_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:38:44.298+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>val_fold3_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:39:19.119+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_env_permit.xes.gz</file>
+        <saveName>train_val_fold3_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:39:31.697+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_env_permit.xes.gz</file>
+        <saveName>val_fold3_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:40:01.947+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_Helpdesk.xes.gz</file>
+        <saveName>train_val_fold3_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:40:13.868+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_Helpdesk.xes.gz</file>
+        <saveName>val_fold3_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:40:45.435+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_nasa.xes.gz</file>
+        <saveName>train_val_fold3_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:40:57.281+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_nasa.xes.gz</file>
+        <saveName>val_fold3_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:41:40.947+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold3_variation0_SEPSIS.xes.gz</file>
+        <saveName>train_val_fold3_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:41:57.529+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold3_variation0_SEPSIS.xes.gz</file>
+        <saveName>val_fold3_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:42:27.411+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:42:40.038+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_BPI_Challenge_2012.xes.gz</file>
+        <saveName>val_fold4_variation0_BPI_Challenge_2012.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:43:40.388+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:43:58.136+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_BPI_Challenge_2012_A.xes.gz</file>
+        <saveName>val_fold4_variation0_BPI_Challenge_2012_A.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:44:35.647+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:44:52.390+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_BPI_Challenge_2012_Complete.xes.gz</file>
+        <saveName>val_fold4_variation0_BPI_Challenge_2012_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:45:40.732+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:45:54.878+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_BPI_Challenge_2012_O.xes.gz</file>
+        <saveName>val_fold4_variation0_BPI_Challenge_2012_O.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:46:26.810+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:46:40.197+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_BPI_Challenge_2012_W.xes.gz</file>
+        <saveName>val_fold4_variation0_BPI_Challenge_2012_W.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:47:22.542+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:47:36.059+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_BPI_Challenge_2012_W_Complete.xes.gz</file>
+        <saveName>val_fold4_variation0_BPI_Challenge_2012_W_Complete.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:48:09.858+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>train_val_fold4_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:48:23.020+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_BPI_Challenge_2013_closed_problems.xes.gz</file>
+        <saveName>val_fold4_variation0_BPI_Challenge_2013_closed_problems.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:48:53.478+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>train_val_fold4_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:49:06.418+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_bpi_challenge_2013_incidents.xes.gz</file>
+        <saveName>val_fold4_variation0_bpi_challenge_2013_incidents.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:49:41.131+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_env_permit.xes.gz</file>
+        <saveName>train_val_fold4_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:49:54.634+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_env_permit.xes.gz</file>
+        <saveName>val_fold4_variation0_env_permit.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:50:27.593+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_Helpdesk.xes.gz</file>
+        <saveName>train_val_fold4_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:50:40.202+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_Helpdesk.xes.gz</file>
+        <saveName>val_fold4_variation0_Helpdesk.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:51:13.033+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_nasa.xes.gz</file>
+        <saveName>train_val_fold4_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:51:26.156+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_nasa.xes.gz</file>
+        <saveName>val_fold4_variation0_nasa.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:52:11.629+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\train_val_fold4_variation0_SEPSIS.xes.gz</file>
+        <saveName>train_val_fold4_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:52:30.548+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+    <savedElement>
+        <file>C:\Users\Efrén Rama Maneiro\Desktop\francescomarino_automation\declare_miner_files\val_fold4_variation0_SEPSIS.xes.gz</file>
+        <saveName>val_fold4_variation0_SEPSIS.xes.gz</saveName>
+        <saveTimestamp>2021-07-13T19:53:02.311+02:00</saveTimestamp>
+        <typeEnum>EVENT_LOG</typeEnum>
+    </savedElement>
+</savedElements>

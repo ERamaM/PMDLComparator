@@ -1,0 +1,24 @@
+activity Accepted+In Progress
+activity Completed+Resolved
+activity Completed+Closed
+activity Queued+Awaiting Assignment
+activity Accepted+Wait - User
+activity Completed+In Call
+activity Accepted+Assigned
+activity Accepted+Wait
+Existence[Accepted+In Progress] | |
+Existence[Completed+Resolved] | |
+Response[Accepted+In Progress, Completed+Resolved] | | |
+Existence[Completed+Closed] | |
+Response[Completed+Resolved, Completed+Closed] | | |
+Existence[Queued+Awaiting Assignment] | |
+Existence[Accepted+Wait - User] | |
+Existence[Completed+In Call] | |
+Response[Accepted+In Progress, Completed+In Call] | | |
+Existence[Accepted+Assigned] | |
+Response[Accepted+In Progress, Accepted+Wait - User] | | |
+Response[Queued+Awaiting Assignment, Accepted+Assigned] | | |
+Response[Accepted+Wait - User, Accepted+In Progress] | | |
+Existence[Accepted+Wait] | |
+Response[Accepted+Wait, Completed+Resolved] | | |
+Response[Accepted+Assigned, Accepted+Wait - User] | | |

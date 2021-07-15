@@ -1,0 +1,14 @@
+activity W_Completeren aanvraag
+activity W_Nabellen offertes
+activity W_Afhandelen leads
+activity W_Valideren aanvraag
+activity W_Nabellen incomplete dossiers
+Existence[W_Completeren aanvraag] | |
+Response[W_Completeren aanvraag, W_Nabellen offertes] | | |
+Existence[W_Nabellen offertes] | |
+Existence[W_Afhandelen leads] | |
+Existence[W_Valideren aanvraag] | |
+Response[W_Afhandelen leads, W_Completeren aanvraag] | | |
+Response[W_Nabellen offertes, W_Nabellen incomplete dossiers] | | |
+Existence[W_Nabellen incomplete dossiers] | |
+Response[W_Nabellen incomplete dossiers, W_Valideren aanvraag] | | |

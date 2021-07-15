@@ -1,0 +1,38 @@
+activity ER Triage
+activity ER Registration
+activity ER Sepsis Triage
+activity Leucocytes
+activity CRP
+activity LacticAcid
+activity IV Antibiotics
+activity Admission NC
+activity IV Liquid
+activity Release A
+activity Return ER
+activity Admission IC
+Existence[ER Triage] | |
+Existence[ER Registration] | |
+Existence[ER Sepsis Triage] | |
+Response[ER Registration, ER Triage] | | |
+Response[ER Triage, ER Sepsis Triage] | | |
+Existence[Leucocytes] | |
+Existence[CRP] | |
+Existence[LacticAcid] | |
+Existence[IV Antibiotics] | |
+Existence[Admission NC] | |
+Existence[IV Liquid] | |
+Response[ER Sepsis Triage, IV Liquid] | | |
+Existence[Release A] | |
+Response[Admission NC, Release A] | | |
+Response[IV Liquid, IV Antibiotics] | | |
+Response[Admission NC, CRP] | | |
+Existence[Return ER] | |
+Response[Release A, Return ER] | | |
+Response[CRP, Admission NC] | | |
+Response[Leucocytes, LacticAcid] | | |
+Response[CRP, IV Liquid] | | |
+Response[LacticAcid, ER Sepsis Triage] | | |
+Existence[Admission IC] | |
+Response[Admission IC, Leucocytes] | | |
+Response[Admission IC, CRP] | | |
+Response[IV Antibiotics, Admission IC] | | |

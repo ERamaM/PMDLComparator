@@ -1,0 +1,46 @@
+activity W_Completeren aanvraag+SCHEDULE
+activity W_Completeren aanvraag+COMPLETE
+activity W_Completeren aanvraag+START
+activity W_Nabellen offertes+SCHEDULE
+activity W_Nabellen offertes+COMPLETE
+activity W_Nabellen offertes+START
+activity W_Afhandelen leads+SCHEDULE
+activity W_Afhandelen leads+START
+activity W_Afhandelen leads+COMPLETE
+activity W_Valideren aanvraag+SCHEDULE
+activity W_Valideren aanvraag+COMPLETE
+activity W_Valideren aanvraag+START
+activity W_Nabellen incomplete dossiers+START
+activity W_Nabellen incomplete dossiers+SCHEDULE
+activity W_Nabellen incomplete dossiers+COMPLETE
+Existence[W_Completeren aanvraag+SCHEDULE] | |
+Existence[W_Completeren aanvraag+COMPLETE] | |
+Existence[W_Completeren aanvraag+START] | |
+Existence[W_Nabellen offertes+SCHEDULE] | |
+Response[W_Completeren aanvraag+START, W_Nabellen offertes+SCHEDULE] | | |
+Existence[W_Nabellen offertes+COMPLETE] | |
+Response[W_Completeren aanvraag+COMPLETE, W_Nabellen offertes+START] | | |
+Existence[W_Nabellen offertes+START] | |
+Response[W_Nabellen offertes+START, W_Nabellen offertes+COMPLETE] | | |
+Response[W_Afhandelen leads+SCHEDULE, W_Afhandelen leads+START] | | |
+Existence[W_Afhandelen leads+SCHEDULE] | |
+Existence[W_Afhandelen leads+COMPLETE] | |
+Existence[W_Afhandelen leads+START] | |
+Response[W_Nabellen offertes+SCHEDULE, W_Completeren aanvraag+COMPLETE] | | |
+Existence[W_Valideren aanvraag+SCHEDULE] | |
+Existence[W_Valideren aanvraag+COMPLETE] | |
+Existence[W_Valideren aanvraag+START] | |
+Response[W_Valideren aanvraag+START, W_Valideren aanvraag+COMPLETE] | | |
+Response[W_Afhandelen leads+COMPLETE, W_Completeren aanvraag+START] | | |
+Response[W_Afhandelen leads+START, W_Completeren aanvraag+SCHEDULE] | | |
+Response[W_Completeren aanvraag+SCHEDULE, W_Afhandelen leads+COMPLETE] | | |
+Response[W_Valideren aanvraag+SCHEDULE, W_Nabellen offertes+COMPLETE] | | |
+Response[W_Nabellen incomplete dossiers+SCHEDULE, W_Nabellen incomplete dossiers+START] | | |
+Existence[W_Nabellen incomplete dossiers+SCHEDULE] | |
+Existence[W_Nabellen incomplete dossiers+COMPLETE] | |
+Existence[W_Nabellen incomplete dossiers+START] | |
+Response[W_Valideren aanvraag+SCHEDULE, W_Nabellen incomplete dossiers+COMPLETE] | | |
+Response[W_Nabellen offertes+COMPLETE, W_Nabellen incomplete dossiers+SCHEDULE] | | |
+Response[W_Completeren aanvraag+COMPLETE, W_Nabellen offertes+SCHEDULE] | | |
+Response[W_Nabellen incomplete dossiers+START, W_Valideren aanvraag+SCHEDULE] | | |
+Response[W_Nabellen incomplete dossiers+COMPLETE, W_Valideren aanvraag+START] | | |

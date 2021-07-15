@@ -1,0 +1,22 @@
+activity O_SENT
+activity O_SELECTED
+activity O_CREATED
+activity O_SENT_BACK
+activity O_CANCELLED
+activity O_ACCEPTED
+activity O_DECLINED
+Response[O_CREATED, O_SENT] | | |
+Existence[O_SENT] | |
+Existence[O_SELECTED] | |
+Existence[O_CREATED] | |
+Existence[O_SENT_BACK] | |
+Response[O_CREATED, O_SENT_BACK] | | |
+Existence[O_CANCELLED] | |
+Response[O_SENT_BACK, O_ACCEPTED] | | |
+Existence[O_ACCEPTED] | |
+Response[O_SELECTED, O_CANCELLED] | | |
+Response[O_SENT, O_CANCELLED] | | |
+Response[O_CANCELLED, O_CREATED] | | |
+Existence[O_DECLINED] | |
+Response[O_SENT_BACK, O_DECLINED] | | |
+Response[O_CANCELLED, O_SELECTED] | | |

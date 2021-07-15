@@ -1,0 +1,15 @@
+activity Resolve ticket
+activity Closed
+activity Assign seriousness
+activity Take in charge ticket
+activity Wait
+Existence[Resolve ticket] | |
+Response[Resolve ticket, Closed] | | |
+Existence[Closed] | |
+Existence[Assign seriousness] | |
+Existence[Take in charge ticket] | |
+Response[Take in charge ticket, Resolve ticket] | | |
+Existence[Wait] | |
+Response[Assign seriousness, Wait] | | |
+Response[Take in charge ticket, Wait] | | |
+Response[Wait, Take in charge ticket] | | |

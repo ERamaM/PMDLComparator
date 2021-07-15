@@ -1,0 +1,15 @@
+activity Completed-Closed
+activity Accepted-In Progress
+activity Queued-Awaiting Assignment
+activity Accepted-Assigned
+activity Accepted-Wait
+Existence[Completed-Closed] | |
+Existence[Accepted-In Progress] | |
+Existence[Queued-Awaiting Assignment] | |
+Existence[Accepted-Assigned] | |
+Response[Accepted-Wait, Completed-Closed] | | |
+Existence[Accepted-Wait] | |
+Response[Accepted-Assigned, Accepted-In Progress] | | |
+Response[Queued-Awaiting Assignment, Accepted-Assigned] | | |
+Response[Accepted-In Progress, Accepted-Wait] | | |
+Response[Accepted-Wait, Accepted-In Progress] | | |

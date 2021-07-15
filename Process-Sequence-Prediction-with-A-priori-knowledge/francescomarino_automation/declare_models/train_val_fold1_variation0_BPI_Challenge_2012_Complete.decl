@@ -1,0 +1,64 @@
+activity A_PARTLYSUBMITTED
+activity A_SUBMITTED
+activity A_DECLINED
+activity A_PREACCEPTED
+activity W_Completeren aanvraag
+activity A_ACCEPTED
+activity O_CREATED
+activity O_SENT
+activity O_SELECTED
+activity A_FINALIZED
+activity W_Nabellen offertes
+activity W_Afhandelen leads
+activity O_SENT_BACK
+activity W_Valideren aanvraag
+activity A_CANCELLED
+activity O_CANCELLED
+activity A_REGISTERED
+activity A_ACTIVATED
+activity A_APPROVED
+activity O_ACCEPTED
+activity W_Nabellen incomplete dossiers
+Response[A_SUBMITTED, A_PARTLYSUBMITTED] | | |
+Existence[A_PARTLYSUBMITTED] | |
+Existence[A_SUBMITTED] | |
+Existence[A_DECLINED] | |
+Response[A_PARTLYSUBMITTED, A_PREACCEPTED] | | |
+Existence[A_PREACCEPTED] | |
+Existence[W_Completeren aanvraag] | |
+Response[A_ACCEPTED, W_Completeren aanvraag] | | |
+Existence[A_ACCEPTED] | |
+Response[O_CREATED, O_SENT] | | |
+Existence[O_CREATED] | |
+Response[A_FINALIZED, O_CREATED] | | |
+Existence[O_SENT] | |
+Existence[O_SELECTED] | |
+Existence[A_FINALIZED] | |
+Existence[W_Nabellen offertes] | |
+Existence[W_Afhandelen leads] | |
+Response[O_SENT, W_Completeren aanvraag] | | |
+Existence[O_SENT_BACK] | |
+Existence[W_Valideren aanvraag] | |
+Response[O_SENT, O_SENT_BACK] | | |
+Response[O_SENT_BACK, W_Nabellen offertes] | | |
+Existence[A_CANCELLED] | |
+Existence[O_CANCELLED] | |
+Existence[A_APPROVED] | |
+Existence[A_REGISTERED] | |
+Existence[A_ACTIVATED] | |
+Existence[O_ACCEPTED] | |
+Response[W_Nabellen offertes, O_ACCEPTED] | | |
+Response[A_DECLINED, W_Afhandelen leads] | | |
+Response[O_SELECTED, A_FINALIZED] | | |
+Response[A_ACTIVATED, W_Valideren aanvraag] | | |
+Response[A_PREACCEPTED, A_DECLINED] | | |
+Response[W_Nabellen offertes, W_Nabellen incomplete dossiers] | | |
+Existence[W_Nabellen incomplete dossiers] | |
+Response[O_CANCELLED, W_Nabellen offertes] | | |
+Response[O_SENT, A_CANCELLED] | | |
+Response[O_SENT, O_CANCELLED] | | |
+Response[W_Completeren aanvraag, O_SELECTED] | | |
+Response[O_ACCEPTED, A_APPROVED] | | |
+Response[W_Afhandelen leads, A_ACCEPTED] | | |
+Response[A_APPROVED, A_REGISTERED] | | |
+Response[A_REGISTERED, A_ACTIVATED] | | |

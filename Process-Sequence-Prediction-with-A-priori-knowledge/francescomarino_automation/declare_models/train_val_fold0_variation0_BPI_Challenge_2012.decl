@@ -1,0 +1,101 @@
+activity A_SUBMITTED+COMPLETE
+activity A_PARTLYSUBMITTED+COMPLETE
+activity A_DECLINED+COMPLETE
+activity W_Completeren aanvraag+SCHEDULE
+activity W_Completeren aanvraag+COMPLETE
+activity A_PREACCEPTED+COMPLETE
+activity W_Completeren aanvraag+START
+activity A_ACCEPTED+COMPLETE
+activity O_CREATED+COMPLETE
+activity O_SENT+COMPLETE
+activity A_FINALIZED+COMPLETE
+activity W_Nabellen offertes+SCHEDULE
+activity O_SELECTED+COMPLETE
+activity W_Nabellen offertes+COMPLETE
+activity W_Nabellen offertes+START
+activity W_Afhandelen leads+START
+activity W_Afhandelen leads+SCHEDULE
+activity W_Afhandelen leads+COMPLETE
+activity W_Valideren aanvraag+SCHEDULE
+activity O_SENT_BACK+COMPLETE
+activity W_Valideren aanvraag+COMPLETE
+activity W_Valideren aanvraag+START
+activity A_CANCELLED+COMPLETE
+activity O_CANCELLED+COMPLETE
+activity A_ACTIVATED+COMPLETE
+activity A_APPROVED+COMPLETE
+activity A_REGISTERED+COMPLETE
+activity O_ACCEPTED+COMPLETE
+activity W_Nabellen incomplete dossiers+START
+activity W_Nabellen incomplete dossiers+SCHEDULE
+activity W_Nabellen incomplete dossiers+COMPLETE
+Response[A_SUBMITTED+COMPLETE, A_PARTLYSUBMITTED+COMPLETE] | | |
+Existence[A_SUBMITTED+COMPLETE] | |
+Existence[A_PARTLYSUBMITTED+COMPLETE] | |
+Existence[A_DECLINED+COMPLETE] | |
+Existence[W_Completeren aanvraag+SCHEDULE] | |
+Existence[W_Completeren aanvraag+COMPLETE] | |
+Response[A_PREACCEPTED+COMPLETE, W_Completeren aanvraag+SCHEDULE] | | |
+Existence[A_PREACCEPTED+COMPLETE] | |
+Existence[W_Completeren aanvraag+START] | |
+Existence[A_ACCEPTED+COMPLETE] | |
+Existence[W_Nabellen offertes+SCHEDULE] | |
+Response[A_ACCEPTED+COMPLETE, A_FINALIZED+COMPLETE] | | |
+Response[O_SELECTED+COMPLETE, O_SENT+COMPLETE] | | |
+Existence[A_FINALIZED+COMPLETE] | |
+Existence[O_SENT+COMPLETE] | |
+Response[A_FINALIZED+COMPLETE, O_CREATED+COMPLETE] | | |
+Existence[O_CREATED+COMPLETE] | |
+Existence[O_SELECTED+COMPLETE] | |
+Existence[W_Nabellen offertes+COMPLETE] | |
+Existence[W_Nabellen offertes+START] | |
+Response[W_Nabellen offertes+SCHEDULE, W_Nabellen offertes+START] | | |
+Existence[W_Afhandelen leads+COMPLETE] | |
+Response[A_PARTLYSUBMITTED+COMPLETE, W_Afhandelen leads+SCHEDULE] | | |
+Existence[W_Afhandelen leads+SCHEDULE] | |
+Existence[W_Afhandelen leads+START] | |
+Response[W_Afhandelen leads+SCHEDULE, W_Afhandelen leads+START] | | |
+Response[O_SENT+COMPLETE, W_Nabellen offertes+SCHEDULE] | | |
+Response[O_CREATED+COMPLETE, W_Nabellen offertes+SCHEDULE] | | |
+Response[W_Nabellen offertes+SCHEDULE, W_Completeren aanvraag+COMPLETE] | | |
+Response[W_Nabellen offertes+START, O_SENT_BACK+COMPLETE] | | |
+Existence[W_Valideren aanvraag+SCHEDULE] | |
+Existence[O_SENT_BACK+COMPLETE] | |
+Existence[W_Valideren aanvraag+COMPLETE] | |
+Existence[W_Valideren aanvraag+START] | |
+Response[W_Valideren aanvraag+SCHEDULE, W_Valideren aanvraag+START] | | |
+Response[O_SENT_BACK+COMPLETE, W_Nabellen offertes+COMPLETE] | | |
+Existence[A_CANCELLED+COMPLETE] | |
+Response[W_Completeren aanvraag+COMPLETE, O_CANCELLED+COMPLETE] | | |
+Existence[O_CANCELLED+COMPLETE] | |
+Response[W_Afhandelen leads+START, A_PREACCEPTED+COMPLETE] | | |
+Response[W_Afhandelen leads+COMPLETE, W_Completeren aanvraag+START] | | |
+Response[A_DECLINED+COMPLETE, W_Afhandelen leads+COMPLETE] | | |
+Existence[A_REGISTERED+COMPLETE] | |
+Existence[A_APPROVED+COMPLETE] | |
+Existence[A_ACTIVATED+COMPLETE] | |
+Response[W_Valideren aanvraag+START, O_ACCEPTED+COMPLETE] | | |
+Existence[O_ACCEPTED+COMPLETE] | |
+Response[O_SELECTED+COMPLETE, A_FINALIZED+COMPLETE] | | |
+Response[A_REGISTERED+COMPLETE, W_Valideren aanvraag+COMPLETE] | | |
+Response[A_ACTIVATED+COMPLETE, W_Valideren aanvraag+COMPLETE] | | |
+Response[W_Nabellen offertes+START, O_CANCELLED+COMPLETE] | | |
+Response[W_Completeren aanvraag+START, A_DECLINED+COMPLETE] | | |
+Response[W_Completeren aanvraag+SCHEDULE, A_DECLINED+COMPLETE] | | |
+Response[W_Valideren aanvraag+SCHEDULE, W_Nabellen offertes+COMPLETE] | | |
+Existence[W_Nabellen incomplete dossiers+SCHEDULE] | |
+Response[W_Valideren aanvraag+SCHEDULE, W_Nabellen incomplete dossiers+COMPLETE] | | |
+Existence[W_Nabellen incomplete dossiers+START] | |
+Response[W_Nabellen offertes+COMPLETE, W_Nabellen incomplete dossiers+SCHEDULE] | | |
+Response[W_Nabellen incomplete dossiers+SCHEDULE, W_Nabellen incomplete dossiers+START] | | |
+Response[W_Nabellen incomplete dossiers+START, W_Nabellen incomplete dossiers+COMPLETE] | | |
+Existence[W_Nabellen incomplete dossiers+COMPLETE] | |
+Response[O_CANCELLED+COMPLETE, W_Nabellen offertes+COMPLETE] | | |
+Response[W_Nabellen offertes+START, A_CANCELLED+COMPLETE] | | |
+Response[W_Nabellen incomplete dossiers+SCHEDULE, W_Valideren aanvraag+COMPLETE] | | |
+Response[A_APPROVED+COMPLETE, A_ACTIVATED+COMPLETE] | | |
+Response[O_ACCEPTED+COMPLETE, A_APPROVED+COMPLETE] | | |
+Response[W_Afhandelen leads+COMPLETE, A_ACCEPTED+COMPLETE] | | |
+Response[W_Completeren aanvraag+COMPLETE, O_SELECTED+COMPLETE] | | |
+Response[A_APPROVED+COMPLETE, A_REGISTERED+COMPLETE] | | |
+Response[W_Nabellen offertes+COMPLETE, W_Valideren aanvraag+SCHEDULE] | | |
