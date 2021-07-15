@@ -287,6 +287,8 @@ The results are stored inside the "results" folder. The trained models are store
 
 ### Francescomarino (Process-Sequence-Prediction-with-A-priori-knowledge)
 
+#### Manual rule discovery
+
 First, download the RuM tool from: https://sep.cs.ut.ee/Main/RuM
 
 Then, execute the tool with the following command:
@@ -314,6 +316,13 @@ Group the list by "Constraints" and sort the groups by "Fullfillments". Then, se
 
 These rules must be added in the file "formulas.yaml" using the same format as indicated in the comments.
 
+Before running the experiments you need to start the Java LTL checker server. The file is inside the subdirectory "./LTLCheckForTraces/out/artifacts/TryToCompile_jar/". Inside that directory execute:
+
+	java -jar TryToCompile.jar
+
+
+If the file is missing, you'll need to compile the code (use IntelliJ IDEA).
+
 Finally, to run the experiments, execute the training procedure as follows:
 
     python train.py --fold_dataset ../data/[FOLD_DATASET] --full_dataset ../data/[FULL_DATASET] --train --test --test_suffix
@@ -322,4 +331,4 @@ Example:
 
 	python train.py --fold_dataset ../data/fold0_variation0_BPI_Challenge_2012_A.csv --full_dataset ../data/BPI_Challenge_2012_A.csv --test --test_suffix --train
 
-
+I recommend you leave the java app execution inside a Tmux session and use the ./generate_queue.sh script to run all the experiments.
