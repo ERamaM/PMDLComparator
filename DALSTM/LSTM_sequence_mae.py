@@ -71,7 +71,7 @@ print("Dataset name: ", dataset_name)
 np.random.seed(42)
 tf.compat.v1.set_random_seed(42)
 
-(X, y), values = load_dataset(args.full_dataset)
+(_, _), values = load_dataset(args.full_dataset)
 (X_train, y_train), _ = load_dataset(os.path.join(dataset_directory, "train_" + dataset_name), values)
 (X_val, y_val), _ = load_dataset(os.path.join(dataset_directory, "val_" + dataset_name), values)
 (X_test, y_test), _ = load_dataset(os.path.join(dataset_directory, "test_" + dataset_name), values)
@@ -113,7 +113,7 @@ y_train = np.asarray(y_train)
 y_val = np.asarray(y_val)
 y_test = np.asarray(y_test)
 
-if dataset_name.lower() == "bpi_challenge_2013_incidents.csv":
+if "bpi_challenge_2013_incidents" in dataset_name.lower():
     X_train = sequence.pad_sequences(X_train, dtype="int16")
     print("X_train: ", X_train[0])
     print("DEBUG: training shape", X_train.shape)

@@ -44,6 +44,8 @@ def load_dataset(filename, prev_values=None):
             except:
                 dataset[:, i] = dataset[:, i].astype(str)
                 values.append(len(np.unique(dataset[:, i])))  # +1
+
+        return (None, None), values
     else:
         values = prev_values
 
@@ -112,20 +114,22 @@ def load_dataset(filename, prev_values=None):
                 lastevtime = datetime.fromtimestamp(
                     time.mktime(time.strptime(line[2], "%Y-%m-%d %H:%M:%S")))
 
-                a.extend(buildOHE(one_hot(line[1], values[1], split="|")[0], values[1]))
+                a.extend(buildOHE(one_hot(line[1], values[1], filters=[], split="|")[0], values[1]))
 
                 field = 3
                 for i in line[3:]:
                     if not np.issubdtype(dataframe.dtypes[field], np.number):
                         # print "object", field
-                        #print("------")
-                        #print("OH: ", one_hot(str(i), values[field], split="|"))
-                        #print("Values field: ", values[field])
-                        #print("Field: ", field)
-                        #print("str(i): ", str(i))
-                        #print("OH2",  one_hot(str(i), values[field], split="|")[0])
-                        #print("------")
-                        a.extend(buildOHE(one_hot(str(i), values[field], split="|")[0], values[field]))
+                        """
+                        print("------")
+                        print("OH: ", one_hot(str(i), values[field], split="|"))
+                        print("Values field: ", values[field])
+                        print("Field: ", field)
+                        print("str(i): ", str(i))
+                        print("OH2",  one_hot(str(i), values[field], filters=[], split="|")[0])
+                        print("------")
+                        """
+                        a.extend(buildOHE(one_hot(str(i), values[field], filters=[], split="|")[0], values[field]))
                     else:
                         a.append(i)
                     field += 1
