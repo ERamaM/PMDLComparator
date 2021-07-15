@@ -316,10 +316,39 @@ Group the list by "Constraints" and sort the groups by "Fullfillments". Then, se
 
 These rules must be added in the file "formulas.yaml" using the same format as indicated in the comments.
 
+#### Automatic rule discovery
+
+There is a way to automatize the previous steps when you have to perform an experimentation over a big set of process logs. The extraction process is run in two steps: first, we screenshot the rules from RuM automatically using Sikuli. Then, we use Tesseract and OpenCV to extract the rules from the images taken.
+
+The screenshot process must be run in a system with the following characteristics (can be a virtual machine): **Windows 10 x64 with Java 11 x64 under a resolution of 1920x1980 using RuM in full screen under the default theme of Windows. If you use a virtual machine, ensure to use "Full screen" and "Exclusive mode" if available**. This is really important since we rely exclusively in screenshots to detect the buttoms of RuM.
+
+First, download RuM and the Sikuli IDE using the scripts "download_rum" and "download_sikulix". Then, open both applications using Java (put RuM in full screen). Create or empty the folders "declare_models" and "declare_rules" under the same directory that the sikuli executable is placed. Then, click "run" in sikuli to start the extraction process. DON'T touch the mouse under any circumstance or block the screen of RuM with other windows. After the extraction is done, the screenshots will be placed inside the folder "declare_rules". 
+
+Now, we have to prepare the environment for the extraction of the rules from the screenshots.
+
+First, install tesseract and opencv:
+
+	sudo apt install libtesseract-dev tesseract-ocr
+
+Then create a conda environment for the OCR:
+
+	conda create -n "ocr" python=3.6
+	python -m pip install opencv-python==4.5.3.56 pytesseract==0.3.7 pandas==1.1.5
+	conda activate ocr
+
+Then, run the script "ocr_images.py"
+	
+	python ocr_images.py
+
+This script assumes that the images are 1920x1048 (i don't know why sikuli does not capture the screen entirely). If the images are different, you'll need to modify the pixels used to extract the rules in lines 51-65. This script assumes also that a folder with data will be inside "data" called "activity_assignments" (this folder is automatically created when preprocessing the data using the data_preprocessor).
+
+After running the script, the formulas will be placed inside the folder "src" under the file "formulas.yaml".
+
+#### Running the experiments
+
 Before running the experiments you need to start the Java LTL checker server. The file is inside the subdirectory "./LTLCheckForTraces/out/artifacts/TryToCompile_jar/". Inside that directory execute:
 
 	java -jar TryToCompile.jar
-
 
 If the file is missing, you'll need to compile the code (use IntelliJ IDEA).
 
