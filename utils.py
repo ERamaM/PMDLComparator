@@ -229,7 +229,7 @@ class EXTENSIONS:
 
 
 def select_columns(file, input_columns, category_columns, timestamp_format, output_columns, categorize=False,
-                   fill_na=None, francescomarino_fix=None):
+                   fill_na=None, francescomarino_fix=None, save_category_assignment=None):
     """
     Select columns from CSV converted from XES
     :param file: csv file
@@ -262,7 +262,12 @@ def select_columns(file, input_columns, category_columns, timestamp_format, outp
             if category_column == XES_Fields.ACTIVITY_COLUMN:
                 category_list = dataset[category_column].astype("category").cat.categories.tolist()
                 category_dict = {c : i for i, c in enumerate(category_list)}
-                print("Activity assignment: ", category_dict)
+                if save_category_assignment is None:
+                    print("Activity assignment: ", category_dict)
+                else:
+                    file_name = Path(file).name
+                    with open(os.path.join(save_category_assignment, file_name), "w") as fw:
+                        fw.write(str(category_dict))
             dataset[category_column] = dataset[category_column].astype("category").cat.codes
 
     # For reasons unknown, using this scheme of partitioning is not good for RuM and, in general, for loading xes Java based systems.

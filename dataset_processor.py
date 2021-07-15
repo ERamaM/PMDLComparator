@@ -229,6 +229,7 @@ if arguments.net:
             make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/results")
             make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/data")
             make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/data/declare_miner_files")
+            make_dir_if_not_exists("Process-Sequence-Prediction-with-A-priori-knowledge/data/activity_assignments")
 
             # Tax already performs the augmentation in their script
             # so there is no need to perform it here
@@ -278,7 +279,7 @@ if arguments.net:
                 input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
                 category_columns=[XES_Fields.ACTIVITY_COLUMN],
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
-                output_columns=output_columns, categorize=True, francescomarino_fix=False
+                output_columns=output_columns, categorize=True, francescomarino_fix=False, save_category_assignment="Process-Sequence-Prediction-with-A-priori-knowledge/data/activity_assignments/"
             )
             csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp", "CaseID")
             files_to_move = [csv_path] + train_paths + val_paths + test_paths

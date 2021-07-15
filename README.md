@@ -316,8 +316,10 @@ These rules must be added in the file "formulas.yaml" using the same format as i
 
 Finally, to run the experiments, execute the training procedure as follows:
 
-```
-python train.py --dataset DATASET --train --test --test_suffix --test_suffix_calculus
-```
+    python train.py --fold_dataset ../data/[FOLD_DATASET] --full_dataset ../data/[FULL_DATASET] --train --test --test_suffix
+
+Example:
+
+	python train.py --fold_dataset ../data/fold0_variation0_BPI_Challenge_2012_A.csv --full_dataset ../data/BPI_Challenge_2012_A.csv --test --test_suffix --train
 
 
