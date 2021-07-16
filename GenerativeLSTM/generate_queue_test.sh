@@ -7,5 +7,5 @@ else
 fi
 for i in $(ls input_files | grep  "train"); do
 	log=${i/train_/}
-  TS_SOCKET=/tmp/camargo $TS_EXECUTABLE  python evaluation_generator.py --log $log
+  TS_SOCKET=/tmp/camargo_test $TS_EXECUTABLE  python evaluation_generator.py --log $log
 done
