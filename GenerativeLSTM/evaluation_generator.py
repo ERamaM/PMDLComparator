@@ -74,6 +74,6 @@ if hostname == "ctgpgpu8" or hostname == "ctgpgpu7":
 
 command_next = tsp_executable + " python lstm.py -a predict_next -c " + folder + " -b \"" + model + "\" -x False -ho True"
 command_sfx = tsp_executable + " python lstm.py -a pred_sfx -c " + folder + " -b \"" + model + "\" -x False -ho True -t 100"
-os.system(dump_f + "TS_SOCKET=/tmp/camargo " + command_next)
-os.system(dump_f + "TS_SOCKET=/tmp/camargo " + command_sfx)
+os.system(dump_f + "TS_SOCKET=/tmp/camargo_test " + command_next)
+os.system(dump_f + "TS_SOCKET=/tmp/camargo_test " + command_sfx)
 
