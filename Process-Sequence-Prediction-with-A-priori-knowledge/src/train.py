@@ -334,7 +334,7 @@ if args.test:
         file.write("\nWeighted Recall: " + str(recall))
         file.write("\nWeighted F1: " + str(f1))
 
-    with open(os.path.join("results", "raw_" + eventlog_name + ".txt"), "w") as raw_file:
+    with open(os.path.join("../results", "raw_" + eventlog_name + ".txt"), "w") as raw_file:
         raw_file.write("prefix_length;ground_truth;predicted;prediction_probs\n")
         for X, y_t, y_p, y_p_pred in zip(X_test, y_true, y_a_pred, y_a_pred_probs):
             raw_file.write(str(np.count_nonzero(np.sum(X, axis=-1))) + ";" + str(y_t) + ";" + str(y_p) + ";" + np.array2string(
