@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python lstm.py -f fold3_variation0_Helpdesk.csv -w Helpdesk.csv -i 1 -a training -o True -l relu -y 50 -d sigmoid -n max -m shared_cat -p Nadam -z 5
+Slots required: 1
+Enqueue time: Thu Jul  1 10:21:17 2021
+Start time: Mon Jul 12 16:38:35 2021
+End time: Mon Jul 12 17:36:20 2021
+Time run: 3465.419189s

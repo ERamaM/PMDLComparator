@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python lstm.py -f fold0_variation0_BPI_Challenge_2012_W.csv -w BPI_Challenge_2012_W.csv -i 1 -a training -o True -l tanh -y 200 -d linear -n max -m shared_cat -p Adam -z 5
+Slots required: 1
+Enqueue time: Thu Jul  1 10:21:07 2021
+Start time: Sat Jul  3 12:24:41 2021
+End time: Sat Jul  3 14:40:00 2021
+Time run: 8118.958984s

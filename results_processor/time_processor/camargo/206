@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python lstm.py -f fold0_variation0_env_permit.csv -w env_permit.csv -i 1 -a training -o True -l relu -y 100 -d linear -n max -m shared_cat -p Adam -z 5
+Slots required: 1
+Enqueue time: Thu Jul  1 10:21:08 2021
+Start time: Sun Jul  4 10:15:38 2021
+End time: Sun Jul  4 10:33:21 2021
+Time run: 1063.059448s
