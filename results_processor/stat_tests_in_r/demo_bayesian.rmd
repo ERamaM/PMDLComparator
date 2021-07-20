@@ -80,30 +80,33 @@ plotBarycentric(weights)
 # Comparaciones a pares usando el signed rank test bayesiano en múltiples datasets.
 
 ```{r}
-mauro <- data_acc[, "Mauro"]
-pasqua <- data_acc[, "Pasquadibisceglie"]
-evermann <- data_acc[, "Evermann"]
-print(index)
+best_one <- data_acc[, names(index)[1]]
+best_two <- data_acc[, names(index)[2]]
+best_three <- data_acc[, names(index)[3]]
+print(names(index))
 ```
 
-## Mauro vs Pasquadibisceglie
+## Mejor aproximación vs segunda mejor aproximación
 ```{r}
-signed_test <- bSignedRankTest(mauro, pasqua, rope=c(-0.01, 0.01))
+signed_test <- bSignedRankTest(best_one, best_two, rope=c(-0.01, 0.01))
+signed_test$posterior.probabilities
+# Left = P(best_one << best_two)
+# Rope = P(best_one = best_two)
+# Right = P(best_one >> best_two)
+```
+
+```{r}
+plotSimplex(signed_test, A=names(index)[1], B=names(index)[2], plot.density=FALSE, alpha=0.5)
+```
+
+## Segundo mejor vs tercer mejor
+```{r}
+signed_test <- bSignedRankTest(best_two, best_three, rope=c(-0.01, 0.01))
 signed_test$posterior.probabilities
 ```
 
 ```{r}
-plotSimplex(signed_test, A="Mauro", B="Pasquadibisceglie", plot.density=FALSE, alpha=0.5)
-```
-
-## Pasquadibisceglie vs Evermann
-```{r}
-signed_test <- bSignedRankTest(pasqua, evermann, rope=c(-0.01, 0.01))
-signed_test$posterior.probabilities
-```
-
-```{r}
-plotSimplex(signed_test, A="Pasquadibisceglie", B="Evermann", plot.density=FALSE, alpha=0.5)
+plotSimplex(signed_test, A=names(index)[2], B=names(index)[3], plot.density=FALSE, alpha=0.5)
 ```
 
 
@@ -120,7 +123,7 @@ print(index)
 ```
 
 ```{r}
-# Number 3 is the best performing one
+# Number 1 is the best performing one
 subset_1 <- raw_data_acc[raw_data_acc$approach == names(index[1]),][c("log", "fold", "acc")]
 reshaped_1 <- reshape(subset_1, direction="wide", idvar="log", timevar="fold")
 rownames(reshaped_1) <- reshaped_1[,"log"]
@@ -140,7 +143,7 @@ reshaped_1$log <- NULL
 ## Mejor aproximación
 
 ```{r}
-reshaped_3
+reshaped_1
 ```
 
 ## Segunda mejor aproximación
@@ -151,34 +154,10 @@ reshaped_2
 
 ## Tercera mejor aproximación
 ```{r}
-reshaped_1
+reshaped_3
 ```
 
-
-## Mejor aproximación vs segunda mejor aproximación
-
-```{r}
-
-matrix_3 <- data.matrix(reshaped_3)
-matrix_2 <- data.matrix(reshaped_2)
-matrix_3
-```
-
-```{r}
-# For some reason we need to switch the parameters to get the plot right
-results <- bHierarchicalTest(matrix_3, matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
-```
-
-```{r}
-plotSimplex(results, A=names(index[3]), B=names(index[2]), posterior.label=TRUE, alpha=0.5)
-```
-
-```{r}
-rownames(results$additional$per.dataset) <- rownames(reshaped_3)
-results$additional$per.dataset
-```
-
-## Segunda mejor aproximación vs tercera mejor aproximación
+## Mejor aproximación vs segunda mejor
 
 ```{r}
 
@@ -188,14 +167,38 @@ matrix_1 <- data.matrix(reshaped_1)
 
 ```{r}
 # For some reason we need to switch the parameters to get the plot right ??
-results <- bHierarchicalTest(matrix_2, matrix_1, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
+results <- bHierarchicalTest(matrix_1, matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
 ```
 
 ```{r}
-plotSimplex(results, A=names(index[2]), B=names(index[1]), posterior.label=TRUE, alpha=0.5)
+plotSimplex(results, A=names(index[1]), B=names(index[2]), posterior.label=TRUE, alpha=0.5)
 ```
 
 ```{r}
 rownames(results$additional$per.dataset) <- rownames(reshaped_2)
 results$additional$per.dataset
 ```
+
+## Segunda mejor vs tercera mejor
+
+```{r}
+
+matrix_2 <- data.matrix(reshaped_2)
+matrix_3 <- data.matrix(reshaped_3)
+matrix_2
+```
+
+```{r}
+# For some reason we need to switch the parameters to get the plot right
+results <- bHierarchicalTest(matrix_3, matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
+```
+
+```{r}
+plotSimplex(results, A=names(index[2]), B=names(index[3]), posterior.label=TRUE, alpha=0.5)
+```
+
+```{r}
+rownames(results$additional$per.dataset) <- rownames(reshaped_3)
+results$additional$per.dataset
+```
+
