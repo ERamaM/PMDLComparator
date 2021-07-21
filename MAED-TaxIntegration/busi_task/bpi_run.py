@@ -350,7 +350,7 @@ def bpi_task_mix(X_train, y_a_train, y_t_train, X_val, y_a_val, y_t_val, eventlo
             y_t = np.reshape(y_t, [y_t.shape[0], 1, 1])
         return y_t
 
-    batch_size = 32
+    batch_size = 512
 
     print('bs {}'.format(batch_size))
     all_index = list(range(len(X)))
