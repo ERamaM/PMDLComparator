@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python LSTM_sequence_mae.py --fold_dataset data/fold3_variation0_nasa.csv --full_dataset data/nasa.csv --train --test
+Slots required: 1
+Enqueue time: Thu Jul 15 11:54:26 2021
+Start time: Mon Jul 19 12:49:37 2021
+End time: Mon Jul 19 19:03:01 2021
+Time run: 22403.597656s

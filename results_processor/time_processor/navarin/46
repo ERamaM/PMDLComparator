@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python LSTM_sequence_mae.py --fold_dataset data/fold3_variation0_env_permit.csv --full_dataset data/env_permit.csv --train --test
+Slots required: 1
+Enqueue time: Thu Jul 15 11:54:26 2021
+Start time: Mon Jul 19 12:34:07 2021
+End time: Mon Jul 19 12:49:37 2021
+Time run: 930.645447s

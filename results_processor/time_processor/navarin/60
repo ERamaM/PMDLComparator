@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python LSTM_sequence_mae.py --fold_dataset data/fold4_variation0_BPI_Challenge_2013_closed_problems.csv --full_dataset data/BPI_Challenge_2013_closed_problems.csv --train --test
+Slots required: 1
+Enqueue time: Tue Jul 20 10:03:27 2021
+Start time: Tue Jul 20 18:43:23 2021
+End time: Tue Jul 20 19:50:23 2021
+Time run: 4020.654785s

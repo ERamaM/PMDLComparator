@@ -1,0 +1,7 @@
+Exit status: died with exit code 0
+Command: python LSTM_sequence_mae.py --fold_dataset data/fold4_variation0_SEPSIS.csv --full_dataset data/SEPSIS.csv --train --test
+Slots required: 1
+Enqueue time: Thu Jul 15 11:54:26 2021
+Start time: Tue Jul 20 12:16:00 2021
+End time: Tue Jul 20 15:02:00 2021
+Time run: 9959.875977s
