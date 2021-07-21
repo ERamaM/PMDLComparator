@@ -40,7 +40,7 @@ library("here")
 if(dir.exists(file.path(getwd(), "results_processor/stat_tests_in_r"))){
   setwd(file.path(getwd(), "results_processor/stat_tests_in_r"))
 }
-data_acc <- read.csv("../processed_results/csv/acc.csv", row.names=1)
+data_acc <- read.csv("../processed_results/csv/next_activity/results.csv", row.names=1)
 data_acc
 ```
 
@@ -115,7 +115,7 @@ plotSimplex(signed_test, A=names(index)[2], B=names(index)[3], plot.density=FALS
 
 ## Leer y procesar la información de cada uno de los folds para cada dataset.
 ```{r}
-raw_data_acc <- read.csv("../processed_results/csv/raw_acc.csv", row.names=1)
+raw_data_acc <- read.csv("../processed_results/csv/next_activity/raw_results.csv", row.names=1)
 ```
 
 ```{r}

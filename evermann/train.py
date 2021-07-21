@@ -326,11 +326,12 @@ if args.test_suffix:
 if args.test_suffix_calculus:
     import pandas as pd
     df = pd.read_csv(os.path.join("results", "suffix_results_" + file_name + ".csv"), delimiter=";", quotechar="|")
-    print("--------")
-    print("Results for: ", file_name)
-    print("Mean damerau: ", df["normalized_damerau"].mean())
-    print("Damerau per prefix length")
-    print(df.groupby("Prefix length")["normalized_damerau"].mean())
-    print("--------")
+    with open(os.path.join("results", "aggregate_suffix_results_" + file_name + ".res"), "w") as f:
+        f.write("--------\n")
+        f.write("Results for: " + file_name + "\n")
+        f.write("Mean damerau: " + str(df["normalized_damerau"].mean()) + "\n")
+        f.write("Damerau per prefix length" + "\n")
+        f.write(str(df.groupby("Prefix length")["normalized_damerau"].mean()) + "\n")
+        f.write("--------\n")
 
 

@@ -19,46 +19,25 @@ dir_to_approach = {
 directories = [
     "../tax/code/results",
     "../evermann/results",
-    "../ImagePPMiner/results",
-    "../nnpm/results",
-    "../hinkka/src/output",
-    "../PyDREAM-NAP/results",
-    "../PyDREAM-NAP/results_no_resources",
     "../GenerativeLSTM/output_files/",
-    "../MAED-TaxIntegration/busi_task/data"
 ]
 
 # These regexes allow us to find the file that contains the results
 file_approaches_regex = {
-    "tax": ".*next_event.log",  # Ends with "next_event.log"
-    "evermann": ".*\.txt$",  # Does not start with "raw" # TODO: what about suffix calculations
-    "pasquadibisceglie" : "^(?!raw).*",
-    "mauro" : "^fold.*.txt",
-    "hinkka" : "results_.*",
-    "theis": ".*\.txt$",
-    "khan" : "results_.*"
+    "tax": "suffix_.*.csv",  # Ends with "next_event.log"
+    "evermann": "aggregate_suffix_results_.*\.res$",  # Does not start with "raw" # TODO: what about suffix calculations
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
 approaches_accuracy_regexes = {
-    "tax": "ACC Sklearn: (.*)",
-    "evermann": "Accuracy: (.*)",
-    "pasquadibisceglie" : "Accuracy: (.*)",
-    "mauro" : "Final Accuracy score:.*\[(.*)\]",
-    "hinkka": "Accuracy sklearn: (.*)",
-    "theis" : "    \"test_acc\": (.*),",
-    "khan" : "Accuracy: (.*)"
+    "tax": "Mean DL: (.*)",
+    "evermann": "Mean damerau: (.*)",
 }
 
 # These regexes allow us to delete parts of the filename that are not relevant
 approaches_clean_log_regexes = {
-    "tax": "_next_event.log",
-    "evermann": ".xes.txt",
-    "pasquadibisceglie" : ".txt",
-    "mauro" : ".txt",
-    "hinkka" : "results_",
-    "theis" : ".xes.gz_results.txt",
-    "khan" : "results_"
+    "tax": [".csv", "suffix_"],
+    "evermann": [".xes.res", "aggregate_suffix_results_"],
 }
 
 approaches_by_csv = ["camargo"]
@@ -98,7 +77,9 @@ def extract_by_regex(directory, approach, results, real_approach=None):
                     if acc_regex_match is not None:
                         accuracy = float(acc_regex_match.group(1))
                         break
-                clean_filename = file.replace(approaches_clean_log_regexes[approach], "")
+                clean_filename = file
+                for to_clean in approaches_clean_log_regexes[approach]:
+                    clean_filename = clean_filename.replace(to_clean, "")
                 parse_groups = re.match(log_regex, clean_filename)
                 fold, variation, log = parse_groups.groups()
                 log = log.lower()
@@ -190,7 +171,7 @@ for approach_A, approach_B in itertools.permutations(results.keys(), 2):
         approach_pair = (approach_A.capitalize(), approach_B.capitalize())
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
         if approach_pair not in t_results:
-            t_results[approach_pair] = {}
+            t_results[approach_pair] =  }
         t_results[approach_pair][log_cap] = t_statistic
         if approach_pair not in p_results:
             p_results[approach_pair] = {}
@@ -255,8 +236,7 @@ print("ACC DF LATX: ", acc_df_latex)
 
 # Format to select the best three approaches and assign them colors
 for column in acc_df_latex.columns:
-    acc_df_latex[column] = acc_df_latex[column] * 100
-    acc_df_latex[column] = acc_df_latex[column].round(2)
+    acc_df_latex[column] = acc_df_latex[column].round(4)
     best_three = acc_df_latex[column].nlargest(3)
     acc_df_latex[column] = acc_df_latex[column].astype(str)
     colors = ["PineGreen", "orange", "red"]
@@ -289,22 +269,22 @@ avg_rank = ranks.mean()
 # Save results
 ############################################
 
-os.makedirs("./processed_results/csv/next_activity", exist_ok=True)
-os.makedirs("./processed_results/latex/next_activity", exist_ok=True)
+os.makedirs("./processed_results/csv/suffix", exist_ok=True)
+os.makedirs("./processed_results/latex/suffix", exist_ok=True)
 
 
 # Save csvs
-pairwise_scores.round(4).to_csv("./processed_results/csv/next_activity/friedman_nemenyi_posthoc.csv")
-ranks.round(4).to_csv("./processed_results/csv/next_activity/raw_ranks.csv")
-avg_rank.round(4).to_csv("./processed_results/csv/next_activity/avg_rank.csv")
-((acc_df * 100).round(2)).to_csv("./processed_results/csv/next_activity/results.csv")
-acc_fold_df.to_csv("./processed_results/csv/next_activity/raw_results.csv")
+pairwise_scores.round(4).to_csv("./processed_results/csv/suffix/friedman_nemenyi_posthoc.csv")
+ranks.round(4).to_csv("./processed_results/csv/suffix/raw_ranks.csv")
+avg_rank.round(4).to_csv("./processed_results/csv/suffix/avg_rank.csv")
+acc_df.to_csv("./processed_results/csv/suffix/results.csv")
+acc_fold_df.to_csv("./processed_results/csv/suffix/raw_results.csv")
 
 #p_df.to_csv("./processed_results/csv/p_values_t_test.csv")
 #t_df.round(4).to_csv("./processed_results/csv/t_statistic_t_test.csv")
 
 # Save latex
-with open("./processed_results/latex/next_activity/acc_latex.txt", "w") as f:
+with open("./processed_results/latex/suffix/acc_latex.txt", "w") as f:
     f.write(acc_latex)
 #with open("../processed_results/latex/p_latex.txt", "w") as f:
 #    f.write(p_latex)

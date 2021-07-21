@@ -1,5 +1,4 @@
 #!/bin/bash
-rm results/*
 # Find task-spooler executable
 if command -v ts &> /dev/null
 then
@@ -25,6 +24,7 @@ for i in $(ls data | grep  "train"); do
 	  then
 	    TMPDIR=$DUMP_DIR CUDA_VISIBLE_DEVICES=0 TS_SOCKET=/tmp/evermann $TS_EXECUTABLE python train.py --fold_dataset data/$log --full_dataset data/$full_log --train --test --test_suffix --test_suffix_calculus
 	  else
-	    CUDA_VISIBLE_DEVICES=0 TS_SOCKET=/tmp/evermann $TS_EXECUTABLE python train.py --fold_dataset data/$log --full_dataset data/$full_log --train --test --test_suffix --test_suffix_calculus
+	    #CUDA_VISIBLE_DEVICES=0 TS_SOCKET=/tmp/evermann $TS_EXECUTABLE python train.py --fold_dataset data/$log --full_dataset data/$full_log --train --test --test_suffix --test_suffix_calculus
+	    CUDA_VISIBLE_DEVICES=0 TS_SOCKET=/tmp/evermann $TS_EXECUTABLE python train.py --fold_dataset data/$log --full_dataset data/$full_log --test_suffix_calculus
 	  fi
 done

@@ -1,5 +1,4 @@
 #!/bin/bash
-rm results/*
 if command -v ts &> /dev/null
 then
     TS_EXECUTABLE=ts
