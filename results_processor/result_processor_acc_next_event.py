@@ -290,7 +290,7 @@ avg_rank = ranks.mean()
 ############################################
 
 os.makedirs("./processed_results/csv/next_activity", exist_ok=True)
-os.makedirs("./processed_results/latex/next_activity", exist_ok=True)
+os.makedirs("./processed_results/latex/next_activity/plots", exist_ok=True)
 
 
 # Save csvs
