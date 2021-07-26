@@ -9,6 +9,13 @@ from scipy.stats import friedmanchisquare
 import numpy as np
 import scikit_posthocs as posthocs
 
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--metric", required=True, choices=["accuracy", "mcc", "f1-score", "precision", "recall", "brier"])
+arguments = parser.parse_args()
+metric = arguments.metric
+
 dir_to_approach = {
     "ImagePPMiner" : "pasquadibisceglie",
     "nnpm" : "mauro",
@@ -40,15 +47,68 @@ file_approaches_regex = {
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
-approaches_accuracy_regexes = {
-    "tax": "ACC Sklearn: (.*)",
-    "evermann": "Accuracy: (.*)",
-    "pasquadibisceglie" : "Accuracy: (.*)",
-    "mauro" : "Final Accuracy score:.*\[(.*)\]",
-    "hinkka": "Accuracy sklearn: (.*)",
-    "theis" : "    \"test_acc\": (.*),",
-    "khan" : "Accuracy: (.*)"
-}
+if metric == "accuracy":
+    approaches_accuracy_regexes = {
+        "tax": "ACC Sklearn: (.*)",
+        "evermann": "Accuracy: (.*)",
+        "pasquadibisceglie" : "Accuracy: (.*)",
+        "mauro" : "Final Accuracy score:.*\[(.*)\]",
+        "hinkka": "Accuracy sklearn: (.*)",
+        "theis" : "    \"test_acc\": (.*),",
+        "khan" : "Accuracy: (.*)"
+    }
+elif metric == "mcc":
+    approaches_accuracy_regexes = {
+        "evermann" : "MCC: (.*)",
+        "hinkka" : "MCC: (.*)",
+        "pasquadibisceglie" : "MCC: (.*)",
+        "mauro" : "MCC: (.*)",
+        "theis": "    \"test_mcc\": (.*),",
+        "tax"  : "MCC: (.*)",
+        "khan" : "" # TODO
+    }
+elif metric == "f1-score":
+    approaches_accuracy_regexes = {
+        "evermann" : "Weighted f1: (.*)",
+        "hinkka" : "Weighted f1: (.*)",
+        "pasquadibisceglie" : "Weighted F1: (.*)",
+        "mauro" : "Weighted F1: (.*)",
+        "theis": "    \"test_fscore_weighted\": (.*),",
+        "tax" : "Weighted F1: (.*)",
+        "khan": ""  # TODO
+    }
+elif metric == "precision":
+    approaches_accuracy_regexes = {
+        "evermann" : "Weighted precision: (.*)",
+        "hinkka" : "Weighted Precision: (.*)",
+        "pasquadibisceglie" : "Weighted Precision: (.*)",
+        "mauro" : "Weighted Precision: (.*)",
+        "theis": "    \"test_prec_weighted\": (.*),",
+        "tax" : "Weighted Precision: (.*)",
+        "khan": ""  # TODO
+    }
+elif metric == "recall":
+    approaches_accuracy_regexes = {
+        "evermann" : "Weighted recall: (.*)",
+        "hinkka" : "Weighted recall: (.*)",
+        "pasquadibisceglie" : "Weighted Recall: (.*)",
+        "mauro" : "Weighted Recall: (.*)",
+        "theis": "    \"test_rec_weighted\": (.*),",
+        "tax" : "Weighted Recall: (.*)",
+        "khan": ""  # TODO
+    }
+elif metric == "brier":
+    approaches_accuracy_regexes = {
+        "evermann": "Brier score: (.*)",
+        "hinkka": "Brier score: (.*)",
+        "pasquadibisceglie": "Brier score: (.*)",
+        "mauro" : "Brier score: (.*)",
+        "theis": "    \"test_brier_score\": (.*),",
+        "tax" : "Brier score: (.*)",
+        "khan": ""  # TODO
+    }
+else:
+    raise ValueError
 
 # These regexes allow us to delete parts of the filename that are not relevant
 approaches_clean_log_regexes = {
@@ -112,7 +172,23 @@ def extract_by_csv_camargo(directory, approach, results):
     if not os.path.exists(os.path.join(directory, "ac_predict_next.csv")):
         return
     csv = pd.read_csv(os.path.join(directory, "ac_predict_next.csv"))
-    relevant_rows = csv[["implementation", "accuracy", "file_name"]][csv["implementation"] == "Arg Max"]
+
+    if metric == "accuracy":
+        get_metric = "accuracy"
+    elif metric == "mcc":
+        get_metric = "mcc"
+    elif metric == "brier":
+        get_metric = "brier_score"
+    elif metric == "f1-score":
+        get_metric = "f1_score_weighted"
+    elif metric == "precision":
+        get_metric = "precision_weighted"
+    elif metric == "recall":
+        get_metric = "recall_weighted"
+    else:
+        raise ValueError
+
+    relevant_rows = csv[["implementation", get_metric, "file_name"]][csv["implementation"] == "Arg Max"]
     for idx, row in relevant_rows.iterrows():
         clean_filename = row["file_name"].replace(".csv", "")
         parse_groups = re.match(log_regex, clean_filename)
@@ -156,69 +232,6 @@ for delete in delete_list:
     results.pop(delete)
 
 ############################################
-# Perform paired t-test and retrieve results
-############################################
-"""
-t_results = {}
-p_results = {}
-for approach_A, approach_B in itertools.permutations(results.keys(), 2):
-    for log in list(available_logs):
-        s2_list = []
-        # We need to sort to guarantee that the first element is always the same (e.g., fold 0 vs fold 0 and so on)
-        # Calculation from here: http://rasbt.github.io/mlxtend/user_guide/evaluate/paired_ttest_5x2cv/
-        p_mean = 0
-        first_p = 0
-        for fold_A, fold_B in zip(sorted(results[approach_A][log].keys()), sorted(results[approach_B][log].keys())):
-            # Error estimates
-            p1 = results[approach_A][log][fold_A]["0"] - results[approach_B][log][fold_B]["0"]
-            p2 = results[approach_A][log][fold_A]["1"] - results[approach_B][log][fold_B]["1"]
-            p_mean = (p1 + p2) / 2
-            # We need this information to calculate the t-statistic
-            if fold_A == "0":
-                first_p = p1
-
-            s2 = (p1 - p_mean) ** 2 + (p2 - p_mean) ** 2  # Variance of the ith replication
-            s2_list.append(s2)
-
-        t_statistic = first_p / math.sqrt((1 / len(s2_list)) * sum(s2_list))
-        # For some reason you must multiply by 2
-        # I think it is because you are performing a two-sided test
-        # https://github.com/rasbt/mlxtend/blob/7c329e40fab7659c3dd9b77f31a55db6f2400521/mlxtend/evaluate/ttest.py#L335
-        p_value = t.sf(t_statistic, len(s2_list)) * 2
-        print("T statistic: ", t_statistic)
-        print("P value: ", p_value)
-        approach_pair = (approach_A.capitalize(), approach_B.capitalize())
-        log_cap = " ".join([x.capitalize() for x in log.split("_")])
-        if approach_pair not in t_results:
-            t_results[approach_pair] = {}
-        t_results[approach_pair][log_cap] = t_statistic
-        if approach_pair not in p_results:
-            p_results[approach_pair] = {}
-        p_results[approach_pair][log_cap] = p_value
-
-print("T results: ", t_results)
-print("Available logs: ", available_logs)
-
-def bold_p_value_formatter(x):
-    if x < 0.05:
-        return r"\textbf{" + str(round(x, 4)) + "}"
-    else:
-        return str(round(x, 4))
-
-p_df = pd.DataFrame(p_results).transpose()
-print("P value df")
-print(p_df)
-p_latex = p_df.to_latex(formatters=[bold_p_value_formatter] * len(available_logs), escape=False, caption="P-values for the pairwise comparison approaches")
-print(p_latex)
-
-t_df = pd.DataFrame.from_dict(t_results).transpose()
-print("T statistic df")
-print(t_df)
-t_latex = t_df.to_latex(escape=False, caption="T value statistic for the pairwise comparison approaches")
-print(t_latex)
-"""
-
-############################################
 # Retrieve average accuracy results from cross-validation to build accuracy matrix
 ############################################
 accuracy_results = {}
@@ -234,7 +247,7 @@ for approach in results.keys():
         mean_val = statistics.mean(log_values)
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
         for fold in results[approach][log].keys():
-            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, "acc" : results[approach][log][fold]["0"]})
+            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, metric : results[approach][log][fold]["0"]})
         if not approach.capitalize() in accuracy_results:
             accuracy_results[approach.capitalize()] = {}
         accuracy_results[approach.capitalize()][log_cap] = mean_val
@@ -242,28 +255,31 @@ for approach in results.keys():
 acc_df = pd.DataFrame.from_dict(accuracy_results, orient="index")
 acc_df.sort_index(axis=1, inplace=True)
 acc_df.sort_index(axis=0, inplace=True)
-print("Accuracy df")
+print(metric + " df")
 print(acc_df)
 acc_fold_df = pd.DataFrame.from_dict(accuracy_fold_results)
 acc_fold_df.sort_index(axis=1, inplace=True)
 acc_fold_df.sort_index(axis=0, inplace=True)
-print("Accuracy fold df")
+print(metric + " fold df")
 print(acc_fold_df)
 
 acc_df_latex = acc_df.copy()
-print("ACC DF LATX: ", acc_df_latex)
+print(metric + " DF LATX: ", acc_df_latex)
 
 # Format to select the best three approaches and assign them colors
 for column in acc_df_latex.columns:
-    acc_df_latex[column] = acc_df_latex[column] * 100
-    acc_df_latex[column] = acc_df_latex[column].round(2)
+    if metric == "accuracy":
+        acc_df_latex[column] = acc_df_latex[column] * 100
+        acc_df_latex[column] = acc_df_latex[column].round(2)
+    else:
+        acc_df_latex[column] = acc_df_latex[column].round(4)
     best_three = acc_df_latex[column].nlargest(3)
     acc_df_latex[column] = acc_df_latex[column].astype(str)
     colors = ["PineGreen", "orange", "red"]
     for approach, color in zip(best_three.index, colors):
         acc_df_latex[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + acc_df_latex[column].loc[approach] + "}}"
 
-acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 10-fold 5x2cv")
+acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean " + metric + " of the 10-fold 5x2cv")
 print(acc_latex)
 
 ############################################
@@ -294,17 +310,20 @@ os.makedirs("./processed_results/latex/next_activity/plots", exist_ok=True)
 
 
 # Save csvs
-pairwise_scores.round(4).to_csv("./processed_results/csv/next_activity/friedman_nemenyi_posthoc.csv")
-ranks.round(4).to_csv("./processed_results/csv/next_activity/raw_ranks.csv")
-avg_rank.round(4).to_csv("./processed_results/csv/next_activity/avg_rank.csv")
-((acc_df * 100).round(2)).to_csv("./processed_results/csv/next_activity/results.csv")
-acc_fold_df.to_csv("./processed_results/csv/next_activity/raw_results.csv")
+pairwise_scores.round(4).to_csv("./processed_results/csv/next_activity/" + metric + "_friedman_nemenyi_posthoc.csv")
+ranks.round(4).to_csv("./processed_results/csv/next_activity/" + metric + "_raw_ranks.csv")
+avg_rank.round(4).to_csv("./processed_results/csv/next_activity/" + metric + "_avg_rank.csv")
+if metric == "accuracy":
+    ((acc_df * 100).round(2)).to_csv("./processed_results/csv/next_activity/" + metric + "_results.csv")
+else:
+    acc_df.round(4).to_csv("./processed_results/csv/next_activity/" + metric + "_results.csv")
+acc_fold_df.to_csv("./processed_results/csv/next_activity/" + metric + "_raw_results.csv")
 
 #p_df.to_csv("./processed_results/csv/p_values_t_test.csv")
 #t_df.round(4).to_csv("./processed_results/csv/t_statistic_t_test.csv")
 
 # Save latex
-with open("./processed_results/latex/next_activity/acc_latex.txt", "w") as f:
+with open("./processed_results/latex/next_activity/" + metric + "_latex.txt", "w") as f:
     f.write(acc_latex)
 #with open("../processed_results/latex/p_latex.txt", "w") as f:
 #    f.write(p_latex)
