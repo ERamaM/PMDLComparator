@@ -36,10 +36,25 @@ metric <- "accuracy"
 #metric <- "brier"
 #metric <- "mcc"
 
+NO_CAMARGO <- FALSE
+NO_SEPSIS <- TRUE
+
 if(dir.exists(file.path(getwd(), "results_processor/stat_tests_in_r"))){
   setwd(file.path(getwd(), "results_processor/stat_tests_in_r"))
 }
 data_acc <- read.csv(paste("../processed_results/csv/next_activity/", metric, "_results.csv", sep=""), row.names=1)
+
+print("Data acc")
+if(NO_CAMARGO){
+    data_acc <- data_acc[, !(colnames(data_acc) %in% c("Camargo"))]
+    subproblem <- "delete_camargo"
+}
+if(NO_SEPSIS){
+  data_acc <- data_acc[!(rownames(data_acc) %in% c("Sepsis", "Nasa")), ]
+  subproblem <- "delete_sepsis"
+}
+print(data_acc)
+stop()
 
 # Perform ranking with PlackettLuce
 # Save rankings and probs in files
