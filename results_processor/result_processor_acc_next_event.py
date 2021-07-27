@@ -309,6 +309,10 @@ avg_rank = ranks.mean()
 
 os.makedirs("./processed_results/csv/next_activity", exist_ok=True)
 os.makedirs("./processed_results/latex/next_activity/plots", exist_ok=True)
+os.makedirs("./processed_results/latex/next_activity/plots/delete_camargo", exist_ok=True)
+os.makedirs("./processed_results/latex/next_activity/plots/delete_sepsis", exist_ok=True)
+os.makedirs("./processed_results/csv/next_activity/delete_camargo", exist_ok=True)
+os.makedirs("./processed_results/csv/next_activity/delete_sepsis", exist_ok=True)
 
 
 # Save csvs
