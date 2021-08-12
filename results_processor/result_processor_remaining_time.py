@@ -208,6 +208,8 @@ accuracy_fold_results = []
 for approach in results.keys():
     for log in available_logs:
         log_values = []
+        if approach == "camargo" and (log == "nasa" or log == "sepsis"):
+            continue
         for fold in results[approach][log].keys():
             log_values.append(results[approach][log][fold]["0"])
             #log_values.append(results[approach][log][fold]["1"])

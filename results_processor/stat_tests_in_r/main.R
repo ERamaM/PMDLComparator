@@ -24,10 +24,14 @@ if (!require("here")){
 if (!require("xtable")){
   install.packages("xtable")
 }
+if (!require("plyr")){
+  install.packages("plyr")
+}
 
 library("scmamp")
 library("ggplot2")
 library("here")
+library("plyr")
 
 metric <- "accuracy"
 #metric <- "recall"
@@ -55,13 +59,38 @@ if(NO_SEPSIS){
 }
 # Perform ranking with PlackettLuce
 # Save rankings and probs in files
-ranking <- bPlackettLuceModel(data_acc, min=FALSE, nsim=5000, nchains=10, parallel=TRUE)
+ranking <- bPlackettLuceModel(data_acc, min=FALSE, nsim=500000, nchains=10, parallel=TRUE, seed=42)
 
 # Plot the boxplot of rankings
+#boxplot(ranking$posterior.weights)
+probs <- data.frame(ranking$posterior.weights)
+print(colnames(probs))
+stack_probs <- stack(probs)
+colnames(stack_probs)[colnames(stack_probs) == "ind"] <- "Approach"
+colnames(stack_probs)[colnames(stack_probs) == "values"] <- "Probability"
+if (NO_CAMARGO) {
+  approaches <- c("Pasquadibisceglie", "Tax", "Hinkka", "Evermann", "Theis_no_resource", "Mauro", "Theis_resource")
+}
+if (NO_SEPSIS) {
+  approaches <- c("Pasquadibisceglie", "Tax", "Camargo", "Hinkka", "Evermann", "Theis_no_resource", "Mauro", "Theis_resource")
+}
+#stack_probs$Approach <- factor(stack_probs$Approach, levels=c("Pasquadibisceglie", "Tax", "Camargo", "Hinkka", "Evermann", "Khan", "Theis w/o attr", "Mauro", "Theis w/ attr", "GRNN"))
+stack_probs$Approach <- factor(stack_probs$Approach, levels=approaches)
+dd_y95 <- ddply(stack_probs, .(Approach), function(x) quantile(x$Probability, 0.95))
+dd_y05 <- ddply(stack_probs, .(Approach), function(x) quantile(x$Probability, 0.05))
+dd_y50 <- ddply(stack_probs, .(Approach), function(x) median(x$Probability))
+df <- data.frame(
+  #x = c("Pasquadibisceglie", "Tax", "Camargo", "Hinkka", "Evermann", "Khan", "Theis_no_resource", "Mauro", "Theis_resource", "GRNN"),
+  x = approaches,
+  y05 = dd_y05[2],
+  y50 = dd_y50[2],
+  y95 = dd_y95[2]
+)
+colnames(df) <- c("Approaches", "y05", "y50", "y95")
+print(df)
 png(paste("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_ranking_boxplot.png", sep=""), width=1100, height=650)
-boxplot(ranking$posterior.weights)
+ggplot(df, aes(x=Approaches)) + geom_point(aes(y=y50), colour="blue", size=1.5) + geom_errorbar(aes(ymin=y05, ymax=y95), width=0.5) + theme(text = element_text(size=18), axis.title.x=element_blank())
 dev.off()
-
 
 sorted_probs <- data.frame(ranking$expected.win.prob)
 sorted_probs$approach <- rownames(sorted_probs)

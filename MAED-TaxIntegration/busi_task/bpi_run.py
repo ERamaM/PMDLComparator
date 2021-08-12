@@ -378,6 +378,8 @@ def bpi_task_mix(X_train, y_a_train, y_t_train, X_val, y_a_val, y_t_val, eventlo
     # Testing is, in fact, validation...
     X_train = X_train
     X_test = X_val
+
+
     y_a_train = reshape_activities(y_a_train)
     y_a_test = reshape_activities(y_a_val)
     y_t_train = reshape_time(y_t_train)
@@ -399,7 +401,7 @@ def bpi_task_mix(X_train, y_a_train, y_t_train, X_val, y_a_val, y_t_val, eventlo
     word_size = 32
     read_heads = 1
 
-    iterations = 20000
+    iterations = 10000
     start_step = 0
 
     graph = tf.Graph()
@@ -607,7 +609,7 @@ def bpi_task_mix(X_train, y_a_train, y_t_train, X_val, y_a_val, y_t_val, eventlo
 
 def exact_bpi_test_mix(
         chars, char_indices, target_indices_char, target_char_indices, target_chars,
-        maxlen, divisor, divisor2, lines, lines_t, lines_t2, lines_t3, lines_t4, X_train, y_a_train, y_t_train, X_test, y_a_test, y_t_test, eventlog
+        maxlen, divisor, divisor2, lines, lines_t, lines_t2, lines_t3, lines_t4, X_train, y_a_train, y_t_train, X_test, y_a_test, y_t_test, eventlog, truncate_length
 ):
     """Perform testing"""
     """
@@ -755,14 +757,21 @@ def exact_bpi_test_mix(
                     print(prefix_size)
                     for line, times, times2, times3, times4 in zip(lines, lines_t, lines_t2, lines_t3, lines_t4):
                         times.append(0)
-                        cropped_line = ''.join(line[:prefix_size])
-                        cropped_times = times[:prefix_size]
-                        cropped_times2 = times2[:prefix_size]
-                        cropped_times3 = times3[:prefix_size]
-                        cropped_times4 = times4[:prefix_size]
+                        if prefix_size > truncate_length:
+                            cropped_line = ''.join(line[prefix_size-truncate_length:prefix_size])
+                            cropped_times = times[prefix_size-truncate_length:prefix_size]
+                            cropped_times2 = times2[prefix_size-truncate_length:prefix_size]
+                            cropped_times3 = times3[prefix_size-truncate_length:prefix_size]
+                            cropped_times4 = times4[prefix_size-truncate_length:prefix_size]
+                        else:
+                            cropped_line = ''.join(line[:prefix_size])
+                            cropped_times = times[:prefix_size]
+                            cropped_times2 = times2[:prefix_size]
+                            cropped_times3 = times3[:prefix_size]
+                            cropped_times4 = times4[:prefix_size]
                         #print("CR_L: ", cropped_line)
                         #print("LINE: ", line)
-                        if '!' in cropped_line:
+                        if '!' in cropped_line or len(cropped_line) == 0:
                             continue  # make no prediction for this case, since this case has ended already
                         ground_truth = ''.join(line[prefix_size:prefix_size + predict_size])
                         ground_truth_t = times[prefix_size:prefix_size + predict_size]
@@ -1106,13 +1115,22 @@ if __name__ == '__main__':
                                                 divisor, divisor2)
     X_test, _, y_a_test, y_t_test = vectorize_fold(lines_test, timeseqs_test, timeseqs2_test, timeseqs3_test,
                                                    timeseqs4_test, divisor, divisor2)
+
+    truncate_length = 25
+    if X_train.shape[1] > truncate_length:
+        X_train = X_train[:, -truncate_length:, :]
+        X_test = X_test[:, -truncate_length:, :]
+        X = X[:, -truncate_length:, :]
+        X_val = X_val[:, -truncate_length:, :]
+
     if args.train:
         # Execute training
         bpi_task_mix(X_train, y_a_train, y_t_train, X_val, y_a_val, y_t_val, fold_eventlog)
     if args.test:
         # Execute testing
+        print("X_test len: ", len(X_test))
         exact_bpi_test_mix(chars, char_indices, target_indices_char, target_char_indices, target_chars, maxlen, divisor, divisor2, lines_test,
-                           timeseqs_test, timeseqs2_test, timeseqs3_test, timeseqs4_test, X_train, y_a_train, y_t_train, X_test, y_a_test, y_t_test, eventlog_name)
+                           timeseqs_test, timeseqs2_test, timeseqs3_test, timeseqs4_test, X_train, y_a_train, y_t_train, X_test, y_a_test, y_t_test, eventlog_name, truncate_length)
         raw_csv_file = os.path.join(folders, "next_activity_and_time_" + eventlog_name)
         import pandas as pd
         dataframe = pd.read_csv(raw_csv_file, sep=";", quotechar="|", index_col=False)
