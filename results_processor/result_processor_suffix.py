@@ -14,23 +14,27 @@ dir_to_approach = {
     "nnpm" : "mauro",
     "PyDREAM-NAP" : "theis",
     "GenerativeLSTM" : "camargo",
-    "MAED-TaxIntegration" : "khan"
+    "MAED-TaxIntegration" : "khan",
+    "Process-Sequence-Prediction-with-A-priori-knowledge" : "francescomarino"
 }
 directories = [
     "../tax/code/results",
     "../evermann/results",
     "../GenerativeLSTM/output_files/",
+    "../Process-Sequence-Prediction-with-A-priori-knowledge/results/"
 ]
 
 # These regexes allow us to find the file that contains the results
 file_approaches_regex = {
     "tax": "suffix_.*.csv",  # Ends with "next_event.log"
+    "francescomarino": "suffix_.*.csv",  # Ends with "next_event.log"
     "evermann": "aggregate_suffix_results_.*\.res$",  # Does not start with "raw" # TODO: what about suffix calculations
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
 approaches_accuracy_regexes = {
     "tax": "Mean DL: (.*)",
+    "francescomarino": "Mean DL: (.*)",
     "evermann": "Mean damerau: (.*)",
 }
 
@@ -38,6 +42,7 @@ approaches_accuracy_regexes = {
 approaches_clean_log_regexes = {
     "tax": [".csv", "suffix_"],
     "evermann": [".xes.res", "aggregate_suffix_results_"],
+    "francescomarino": [".csv", "suffix_"],
 }
 
 approaches_by_csv = ["camargo"]
@@ -90,18 +95,21 @@ def extract_by_regex(directory, approach, results, real_approach=None):
                     store_results(results, approach, log, fold, variation, accuracy)
 
 def extract_by_csv_camargo(directory, approach, results):
-    if not os.path.exists(os.path.join(directory, "ac_predict_next.csv")):
+    if not os.path.exists(os.path.join(directory, "ac_pred_sfx.csv")):
         return
-    csv = pd.read_csv(os.path.join(directory, "ac_predict_next.csv"))
-    relevant_rows = csv[["implementation", "accuracy", "file_name"]][csv["implementation"] == "Arg Max"]
-    for idx, row in relevant_rows.iterrows():
-        clean_filename = row["file_name"].replace(".csv", "")
-        parse_groups = re.match(log_regex, clean_filename)
-        fold, variation, log = parse_groups.groups()
-        log = log.lower()
-        available_logs.add(log)
-        store_results(results, approach, log, fold, variation, row["accuracy"])
-
+    csv = pd.read_csv(os.path.join(directory, "ac_pred_sfx.csv"))
+    def process_csv(relevant_rows, sampling_type):
+        for idx, row in relevant_rows.iterrows():
+            clean_filename = row["file_name"].replace(".csv", "")
+            parse_groups = re.match(log_regex, clean_filename)
+            fold, variation, log = parse_groups.groups()
+            log = log.lower()
+            available_logs.add(log)
+            store_results(results, approach + "_" + sampling_type, log, fold, variation, row["similarity"])
+    relevant_rows_argmax = csv[["implementation", "similarity", "file_name"]][csv["implementation"] == "Arg Max"]
+    process_csv(relevant_rows_argmax, "argmax")
+    relevant_rows_random = csv[["implementation", "similarity", "file_name"]][csv["implementation"] == "Random Choice"]
+    process_csv(relevant_rows_random, "random")
 
 ############################################
 # Parse the result files for accuracy information
@@ -207,7 +215,7 @@ accuracy_fold_results = []
 for approach in results.keys():
     for log in available_logs:
         log_values = []
-        if approach == "camargo" and (log == "nasa" or log == "sepsis"):
+        if (approach == "camargo_argmax" or approach == "camargo_random") and (log == "nasa" or log == "sepsis"):
             continue
         for fold in results[approach][log].keys():
             log_values.append(results[approach][log][fold]["0"])
@@ -245,7 +253,23 @@ for column in acc_df_latex.columns:
     for approach, color in zip(best_three.index, colors):
         acc_df_latex[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + acc_df_latex[column].loc[approach] + "}}"
 
-acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 10-fold 5x2cv")
+acc_df_latex.rename(columns=lambda x : "\\rotatebox{90}{" + x + "}", inplace=True)
+acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean DL distance of the 5-fold crossvalidation")
+acc_latex = acc_latex.replace("Challenge ", "").replace("Bpi", "BPI")\
+    .replace("\\toprule", "").replace("\\midrule", "").replace("\\bottomrule", "")\
+    .replace("Camargo_argmax", "Camargo (argmax)")\
+    .replace("Camargo_random", "Camargo (random)")\
+    .replace("{table}", "{table*}")\
+    .replace("\\\\", "\\\\ \hline")\
+    .replace("lllllllllllll", "l|cccccccccccc").replace("nan", "-")
+
+# Fix dataset first column
+acc_latex = acc_latex\
+    .replace("BPI 2012 Complete", "\\shortstack[l]{BPI 2012 \\\\ Complete}")\
+    .replace("BPI 2012 W Complete", "\\shortstack[l]{BPI 2012 \\\\ W Complete}")\
+    .replace("BPI 2013 Closed Problems", "\\shortstack[l]{BPI 2013 \\\\ Closed Problems}")\
+    .replace("BPI 2013 Incidents", "\\shortstack[l]{BPI 2013 \\\\ Incidents}")
+
 print(acc_latex)
 
 ############################################
