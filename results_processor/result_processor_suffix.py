@@ -225,7 +225,7 @@ for approach in results.keys():
         mean_val = statistics.mean(log_values)
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
         for fold in results[approach][log].keys():
-            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, "acc" : results[approach][log][fold]["0"]})
+            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, "dl" : results[approach][log][fold]["0"]})
         if not approach.capitalize() in accuracy_results:
             accuracy_results[approach.capitalize()] = {}
         accuracy_results[approach.capitalize()][log_cap] = mean_val
@@ -296,7 +296,7 @@ avg_rank = ranks.mean()
 ############################################
 
 os.makedirs("./processed_results/csv/suffix", exist_ok=True)
-os.makedirs("./processed_results/latex/suffix", exist_ok=True)
+os.makedirs("./processed_results/latex/suffix/plots", exist_ok=True)
 
 
 # Save csvs
