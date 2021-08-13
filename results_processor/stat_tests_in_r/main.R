@@ -40,8 +40,8 @@ metric <- "accuracy"
 #metric <- "brier"
 #metric <- "mcc"
 
-NO_CAMARGO <- TRUE
-NO_SEPSIS <- FALSE
+NO_CAMARGO <- FALSE
+NO_SEPSIS <- TRUE
 
 if(dir.exists(file.path(getwd(), "results_processor/stat_tests_in_r"))){
   setwd(file.path(getwd(), "results_processor/stat_tests_in_r"))
@@ -89,7 +89,7 @@ df <- data.frame(
 colnames(df) <- c("Approaches", "y05", "y50", "y95")
 print(df)
 png(paste("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_ranking_boxplot.png", sep=""), width=1100, height=650)
-ggplot(df, aes(x=Approaches)) + geom_point(aes(y=y50), colour="blue", size=1.5) + geom_errorbar(aes(ymin=y05, ymax=y95), width=0.5) + theme(text = element_text(size=18), axis.title.x=element_blank())
+ggplot(df, aes(x=Approaches)) + geom_point(aes(y=y50), colour="blue", size=3) + geom_errorbar(aes(ymin=y05, ymax=y95), width=0.5) + theme(text = element_text(size=25), axis.title.x=element_blank(), axis.title.y=element_blank()) + scale_x_discrete(labels=c("Theis_no_resource" = "Theis \n (w/o attr)", "Theis_resource" = "Theis \n (w/ attr)"))
 dev.off()
 
 sorted_probs <- data.frame(ranking$expected.win.prob)
@@ -117,19 +117,19 @@ best_one <- data_acc[, names(index)[1]]
 best_two <- data_acc[, names(index)[2]]
 best_three <- data_acc[, names(index)[3]]
 # Pair 1
-signed_test <- bSignedRankTest(best_one, best_two, rope=c(-0.01, 0.01))
+signed_test <- bSignedRankTest(best_one, best_two, rope=c(-0.01, 0.01), seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_signed_rank_test_", names(index)[1], "_vs_", names(index)[2], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(signed_test, A=names(index)[1], B=names(index)[2], plot.density=FALSE, alpha=0.5, posterior.label = TRUE)
 dev.off()
 # Pair 2
-signed_test <- bSignedRankTest(best_two, best_three, rope=c(-0.01, 0.01))
+signed_test <- bSignedRankTest(best_two, best_three, rope=c(-0.01, 0.01), seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_signed_rank_test_", names(index)[2], "_vs_", names(index)[3], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(signed_test, A=names(index)[2], B=names(index)[3], plot.density=FALSE, alpha=0.5, posterior.label = TRUE)
 dev.off()
 # Pair 3
-signed_test <- bSignedRankTest(best_two, best_three, rope=c(-0.01, 0.01))
+signed_test <- bSignedRankTest(best_two, best_three, rope=c(-0.01, 0.01), seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_signed_rank_test_", names(index)[1], "_vs_", names(index)[3], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(signed_test, A=names(index)[1], B=names(index)[3], plot.density=FALSE, alpha=0.5, posterior.label = TRUE)
@@ -175,19 +175,19 @@ print(matrix_1)
 
 # Plot the pairwise comparisons
 # P1
-results <- bHierarchicalTest(matrix_1, matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
+results <- bHierarchicalTest(matrix_1, matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[1], "_vs_", names(index)[2], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[1]), B=names(index[2]), posterior.label=TRUE, alpha=0.5)
 dev.off()
 # P2
-results <- bHierarchicalTest(matrix_2, matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
+results <- bHierarchicalTest(matrix_2, matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[2], "_vs_", names(index)[3], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[2]), B=names(index[3]), posterior.label=TRUE, alpha=0.5)
 dev.off()
 # P3
-results <- bHierarchicalTest(matrix_1, matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=20000, nchains=10, parallel=TRUE)
+results <- bHierarchicalTest(matrix_1, matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[1], "_vs_", names(index)[3], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[1]), B=names(index[3]), posterior.label=TRUE, alpha=0.5)

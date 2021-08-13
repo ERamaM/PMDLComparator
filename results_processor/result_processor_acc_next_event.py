@@ -281,7 +281,23 @@ for column in acc_df_latex.columns:
     for approach, color in zip(best_three.index, colors):
         acc_df_latex[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + acc_df_latex[column].loc[approach] + "}}"
 
-acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean " + metric + " of the 10-fold 5x2cv")
+acc_df_latex.rename(columns=lambda x : "\\rotatebox{90}{" + x + "}", inplace=True)
+acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean " + metric + " of the 5-fold crossvalidation")
+acc_latex = acc_latex.replace("Challenge ", "").replace("Bpi", "BPI")\
+    .replace("\\toprule", "").replace("\\midrule", "").replace("\\bottomrule", "")\
+    .replace("Theis_no_resource", "Theis et al. (w/o attributes)")\
+    .replace("Theis_resource", "Theis et al. (w/ attributes)")\
+    .replace("{table}", "{table*}")\
+    .replace("\\\\", "\\\\ \hline")\
+    .replace("lllllllllllll", "l|cccccccccccc").replace("nan", "-")
+
+
+# Fix dataset first column
+acc_latex = acc_latex\
+    .replace("BPI 2012 Complete", "\\shortstack[l]{BPI 2012 \\\\ Complete}")\
+    .replace("BPI 2012 W Complete", "\\shortstack[l]{BPI 2012 \\\\ W Complete}")\
+    .replace("BPI 2013 Closed Problems", "\\shortstack[l]{BPI 2013 \\\\ Closed Problems}")\
+    .replace("BPI 2013 Incidents", "\\shortstack[l]{BPI 2013 \\\\ Incidents}")
 print(acc_latex)
 
 ############################################
