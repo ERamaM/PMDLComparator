@@ -141,9 +141,10 @@ if(NO_CAMARGO){
   raw_data_acc <- raw_data_acc[raw_data_acc$approach != "Camargo", ]
   subproblem <- "delete_camargo"
 }
+
 if(NO_SEPSIS){
-  raw_data_acc <- raw_data_acc[raw_data_acc$log != "sepsis", ]
-  raw_data_acc <- raw_data_acc[raw_data_acc$log != "nasa", ]
+#  raw_data_acc <- raw_data_acc[raw_data_acc$log != "sepsis", ]
+#  raw_data_acc <- raw_data_acc[raw_data_acc$log != "nasa", ]
   subproblem <- "delete_sepsis"
 }
 # Number 1 is the best performing one
@@ -175,24 +176,51 @@ print(matrix_1)
 
 # Plot the pairwise comparisons
 # P1
-results <- bHierarchicalTest(matrix_1, matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
+if (NO_SEPSIS && (names(index[1]) == "Camargo" || names(index[2]) == "Camargo")){
+  hier_matrix_1 <- matrix_1
+  hier_matrix_1 <- hier_matrix_1[!rownames(hier_matrix_1) %in% c("sepsis", "nasa"), ]
+  hier_matrix_2 <- matrix_2
+  hier_matrix_2 <- hier_matrix_2[!rownames(hier_matrix_2) %in% c("sepsis", "nasa"), ]
+} else {
+  hier_matrix_1 <- matrix_1
+  hier_matrix_2 <- matrix_2
+}
+results <- bHierarchicalTest(hier_matrix_1, hier_matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[1], "_vs_", names(index)[2], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[1]), B=names(index[2]), posterior.label=TRUE, alpha=0.5)
 dev.off()
 # P2
-results <- bHierarchicalTest(matrix_2, matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
+if (NO_SEPSIS && (names(index[3]) == "Camargo" || names(index[2]) == "Camargo")){
+  hier_matrix_3 <- matrix_3
+  hier_matrix_3 <- hier_matrix_3[!rownames(hier_matrix_3) %in% c("sepsis", "nasa"), ]
+  hier_matrix_2 <- matrix_2
+  hier_matrix_2 <- hier_matrix_2[!rownames(hier_matrix_2) %in% c("sepsis", "nasa"), ]
+} else{
+  hier_matrix_3 <- matrix_3
+  hier_matrix_2 <- matrix_2
+}
+results <- bHierarchicalTest(hier_matrix_2, hier_matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[2], "_vs_", names(index)[3], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[2]), B=names(index[3]), posterior.label=TRUE, alpha=0.5)
 dev.off()
 # P3
-results <- bHierarchicalTest(matrix_1, matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
+if (NO_SEPSIS && (names(index[3]) == "Camargo" || names(index[1]) == "Camargo")){
+  hier_matrix_3 <- matrix_3
+  hier_matrix_3 <- hier_matrix_3[!rownames(hier_matrix_3) %in% c("sepsis", "nasa"), ]
+  hier_matrix_1 <- matrix_1
+  hier_matrix_1 <- hier_matrix_1[!rownames(hier_matrix_1) %in% c("sepsis", "nasa"), ]
+} else {
+  hier_matrix_3 <- matrix_3
+  hier_matrix_1 <- matrix_1
+}
+results <- bHierarchicalTest(hier_matrix_1, hier_matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
 filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[1], "_vs_", names(index)[3], ".png")
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[1]), B=names(index[3]), posterior.label=TRUE, alpha=0.5)
 dev.off()
 
 # Save results per dataset
-rownames(results$additional$per.dataset) <- rownames(reshaped_3)
+rownames(results$additional$per.dataset) <- rownames(hier_matrix_3)
 write.csv(data.frame(results$additional$per.dataset), paste("../processed_results/csv/next_activity/", subproblem, "/", metric, "_hierarchical_results_per_dataset.csv", sep=""))
