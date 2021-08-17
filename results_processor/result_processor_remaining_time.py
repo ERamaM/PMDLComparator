@@ -15,29 +15,34 @@ dir_to_approach = {
     "PyDREAM-NAP" : "theis",
     "GenerativeLSTM" : "camargo",
     "MAED-TaxIntegration" : "khan",
-    "DALSTM" : "navarin"
+    "DALSTM" : "navarin",
+    "Process-Sequence-Prediction-with-A-priori-knowledge": "francescomarino"
 }
 directories = [
     "../tax/code/results",
     "../GenerativeLSTM/output_files/",
-    "../DALSTM/results/"
+    "../DALSTM/results/",
+    "../Process-Sequence-Prediction-with-A-priori-knowledge/results/"
 ]
 
 # These regexes allow us to find the file that contains the results
 file_approaches_regex = {
     "tax": "suffix_.*.csv",  # Ends with "next_event.log"
+    "francescomarino": "suffix_.*.csv",  # Ends with "next_event.log"
     "navarin" : ".*\.txt$"
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
 approaches_accuracy_regexes = {
     "tax": "Mean MAE: (.*)",
+    "francescomarino": "Mean MAE: (.*)",
     "navarin" : "Root Mean Squared Error: \d+\.\d+ d MAE: (\d+\.\d+) d MAPE: .*"
 }
 
 # These regexes allow us to delete parts of the filename that are not relevant
 approaches_clean_log_regexes = {
     "tax": [".csv", "suffix_"],
+    "francescomarino": [".csv", "suffix_"],
     "navarin" : [".csv.txt"]
 }
 
@@ -91,17 +96,21 @@ def extract_by_regex(directory, approach, results, real_approach=None):
                     store_results(results, approach, log, fold, variation, accuracy)
 
 def extract_by_csv_camargo(directory, approach, results):
-    if not os.path.exists(os.path.join(directory, "ac_predict_next.csv")):
+    if not os.path.exists(os.path.join(directory, "tm_pred_sfx.csv")):
         return
-    csv = pd.read_csv(os.path.join(directory, "ac_predict_next.csv"))
-    relevant_rows = csv[["implementation", "accuracy", "file_name"]][csv["implementation"] == "Arg Max"]
-    for idx, row in relevant_rows.iterrows():
-        clean_filename = row["file_name"].replace(".csv", "")
-        parse_groups = re.match(log_regex, clean_filename)
-        fold, variation, log = parse_groups.groups()
-        log = log.lower()
-        available_logs.add(log)
-        store_results(results, approach, log, fold, variation, row["accuracy"])
+    csv = pd.read_csv(os.path.join(directory, "tm_pred_sfx.csv"))
+    def process_csv(relevant_rows, sampling_type):
+        for idx, row in relevant_rows.iterrows():
+            clean_filename = row["file_name"].replace(".csv", "")
+            parse_groups = re.match(log_regex, clean_filename)
+            fold, variation, log = parse_groups.groups()
+            log = log.lower()
+            available_logs.add(log)
+            store_results(results, approach + "_" + sampling_type, log, fold, variation, row["mae"] / 86400)
+    relevant_rows_argmax = csv[["implementation", "mae", "file_name"]][csv["implementation"] == "Arg Max"]
+    process_csv(relevant_rows_argmax, "argmax")
+    relevant_rows_random = csv[["implementation", "mae", "file_name"]][csv["implementation"] == "Random Choice"]
+    process_csv(relevant_rows_random, "random")
 
 
 ############################################
@@ -208,7 +217,7 @@ accuracy_fold_results = []
 for approach in results.keys():
     for log in available_logs:
         log_values = []
-        if approach == "camargo" and (log == "nasa" or log == "sepsis"):
+        if (approach == "camargo_argmax" or approach == "camargo_random") and (log == "nasa" or log == "sepsis"):
             continue
         for fold in results[approach][log].keys():
             log_values.append(results[approach][log][fold]["0"])
@@ -218,7 +227,7 @@ for approach in results.keys():
         mean_val = statistics.mean(log_values)
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
         for fold in results[approach][log].keys():
-            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, "acc" : results[approach][log][fold]["0"]})
+            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, "mae" : results[approach][log][fold]["0"]})
         if not approach.capitalize() in accuracy_results:
             accuracy_results[approach.capitalize()] = {}
         accuracy_results[approach.capitalize()][log_cap] = mean_val
@@ -240,13 +249,26 @@ print("ACC DF LATX: ", acc_df_latex)
 # Format to select the best three approaches and assign them colors
 for column in acc_df_latex.columns:
     acc_df_latex[column] = acc_df_latex[column].round(3)
-    best_three = acc_df_latex[column].nlargest(3)
+    best_three = acc_df_latex[column].nsmallest(3)
     acc_df_latex[column] = acc_df_latex[column].astype(str)
     colors = ["PineGreen", "orange", "red"]
     for approach, color in zip(best_three.index, colors):
         acc_df_latex[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + acc_df_latex[column].loc[approach] + "}}"
 
-acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 10-fold 5x2cv")
+acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 5-fold crossvalidation")
+acc_latex = acc_latex.replace("Challenge ", "").replace("Bpi", "BPI") \
+    .replace("\\toprule", "").replace("\\midrule", "").replace("\\bottomrule", "") \
+    .replace("Camargo_argmax", "Camargo (argmax)") \
+    .replace("Camargo_random", "Camargo (random)") \
+    .replace("{table}", "{table*}") \
+    .replace("\\\\", "\\\\ \hline") \
+    .replace("lllllllllllll", "l|ccccccccccc").replace("nan", "-")
+
+acc_latex = acc_latex \
+    .replace("BPI 2012 Complete", "\\shortstack[l]{BPI 2012 \\\\ Complete}") \
+    .replace("BPI 2012 W Complete", "\\shortstack[l]{BPI 2012 \\\\ W Complete}") \
+    .replace("BPI 2013 Closed Problems", "\\shortstack[l]{BPI 2013 \\\\ Closed Problems}") \
+    .replace("BPI 2013 Incidents", "\\shortstack[l]{BPI 2013 \\\\ Incidents}")
 print(acc_latex)
 
 ############################################

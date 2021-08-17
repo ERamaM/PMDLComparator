@@ -49,6 +49,8 @@ if(dir.exists(file.path(getwd(), "results_processor/stat_tests_in_r"))){
 }
 if (metric == "dl"){
   data_acc <- read.csv(paste("../processed_results/csv/suffix/results.csv", sep=""), row.names=1)
+  colnames(data_acc)[colnames(data_acc) == "Camargo_argmax"] <- "Camargo_arg"
+  colnames(data_acc)[colnames(data_acc) == "Camargo_random"] <- "Camargo_ran"
 } else{
   data_acc <- read.csv(paste("../processed_results/csv/next_activity/", metric, "_results.csv", sep=""), row.names=1)
 }
@@ -78,7 +80,7 @@ if (NO_CAMARGO) {
 }
 if (NO_SEPSIS) {
   if (metric == "dl"){
-    approaches <- c("Camargo_argmax", "Camargo_random", "Evermann", "Francescomarino", "Tax")
+    approaches <- c("Camargo_arg", "Camargo_ran", "Evermann", "Francescomarino", "Tax")
   } else{
     approaches <- c("Pasquadibisceglie", "Tax", "Camargo", "Hinkka", "Evermann", "Theis_no_resource", "Mauro", "Theis_resource")
   }
@@ -178,6 +180,8 @@ dev.off()
 # Perform the hierarchical tests
 if (metric == "dl") {
   raw_data_acc <- read.csv(paste("../processed_results/csv/suffix/raw_results.csv", sep=""), row.names=1)
+  levels(raw_data_acc$approach)[levels(raw_data_acc$approach) == "Camargo_argmax"] <- "Camargo_arg"
+  levels(raw_data_acc$approach)[levels(raw_data_acc$approach) == "Camargo_random"] <- "Camargo_ran"
 } else {
   raw_data_acc <- read.csv(paste("../processed_results/csv/next_activity/", metric, "_raw_results.csv", sep=""), row.names=1)
 }
