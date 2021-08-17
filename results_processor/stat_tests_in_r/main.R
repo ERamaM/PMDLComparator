@@ -39,7 +39,8 @@ library("plyr")
 #metric <- "f1-score"
 #metric <- "brier"
 #metric <- "mcc"
-metric <- "dl"
+#metric <- "dl"
+metric <- "rt"
 
 NO_CAMARGO <- FALSE
 NO_SEPSIS <- TRUE
@@ -51,8 +52,18 @@ if (metric == "dl"){
   data_acc <- read.csv(paste("../processed_results/csv/suffix/results.csv", sep=""), row.names=1)
   colnames(data_acc)[colnames(data_acc) == "Camargo_argmax"] <- "Camargo_arg"
   colnames(data_acc)[colnames(data_acc) == "Camargo_random"] <- "Camargo_ran"
+  MINIMIZE <- FALSE
+  ROPE <- c(-0.01, 0.01)
+} else if (metric == "rt"){
+  data_acc <- read.csv(paste("../processed_results/csv/remaining_time/results.csv", sep=""), row.names=1)
+  colnames(data_acc)[colnames(data_acc) == "Camargo_argmax"] <- "Camargo_arg"
+  colnames(data_acc)[colnames(data_acc) == "Camargo_random"] <- "Camargo_ran"
+  data_acc <- data_acc * -1
+  ROPE <- c(-0.1, 0.1)
 } else{
   data_acc <- read.csv(paste("../processed_results/csv/next_activity/", metric, "_results.csv", sep=""), row.names=1)
+  MINIMIZE <- FALSE
+  ROPE <- c(-0.01, 0.01)
 }
 
 print("Data acc")
@@ -81,7 +92,9 @@ if (NO_CAMARGO) {
 if (NO_SEPSIS) {
   if (metric == "dl"){
     approaches <- c("Camargo_arg", "Camargo_ran", "Evermann", "Francescomarino", "Tax")
-  } else{
+  } else if (metric == "rt"){
+    approaches <- c("Camargo_arg", "Camargo_ran", "Francescomarino", "Navarin", "Tax")
+  } else {
     approaches <- c("Pasquadibisceglie", "Tax", "Camargo", "Hinkka", "Evermann", "Theis_no_resource", "Mauro", "Theis_resource")
   }
 }
@@ -102,6 +115,8 @@ colnames(df) <- c("Approaches", "y05", "y50", "y95")
 print(df)
 if (metric == "dl"){
   png(paste("../processed_results/latex/suffix/plots/ranking_boxplot.png", sep=""), width=1100, height=650)
+} else if (metric == "rt"){
+  png(paste("../processed_results/latex/remaining_time/plots/ranking_boxplot.png", sep=""), width=1100, height=650)
 } else {
   png(paste("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_ranking_boxplot.png", sep=""), width=1100, height=650)
 }
@@ -114,6 +129,9 @@ sorted_probs <- data.frame(sorted_probs[order(sorted_probs$ranking.expected.win.
 if (metric == "dl"){
   write.csv(sorted_probs, paste("../processed_results/csv/suffix/plackett_sorted_probs.csv", sep=""))
   print(xtable(sorted_probs, digits=4, caption="Approaches probability calculated by the Bayesian Plackett-Luce model"), file=paste("../processed_results/latex/suffix/plackett_sorted_probs.txt", sep=""))
+} else if (metric == "rt"){
+  write.csv(sorted_probs, paste("../processed_results/csv/remaining_time/plackett_sorted_probs.csv", sep=""))
+  print(xtable(sorted_probs, digits=4, caption="Approaches probability calculated by the Bayesian Plackett-Luce model"), file=paste("../processed_results/latex/remaining_time/plackett_sorted_probs.txt", sep=""))
 } else {
   write.csv(sorted_probs, paste("../processed_results/csv/next_activity/", subproblem, "/", metric, "_plackett_sorted_probs.csv", sep=""))
   print(xtable(sorted_probs, digits=4, caption="Approaches probability calculated by the Bayesian Plackett-Luce model"), file=paste("../processed_results/latex/next_activity/", metric, "_plackett_sorted_probs.txt", sep=""))
@@ -125,6 +143,9 @@ sorted_rankings <- data.frame(sorted_rankings[order(sorted_rankings$ranking.expe
 if (metric == "dl") {
   write.csv(sorted_rankings, paste("../processed_results/csv/suffix/plackett_sorted_rankings.csv", sep=""))
   print(xtable(sorted_rankings, digits=4, caption="Approaches probability calculated by the Bayesian Plackett-Luce model"), file=paste("../processed_results/latex/suffix/plackett_sorted_rankings.txt", sep=""))
+} else if (metric == "rt"){
+  write.csv(sorted_rankings, paste("../processed_results/csv/remaining_time/plackett_sorted_rankings.csv", sep=""))
+  print(xtable(sorted_rankings, digits=4, caption="Approaches probability calculated by the Bayesian Plackett-Luce model"), file=paste("../processed_results/latex/remaining_time/plackett_sorted_rankings.txt", sep=""))
 } else {
   write.csv(sorted_rankings, paste("../processed_results/csv/next_activity/", subproblem, "/", metric, "_plackett_sorted_rankings.csv", sep=""))
   print(xtable(sorted_rankings, digits=4, caption="Approaches probability calculated by the Bayesian Plackett-Luce model"), file=paste("../processed_results/latex/next_activity/", metric, "_plackett_sorted_rankings.txt", sep=""))
@@ -150,6 +171,8 @@ best_three <- data_acc[, names(index)[3]]
 signed_test <- bSignedRankTest(best_one, best_two, rope=c(-0.01, 0.01), seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/signed_rank_test_", names(index)[1], "_vs_", names(index)[2], ".png")
+} else if (metric == "rt") {
+  filename <- c("../processed_results/latex/remaining_time/plots/signed_rank_test_", names(index)[1], "_vs_", names(index)[2], ".png")
 } else {
   filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_signed_rank_test_", names(index)[1], "_vs_", names(index)[2], ".png")
 }
@@ -160,6 +183,8 @@ dev.off()
 signed_test <- bSignedRankTest(best_two, best_three, rope=c(-0.01, 0.01), seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/signed_rank_test_", names(index)[2], "_vs_", names(index)[3], ".png")
+} else if (metric == "rt"){
+  filename <- c("../processed_results/latex/remaining_time/plots/signed_rank_test_", names(index)[2], "_vs_", names(index)[3], ".png")
 } else {
   filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_signed_rank_test_", names(index)[2], "_vs_", names(index)[3], ".png")
 }
@@ -170,6 +195,8 @@ dev.off()
 signed_test <- bSignedRankTest(best_two, best_three, rope=c(-0.01, 0.01), seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/signed_rank_test_", names(index)[1], "_vs_", names(index)[3], ".png")
+} else if (metric == "rt"){
+  filename <- c("../processed_results/latex/remaining_time/plots/signed_rank_test_", names(index)[1], "_vs_", names(index)[3], ".png")
 } else {
   filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_signed_rank_test_", names(index)[1], "_vs_", names(index)[3], ".png")
 }
@@ -182,6 +209,11 @@ if (metric == "dl") {
   raw_data_acc <- read.csv(paste("../processed_results/csv/suffix/raw_results.csv", sep=""), row.names=1)
   levels(raw_data_acc$approach)[levels(raw_data_acc$approach) == "Camargo_argmax"] <- "Camargo_arg"
   levels(raw_data_acc$approach)[levels(raw_data_acc$approach) == "Camargo_random"] <- "Camargo_ran"
+} else if (metric == "rt"){
+  raw_data_acc <- read.csv(paste("../processed_results/csv/remaining_time/raw_results.csv", sep=""), row.names=1)
+  raw_data_acc$rt <- raw_data_acc$rt * -1
+  levels(raw_data_acc$approach)[levels(raw_data_acc$approach) == "Camargo_argmax"] <- "Camargo_arg"
+  levels(raw_data_acc$approach)[levels(raw_data_acc$approach) == "Camargo_random"] <- "Camargo_ran"
 } else {
   raw_data_acc <- read.csv(paste("../processed_results/csv/next_activity/", metric, "_raw_results.csv", sep=""), row.names=1)
 }
@@ -192,7 +224,9 @@ if(NO_CAMARGO){
 
 if(NO_SEPSIS){
 #  raw_data_acc <- raw_data_acc[raw_data_acc$log != "sepsis", ]
-#  raw_data_acc <- raw_data_acc[raw_data_acc$log != "nasa", ]
+  if (metric == "dl"){
+    raw_data_acc <- raw_data_acc[raw_data_acc$log != "nasa", ]
+  }
   subproblem <- "delete_sepsis"
 }
 # Number 1 is the best performing one
@@ -237,9 +271,11 @@ if (NO_SEPSIS && (grepl("Camargo", names(index[1])) || grepl("Camargo" , names(i
   hier_matrix_1 <- matrix_1
   hier_matrix_2 <- matrix_2
 }
-results <- bHierarchicalTest(hier_matrix_1, hier_matrix_2, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
+results <- bHierarchicalTest(hier_matrix_1, hier_matrix_2, rho=0.1, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/hierarchical_test_", names(index)[1], "_vs_", names(index)[2], ".png")
+} else if (metric == "rt"){
+  filename <- c("../processed_results/latex/remaining_time/plots/hierarchical_test_", names(index)[1], "_vs_", names(index)[2], ".png")
 } else {
   filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[1], "_vs_", names(index)[2], ".png")
 }
@@ -256,9 +292,11 @@ if (NO_SEPSIS && (grepl("Camargo", names(index[3])) || grepl("Camargo" , names(i
   hier_matrix_3 <- matrix_3
   hier_matrix_2 <- matrix_2
 }
-results <- bHierarchicalTest(hier_matrix_2, hier_matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
+results <- bHierarchicalTest(hier_matrix_2, hier_matrix_3, rho=0.1, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/hierarchical_test_", names(index)[2], "_vs_", names(index)[3], ".png")
+} else if (metric == "rt"){
+  filename <- c("../processed_results/latex/remaining_time/plots/hierarchical_test_", names(index)[2], "_vs_", names(index)[3], ".png")
 } else {
   filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[2], "_vs_", names(index)[3], ".png")
 }
@@ -275,9 +313,11 @@ if (NO_SEPSIS && (grepl("Camargo", names(index[3])) || grepl("Camargo" , names(i
   hier_matrix_3 <- matrix_3
   hier_matrix_1 <- matrix_1
 }
-results <- bHierarchicalTest(hier_matrix_1, hier_matrix_3, rho=0.1, rope=c(-0.01, 0.01), nsim=50000, nchains=10, parallel=TRUE, seed=42)
+results <- bHierarchicalTest(hier_matrix_1, hier_matrix_3, rho=0.1, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/hierarchical_test_", names(index)[1], "_vs_", names(index)[3], ".png")
+} else if (metric == "rt"){
+  filename <- c("../processed_results/latex/remaining_time/plots/hierarchical_test_", names(index)[1], "_vs_", names(index)[3], ".png")
 } else {
   filename <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_test_", names(index)[1], "_vs_", names(index)[3], ".png")
 }
@@ -289,6 +329,8 @@ dev.off()
 rownames(results$additional$per.dataset) <- rownames(hier_matrix_3)
 if (metric == "dl") {
   write.csv(data.frame(results$additional$per.dataset), paste("../processed_results/csv/suffix/hierarchical_results_per_dataset.csv", sep=""))
+} else if (metric == "rt"){
+  write.csv(data.frame(results$additional$per.dataset), paste("../processed_results/csv/remaining_time/hierarchical_results_per_dataset.csv", sep=""))
 } else {
   write.csv(data.frame(results$additional$per.dataset), paste("../processed_results/csv/next_activity/", subproblem, "/", metric, "_hierarchical_results_per_dataset.csv", sep=""))
 }

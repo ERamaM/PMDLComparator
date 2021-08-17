@@ -217,7 +217,7 @@ accuracy_fold_results = []
 for approach in results.keys():
     for log in available_logs:
         log_values = []
-        if (approach == "camargo_argmax" or approach == "camargo_random") and (log == "nasa" or log == "sepsis"):
+        if log == "nasa" or ((approach == "camargo_argmax" or approach == "camargo_random") and (log == "sepsis")):
             continue
         for fold in results[approach][log].keys():
             log_values.append(results[approach][log][fold]["0"])
@@ -227,7 +227,7 @@ for approach in results.keys():
         mean_val = statistics.mean(log_values)
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
         for fold in results[approach][log].keys():
-            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, "mae" : results[approach][log][fold]["0"]})
+            accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, "rt" : results[approach][log][fold]["0"]})
         if not approach.capitalize() in accuracy_results:
             accuracy_results[approach.capitalize()] = {}
         accuracy_results[approach.capitalize()][log_cap] = mean_val
@@ -255,7 +255,8 @@ for column in acc_df_latex.columns:
     for approach, color in zip(best_three.index, colors):
         acc_df_latex[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + acc_df_latex[column].loc[approach] + "}}"
 
-acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean accuracy of the 5-fold crossvalidation")
+acc_df_latex.rename(columns=lambda x : "\\rotatebox{90}{" + x + "}", inplace=True)
+acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean remaining time of the 5-fold crossvalidation")
 acc_latex = acc_latex.replace("Challenge ", "").replace("Bpi", "BPI") \
     .replace("\\toprule", "").replace("\\midrule", "").replace("\\bottomrule", "") \
     .replace("Camargo_argmax", "Camargo (argmax)") \
@@ -295,7 +296,7 @@ avg_rank = ranks.mean()
 ############################################
 
 os.makedirs("./processed_results/csv/remaining_time", exist_ok=True)
-os.makedirs("./processed_results/latex/remaining_time", exist_ok=True)
+os.makedirs("./processed_results/latex/remaining_time/plots", exist_ok=True)
 
 
 # Save csvs
