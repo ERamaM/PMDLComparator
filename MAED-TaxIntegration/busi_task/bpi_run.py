@@ -672,7 +672,7 @@ def exact_bpi_test_mix(
 
     dirname = os.path.dirname(os.path.abspath(__file__)) + '/data/'
     print(dirname)
-    ckpts_dir = os.path.join(dirname, 'checkpoints_data/' + eventlog + ".csv")
+    ckpts_dir = os.path.join(dirname, 'checkpoints_./data/' + eventlog + ".csv")
     batch_size = 1
 
     #X, y_a, y_t = load_np_data('./data/bpi/')
