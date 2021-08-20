@@ -33,14 +33,15 @@ library("ggplot2")
 library("here")
 library("plyr")
 
-#metric <- "accuracy"
+metric <- "accuracy"
 #metric <- "recall"
 #metric <- "precision"
 #metric <- "f1-score"
 #metric <- "brier"
 #metric <- "mcc"
+
 #metric <- "dl"
-metric <- "rt"
+#metric <- "rt"
 
 NO_CAMARGO <- FALSE
 NO_SEPSIS <- TRUE
@@ -95,7 +96,8 @@ if (NO_SEPSIS) {
   } else if (metric == "rt"){
     approaches <- c("Camargo_arg", "Camargo_ran", "Francescomarino", "Navarin", "Tax")
   } else {
-    approaches <- c("Pasquadibisceglie", "Tax", "Camargo", "Hinkka", "Evermann", "Theis_no_resource", "Mauro", "Theis_resource")
+    #approaches <- c("Pasquadibisceglie", "Tax", "Camargo", "Hinkka", "Evermann", "Theis_no_resource", "Mauro", "Theis_resource")
+    approaches <- c("Camargo","Evermann","Hinkka","Khan","Mauro","Pasquadibisceglie","Tax","Theis_no_resource","Theis_resource")
   }
 }
 
