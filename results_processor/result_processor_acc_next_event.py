@@ -65,7 +65,7 @@ elif metric == "mcc":
         "mauro" : "MCC: (.*)",
         "theis": "    \"test_mcc\": (.*),",
         "tax"  : "MCC: (.*)",
-        "khan" : "" # TODO
+        "khan" : "MCC: (.*)"
     }
 elif metric == "f1-score":
     approaches_accuracy_regexes = {
@@ -75,7 +75,7 @@ elif metric == "f1-score":
         "mauro" : "Weighted F1: (.*)",
         "theis": "    \"test_fscore_weighted\": (.*),",
         "tax" : "Weighted F1: (.*)",
-        "khan": ""  # TODO
+        "khan": "Weigted f1: (.*)"
     }
 elif metric == "precision":
     approaches_accuracy_regexes = {
@@ -85,7 +85,7 @@ elif metric == "precision":
         "mauro" : "Weighted Precision: (.*)",
         "theis": "    \"test_prec_weighted\": (.*),",
         "tax" : "Weighted Precision: (.*)",
-        "khan": ""  # TODO
+        "khan": "Weighted precision: (.*)"
     }
 elif metric == "recall":
     approaches_accuracy_regexes = {
@@ -95,7 +95,7 @@ elif metric == "recall":
         "mauro" : "Weighted Recall: (.*)",
         "theis": "    \"test_rec_weighted\": (.*),",
         "tax" : "Weighted Recall: (.*)",
-        "khan": ""  # TODO
+        "khan": "Weighted recall: (.*)"
     }
 elif metric == "brier":
     approaches_accuracy_regexes = {
@@ -105,7 +105,7 @@ elif metric == "brier":
         "mauro" : "Brier score: (.*)",
         "theis": "    \"test_brier_score\": (.*),",
         "tax" : "Brier score: (.*)",
-        "khan": ""  # TODO
+        "khan": "Brier score: (.*)"
     }
 else:
     raise ValueError
@@ -195,7 +195,7 @@ def extract_by_csv_camargo(directory, approach, results):
         fold, variation, log = parse_groups.groups()
         log = log.lower()
         available_logs.add(log)
-        store_results(results, approach, log, fold, variation, row["accuracy"])
+        store_results(results, approach, log, fold, variation, row[get_metric])
 
 
 ############################################
@@ -235,6 +235,7 @@ for delete in delete_list:
 # Retrieve average accuracy results from cross-validation to build accuracy matrix
 ############################################
 accuracy_results = {}
+accuracy_std_results = {}
 accuracy_fold_results = []
 for approach in results.keys():
     for log in available_logs:
@@ -247,16 +248,22 @@ for approach in results.keys():
 
 
         mean_val = statistics.mean(log_values)
+        std_val = statistics.stdev(log_values)
         log_cap = " ".join([x.capitalize() for x in log.split("_")])
         for fold in results[approach][log].keys():
             accuracy_fold_results.append({"approach" : approach.capitalize(), "log" : log, "fold" : fold, metric : results[approach][log][fold]["0"]})
         if not approach.capitalize() in accuracy_results:
             accuracy_results[approach.capitalize()] = {}
+            accuracy_std_results[approach.capitalize()] = {}
         accuracy_results[approach.capitalize()][log_cap] = mean_val
+        accuracy_std_results[approach.capitalize()][log_cap] = std_val
 
 acc_df = pd.DataFrame.from_dict(accuracy_results, orient="index")
+acc_df_std = pd.DataFrame.from_dict(accuracy_std_results, orient="index")
 acc_df.sort_index(axis=1, inplace=True)
 acc_df.sort_index(axis=0, inplace=True)
+acc_df_std.sort_index(axis=1, inplace=True)
+acc_df_std.sort_index(axis=0, inplace=True)
 print(metric + " df")
 print(acc_df)
 acc_fold_df = pd.DataFrame.from_dict(accuracy_fold_results)
@@ -266,39 +273,55 @@ print(metric + " fold df")
 print(acc_fold_df)
 
 acc_df_latex = acc_df.copy()
+acc_df_latex_std = acc_df_std.copy()
 print(metric + " DF LATX: ", acc_df_latex)
 
-# Format to select the best three approaches and assign them colors
-for column in acc_df_latex.columns:
-    if metric == "accuracy":
-        acc_df_latex[column] = acc_df_latex[column] * 100
-        acc_df_latex[column] = acc_df_latex[column].round(2)
-    else:
-        acc_df_latex[column] = acc_df_latex[column].round(4)
-    best_three = acc_df_latex[column].nlargest(3)
-    acc_df_latex[column] = acc_df_latex[column].astype(str)
-    colors = ["PineGreen", "orange", "red"]
-    for approach, color in zip(best_three.index, colors):
-        acc_df_latex[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + acc_df_latex[column].loc[approach] + "}}"
+def fix_latex_dataset(latex_dataset, paint=True, add=None, largest=True):
+    # Format to select the best three approaches and assign them colors
+    for column in latex_dataset.columns:
+        if metric == "accuracy":
+            latex_dataset[column] = latex_dataset[column] * 100
+            latex_dataset[column] = latex_dataset[column].round(2)
+        else:
+            latex_dataset[column] = latex_dataset[column].round(4)
+        if largest:
+            best_three = latex_dataset[column].nlargest(3)
+        else:
+            best_three = latex_dataset[column].nsmallest(3)
+        latex_dataset[column] = latex_dataset[column].astype(str)
+        colors = ["PineGreen", "orange", "red"]
+        if paint:
+            for approach, color in zip(best_three.index, colors):
+                latex_dataset[column].loc[approach] = r"\textcolor{" + color + r"}{\textbf{" + latex_dataset[column].loc[approach] + "}}"
 
-acc_df_latex.rename(columns=lambda x : "\\rotatebox{90}{" + x + "}", inplace=True)
-acc_latex = acc_df_latex.to_latex(escape=False, caption="Mean " + metric + " of the 5-fold crossvalidation")
-acc_latex = acc_latex.replace("Challenge ", "").replace("Bpi", "BPI")\
-    .replace("\\toprule", "").replace("\\midrule", "").replace("\\bottomrule", "")\
-    .replace("Theis_no_resource", "Theis et al. (w/o attributes)")\
-    .replace("Theis_resource", "Theis et al. (w/ attributes)")\
-    .replace("{table}", "{table*}")\
-    .replace("\\\\", "\\\\ \hline")\
-    .replace("lllllllllllll", "l|cccccccccccc").replace("nan", "-")
+    latex_dataset.rename(columns=lambda x : "\\rotatebox{90}{" + x + "}", inplace=True)
+    if add is not None:
+        def applymap(x):
+            return add + x
+        latex_dataset = latex_dataset.applymap(applymap)
+    acc_latex = latex_dataset.to_latex(escape=False, caption="Mean " + metric + " of the 5-fold crossvalidation")
+    acc_latex = acc_latex.replace("Challenge ", "").replace("Bpi", "BPI")\
+        .replace("\\toprule", "").replace("\\midrule", "").replace("\\bottomrule", "")\
+        .replace("Theis_no_resource", "Theis et al. (w/o attributes)")\
+        .replace("Theis_resource", "Theis et al. (w/ attributes)")\
+        .replace("{table}", "{table*}")\
+        .replace("\\\\", "\\\\ \hline")\
+        .replace("lllllllllllll", "l|cccccccccccc").replace("nan", "-")
 
+    # Fix dataset first column
+    acc_latex = acc_latex\
+        .replace("BPI 2012 Complete", "\\shortstack[l]{BPI 2012 \\\\ Complete}")\
+        .replace("BPI 2012 W Complete", "\\shortstack[l]{BPI 2012 \\\\ W Complete}")\
+        .replace("BPI 2013 Closed Problems", "\\shortstack[l]{BPI 2013 \\\\ Closed Problems}")\
+        .replace("BPI 2013 Incidents", "\\shortstack[l]{BPI 2013 \\\\ Incidents}")
+    print(acc_latex)
+    return acc_latex
 
-# Fix dataset first column
-acc_latex = acc_latex\
-    .replace("BPI 2012 Complete", "\\shortstack[l]{BPI 2012 \\\\ Complete}")\
-    .replace("BPI 2012 W Complete", "\\shortstack[l]{BPI 2012 \\\\ W Complete}")\
-    .replace("BPI 2013 Closed Problems", "\\shortstack[l]{BPI 2013 \\\\ Closed Problems}")\
-    .replace("BPI 2013 Incidents", "\\shortstack[l]{BPI 2013 \\\\ Incidents}")
-print(acc_latex)
+if metric != "brier":
+    acc_latex = fix_latex_dataset(acc_df_latex)
+else:
+    acc_latex = fix_latex_dataset(acc_df_latex, largest=False)
+acc_latex_std = fix_latex_dataset(acc_df_latex_std, paint=False, add="$\pm$")
 
 ############################################
 # Perform friedman test
@@ -347,6 +370,8 @@ acc_fold_df.to_csv("./processed_results/csv/next_activity/" + metric + "_raw_res
 # Save latex
 with open("./processed_results/latex/next_activity/" + metric + "_latex.txt", "w") as f:
     f.write(acc_latex)
+with open("./processed_results/latex/next_activity/" + metric + "_std_latex.txt", "w") as f:
+    f.write(acc_latex_std)
 #with open("../processed_results/latex/p_latex.txt", "w") as f:
 #    f.write(p_latex)
 #with open("../processed_results/latex/t_latex.txt", "w") as f:
