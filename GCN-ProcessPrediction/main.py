@@ -16,12 +16,13 @@ print("Starting up")
 from copy import copy
 import re
 import pandas as pd
-from sklearn.metrics import accuracy_score
-from utils import EventPredictor, generate_process_graph, generate_input_and_labels
+from sklearn.metrics import accuracy_score, matthews_corrcoef, precision_score, recall_score, f1_score
+from utils import EventPredictor, generate_process_graph, generate_input_and_labels, calculate_brier_score
 import argparse
 import torch
 import torch.nn as nn
 from pm4py.objects.conversion.log import converter as log_converter
+import numpy as np
 
 
 
@@ -52,7 +53,7 @@ print("Train path: ", train_path)
 num_features = 4
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # device = 'cuda'
-num_epochs = 100
+num_epochs = 10
 seed_value = 42
 # lr_value = 1e-05
 weighted_adjacency = True
@@ -102,8 +103,8 @@ for lr_run in range(lr_run, 2):
             model.train()
             num_train = 0
             training_loss = 0
-            predictions, actuals = list(), list()
 
+            y_pred_train, y_true_train = [], []
             for i, (inputs, targets) in enumerate(train_dl):
                 inputs, targets = inputs.to(device), targets.to(device)
                 optimizer.zero_grad()  # Clearing the gradients
@@ -120,8 +121,9 @@ for lr_run in range(lr_run, 2):
                 yhat = torch.argmax(yhat)
                 actual = targets.to('cpu')
                 actual = actual[0]
-                predictions.append(yhat)
-                actuals.append(actual)
+                y_pred_train.append(yhat)
+                y_true_train.append(actual)
+
                 num_train += 1
 
             with torch.no_grad():
@@ -135,7 +137,7 @@ for lr_run in range(lr_run, 2):
                     validation_loss += loss_valid.item()
                     num_valid += 1
 
-            acc = accuracy_score(actuals, predictions)
+            acc = accuracy_score(y_pred_train, y_true_train)
             avg_training_loss = training_loss / num_train
             avg_validation_loss = validation_loss / num_valid
 
@@ -159,6 +161,9 @@ for lr_run in range(lr_run, 2):
             valid_loss_plt.append(avg_validation_loss)
 
         filepath = '{}/Accuracy_{}_{}_{}_run{}.txt'.format("results/", dataset, variant, lr_value, run)
+
+        y_pred_test, y_true_test = list(), list()
+        y_prob_pred_test, y_true_oh_test = [], []
         with torch.no_grad():
             model.eval()
             num_valid = 0
@@ -166,12 +171,35 @@ for lr_run in range(lr_run, 2):
             for i, (inputs, targets) in enumerate(test_dl):
                 inputs, targets = inputs.to(device), targets.to(device)
                 yhat_valid = model(inputs[0], adj)
+
+                yhat = yhat_valid.to('cpu')
+                y_prob_pred_test.append(torch.softmax(yhat, dim=-1).numpy().tolist())
+                yhat = torch.argmax(yhat)
+                actual = targets.to('cpu')
+                actual = actual[0]
+                y_pred_test.append(yhat)
+                y_true_test.append(actual)
+                y_true_oh_test.append(
+                    np.eye(num_nodes + 1)[int(actual.numpy()[0])].tolist()
+                )
+
                 loss_valid = criterion(yhat_valid.reshape((1, -1)), targets[0].to(torch.long))
                 validation_loss += loss_valid.item()
                 num_valid += 1
 
-        acc = accuracy_score(actuals, predictions)
+        acc_test = accuracy_score(y_true_test, y_pred_test)
+        mcc = matthews_corrcoef(y_true_test, y_pred_test)
+        precision = precision_score(y_true_test, y_pred_test, average="weighted")
+        recall = recall_score(y_true_test, y_pred_test, average="weighted")
+        f1 = f1_score(y_true_test, y_pred_test, average="weighted")
+        brier_score = calculate_brier_score(np.array(y_prob_pred_test), np.array(y_true_oh_test))
         with open(filepath, "w") as result_file:
-            result_file.write("Test accuracy: " + str(acc))
+            result_file.write("Accuracy: " + str(acc_test) + "\n")
+            result_file.write("MCC: " + str(mcc) + "\n")
+            result_file.write("Precision: " + str(precision) + "\n")
+            result_file.write("Recall: " + str(recall) + "\n")
+            result_file.write("F1: " + str(f1) + "\n")
+            result_file.write("Brier score: " + str(brier_score) + "\n")
+
 
 

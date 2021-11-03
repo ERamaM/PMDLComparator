@@ -370,4 +370,4 @@ You'll need to install pytorch and pm4py.
 	conda create -n "venugopal" python=3.6
 	conda activate venugopal
 	conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
-	python -m pip install pm4py==2.2.15
+	python -m pip install pm4py==2.2.15 pandas

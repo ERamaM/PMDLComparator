@@ -332,3 +332,7 @@ def random_split(dataset, lengths, generator=default_generator):
 
     indices = randperm(sum(lengths), generator=generator).tolist()
     return [Subset(dataset, indices[offset - length: offset]) for offset, length in zip(_accumulate(lengths), lengths)]
+
+def calculate_brier_score(y_pred, y_true):
+    # From: https://stats.stackexchange.com/questions/403544/how-to-compute-the-brier-score-for-more-than-two-classes
+    return np.mean(np.sum((y_true - y_pred)**2, axis=1))
