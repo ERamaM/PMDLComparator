@@ -55,6 +55,7 @@ Where AUTHOR is one of above:
 - francescomarino
 - theis
 - tax
+- venugopal
 
 Examples:
 
@@ -361,3 +362,12 @@ Example:
 	python train.py --fold_dataset ../data/fold0_variation0_BPI_Challenge_2012_A.csv --full_dataset ../data/BPI_Challenge_2012_A.csv --test --test_suffix --train
 
 I recommend you leave the java app execution inside a Tmux session and use the ./generate_queue.sh script to run all the experiments.
+
+### Venugopal
+
+You'll need to install pytorch and pm4py.
+
+	conda create -n "venugopal" python=3.6
+	conda activate venugopal
+	conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
+	python -m pip install pm4py==2.2.15
