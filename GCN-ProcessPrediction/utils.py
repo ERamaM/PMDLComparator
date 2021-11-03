@@ -130,25 +130,35 @@ class EventLogData(Dataset):
 
 def prepare_data_for_Predictor(NN_features, label):
     dataset = EventLogData(NN_features, label)
-    train, valid, test = dataset.get_splits()
-    train_dl = DataLoader(train, batch_size=1, shuffle=True)
-    valid_dl = DataLoader(valid, batch_size=1, shuffle=False)
-    test_dl = DataLoader(test, batch_size=1, shuffle=False)
-    return train_dl, valid_dl, test_dl
+    dataset_dl = DataLoader(dataset, batch_size=1, shuffle=True)
+    return dataset_dl
 
 
-def generate_input_and_labels(path, num_nodes, num_features):
-    df = pd.read_csv(path)
+def generate_input_and_labels(train_path, val_path, test_path, num_nodes, num_features):
     total_unique_activities = num_nodes
-    NN_features = generate_features(df, total_unique_activities, num_features)
-    next_activity, next_timestamp = generate_labels(df, total_unique_activities)
-    NN_features = torch.Tensor(NN_features).to(torch.float32)
-    next_activity = torch.Tensor(next_activity).to(torch.float32)
-    next_timestamp = torch.Tensor(next_timestamp).to(torch.float32)
 
-    train_dl, valid_dl, test_dl = prepare_data_for_Predictor(NN_features, next_activity)
+    train_df = pd.read_csv(train_path)
+    train_NN_features = generate_features(train_df, total_unique_activities, num_features)
+    train_next_activity, train_next_timestamp = generate_labels(train_df, total_unique_activities)
+    train_NN_features = torch.Tensor(train_NN_features).to(torch.float32)
+    train_next_activity = torch.Tensor(train_next_activity).to(torch.float32)
+    train_dl = prepare_data_for_Predictor(train_NN_features, train_next_activity)
 
-    return train_dl, valid_dl, test_dl
+    val_df = pd.read_csv(val_path)
+    val_NN_features = generate_features(val_df, total_unique_activities, num_features)
+    val_next_activity, val_next_timestamp = generate_labels(val_df, total_unique_activities)
+    val_NN_features = torch.Tensor(val_NN_features).to(torch.float32)
+    val_next_activity = torch.Tensor(val_next_activity).to(torch.float32)
+    val_dl = prepare_data_for_Predictor(val_NN_features, val_next_activity)
+
+    test_df = pd.read_csv(test_path)
+    test_NN_features = generate_features(test_df, total_unique_activities, num_features)
+    test_next_activity, test_next_timestamp = generate_labels(test_df, total_unique_activities)
+    test_NN_features = torch.Tensor(test_NN_features).to(torch.float32)
+    test_next_activity = torch.Tensor(test_next_activity).to(torch.float32)
+    test_dl = prepare_data_for_Predictor(test_NN_features, test_next_activity)
+
+    return train_dl, val_dl, test_dl
 
 
 # Much better function than using "fractional_matrix_power"

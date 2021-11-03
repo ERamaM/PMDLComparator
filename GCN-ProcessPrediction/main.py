@@ -50,7 +50,7 @@ print("Train path: ", train_path)
 num_features = 4
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # device = 'cuda'
-num_epochs = 100
+num_epochs = 10
 seed_value = 42
 # lr_value = 1e-05
 weighted_adjacency = True
@@ -82,7 +82,7 @@ for lr_run in range(lr_run, 2):
         num_nodes = count_nodes(full_path)
         model = EventPredictor(num_nodes, num_features)
         adj = generate_process_graph(train_path, num_nodes)
-        train_dl, valid_dl, test_dl = generate_input_and_labels(train_path, num_nodes, num_features)
+        train_dl, valid_dl, test_dl = generate_input_and_labels(train_path, val_path, test_path, num_nodes, num_features)
         criterion = nn.CrossEntropyLoss()
         optimizer = torch.optim.Adam(model.parameters(), lr=lr_value)
         # print("************* Event Predictor ***************")
@@ -157,7 +157,19 @@ for lr_run in range(lr_run, 2):
             valid_loss_plt.append(avg_validation_loss)
 
         filepath = '{}/Accuracy_{}_{}_{}_run{}.txt'.format("results/", dataset, variant, lr_value, run)
+        with torch.no_grad():
+            model.eval()
+            num_valid = 0
+            validation_loss = 0
+            for i, (inputs, targets) in enumerate(test_dl):
+                inputs, targets = inputs.to(device), targets.to(device)
+                yhat_valid = model(inputs[0], adj)
+                loss_valid = criterion(yhat_valid.reshape((1, -1)), targets[0].to(torch.long))
+                validation_loss += loss_valid.item()
+                num_valid += 1
 
-        with open(filepath, 'w') as file:
-            for item in zip(epochs_plt, acc_plt, loss_plt, valid_loss_plt):
-                file.write("{}\n".format(item))
+        acc = accuracy_score(actuals, predictions)
+        with open(filepath, "w") as result_file:
+            result_file.write("Test accuracy: " + str(acc))
+
+
