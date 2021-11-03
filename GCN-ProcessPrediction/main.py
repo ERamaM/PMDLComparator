@@ -11,6 +11,8 @@ Original file is located at
 
 # !pip install pm4py
 
+print("Starting up")
+
 from copy import copy
 import re
 import pandas as pd
@@ -33,7 +35,7 @@ args = parser.parse_args()
 fold_log = args.dataset
 print("Fold log: ", fold_log)
 full_log = re.sub("fold\\d_variation\\d_", "", fold_log)
-dataset = re.sub(".xes.gz", "", full_log)
+dataset = re.sub(".xes.gz", "", fold_log)
 print("Full log: ", full_log)
 full_path = "./data/" + full_log
 train_path = "./data/train_" + fold_log
@@ -50,7 +52,7 @@ print("Train path: ", train_path)
 num_features = 4
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 # device = 'cuda'
-num_epochs = 10
+num_epochs = 100
 seed_value = 42
 # lr_value = 1e-05
 weighted_adjacency = True

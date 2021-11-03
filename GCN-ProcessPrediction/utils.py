@@ -128,7 +128,7 @@ class EventLogData(Dataset):
         return train, valid, test
 
 
-def prepare_data_for_Predictor(NN_features, label):
+def prepare_data_for_Predictor(NN_features, label, batch_size, shuffle):
     dataset = EventLogData(NN_features, label)
     dataset_dl = DataLoader(dataset, batch_size=1, shuffle=True)
     return dataset_dl
@@ -142,21 +142,21 @@ def generate_input_and_labels(train_path, val_path, test_path, num_nodes, num_fe
     train_next_activity, train_next_timestamp = generate_labels(train_df, total_unique_activities)
     train_NN_features = torch.Tensor(train_NN_features).to(torch.float32)
     train_next_activity = torch.Tensor(train_next_activity).to(torch.float32)
-    train_dl = prepare_data_for_Predictor(train_NN_features, train_next_activity)
+    train_dl = prepare_data_for_Predictor(train_NN_features, train_next_activity, 32, True)
 
     val_df = pd.read_csv(val_path)
     val_NN_features = generate_features(val_df, total_unique_activities, num_features)
     val_next_activity, val_next_timestamp = generate_labels(val_df, total_unique_activities)
     val_NN_features = torch.Tensor(val_NN_features).to(torch.float32)
     val_next_activity = torch.Tensor(val_next_activity).to(torch.float32)
-    val_dl = prepare_data_for_Predictor(val_NN_features, val_next_activity)
+    val_dl = prepare_data_for_Predictor(val_NN_features, val_next_activity, 1, False)
 
     test_df = pd.read_csv(test_path)
     test_NN_features = generate_features(test_df, total_unique_activities, num_features)
     test_next_activity, test_next_timestamp = generate_labels(test_df, total_unique_activities)
     test_NN_features = torch.Tensor(test_NN_features).to(torch.float32)
     test_next_activity = torch.Tensor(test_next_activity).to(torch.float32)
-    test_dl = prepare_data_for_Predictor(test_NN_features, test_next_activity)
+    test_dl = prepare_data_for_Predictor(test_NN_features, test_next_activity, 1, False)
 
     return train_dl, val_dl, test_dl
 
@@ -183,7 +183,7 @@ def degree_power(A, k):
         D = np.diag(degrees)
     return D
 
-def generate_process_graph(path, num_nodes, binary_adjacency=True, laplacian_matrix=False):
+def generate_process_graph(path, num_nodes, binary_adjacency=False, laplacian_matrix=False):
     data = pd.read_csv(path)
     cols = ['case:concept:name', 'concept:name', 'time:timestamp']
     data.columns = cols
