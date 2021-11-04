@@ -21,7 +21,8 @@ dir_to_approach = {
     "nnpm" : "mauro",
     "PyDREAM-NAP" : "theis",
     "GenerativeLSTM" : "camargo",
-    "MAED-TaxIntegration" : "khan"
+    "MAED-TaxIntegration" : "khan",
+    "GCN-ProcessPrediction" : "venugopal"
 }
 directories = [
     "../tax/code/results",
@@ -32,7 +33,8 @@ directories = [
     "../PyDREAM-NAP/results",
     "../PyDREAM-NAP/results_no_resources",
     "../GenerativeLSTM/output_files/",
-    "../MAED-TaxIntegration/busi_task/data"
+    "../MAED-TaxIntegration/busi_task/data",
+    "../GCN-ProcessPrediction/results"
 ]
 
 # These regexes allow us to find the file that contains the results
@@ -43,7 +45,8 @@ file_approaches_regex = {
     "mauro" : "^fold.*.txt",
     "hinkka" : "results_.*",
     "theis": ".*\.txt$",
-    "khan" : "results_.*"
+    "khan" : "results_.*",
+    "venugopal" : "Accuracy_*"
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
@@ -55,7 +58,8 @@ if metric == "accuracy":
         "mauro" : "Final Accuracy score:.*\[(.*)\]",
         "hinkka": "Accuracy sklearn: (.*)",
         "theis" : "    \"test_acc\": (.*),",
-        "khan" : "Accuracy: (.*)"
+        "khan" : "Accuracy: (.*)",
+        "venugopal" : "Accuracy: (.*)"
     }
 elif metric == "mcc":
     approaches_accuracy_regexes = {
@@ -65,7 +69,8 @@ elif metric == "mcc":
         "mauro" : "MCC: (.*)",
         "theis": "    \"test_mcc\": (.*),",
         "tax"  : "MCC: (.*)",
-        "khan" : "MCC: (.*)"
+        "khan" : "MCC: (.*)",
+        "venugopal" : "MCC: (.*)"
     }
 elif metric == "f1-score":
     approaches_accuracy_regexes = {
@@ -75,7 +80,8 @@ elif metric == "f1-score":
         "mauro" : "Weighted F1: (.*)",
         "theis": "    \"test_fscore_weighted\": (.*),",
         "tax" : "Weighted F1: (.*)",
-        "khan": "Weigted f1: (.*)"
+        "khan": "Weigted f1: (.*)",
+        "venugopal" : "F1: (.*)"
     }
 elif metric == "precision":
     approaches_accuracy_regexes = {
@@ -85,7 +91,8 @@ elif metric == "precision":
         "mauro" : "Weighted Precision: (.*)",
         "theis": "    \"test_prec_weighted\": (.*),",
         "tax" : "Weighted Precision: (.*)",
-        "khan": "Weighted precision: (.*)"
+        "khan": "Weighted precision: (.*)",
+        "venugopal" : "Precision: (.*)"
     }
 elif metric == "recall":
     approaches_accuracy_regexes = {
@@ -95,7 +102,8 @@ elif metric == "recall":
         "mauro" : "Weighted Recall: (.*)",
         "theis": "    \"test_rec_weighted\": (.*),",
         "tax" : "Weighted Recall: (.*)",
-        "khan": "Weighted recall: (.*)"
+        "khan": "Weighted recall: (.*)",
+        "venugopal" : "Recall: (.*)"
     }
 elif metric == "brier":
     approaches_accuracy_regexes = {
@@ -105,7 +113,8 @@ elif metric == "brier":
         "mauro" : "Brier score: (.*)",
         "theis": "    \"test_brier_score\": (.*),",
         "tax" : "Brier score: (.*)",
-        "khan": "Brier score: (.*)"
+        "khan": "Brier score: (.*)",
+        "venugopal" : "Brier score: (.*)"
     }
 else:
     raise ValueError
@@ -118,7 +127,8 @@ approaches_clean_log_regexes = {
     "mauro" : ".txt",
     "hinkka" : "results_",
     "theis" : ".xes.gz_results.txt",
-    "khan" : "results_"
+    "khan" : "results_",
+    "venugopal" : "Accuracy_|.csv_weighted_0.0001_run0.txt"
 }
 
 approaches_by_csv = ["camargo"]
@@ -158,7 +168,9 @@ def extract_by_regex(directory, approach, results, real_approach=None):
                     if acc_regex_match is not None:
                         accuracy = float(acc_regex_match.group(1))
                         break
-                clean_filename = file.replace(approaches_clean_log_regexes[approach], "")
+                clean_filename = re.sub(approaches_clean_log_regexes[approach], "", file)
+                print("Log regex: ", log_regex)
+                print("Clean filename: ", clean_filename)
                 parse_groups = re.match(log_regex, clean_filename)
                 fold, variation, log = parse_groups.groups()
                 log = log.lower()
@@ -239,7 +251,7 @@ accuracy_std_results = {}
 accuracy_fold_results = []
 for approach in results.keys():
     for log in available_logs:
-        if approach == "camargo" and (log == "nasa" or log == "sepsis"):
+        if (approach == "camargo" and (log == "nasa" or log == "sepsis")) or approach == "venugopal" and log == "nasa":
             continue
         log_values = []
         for fold in results[approach][log].keys():

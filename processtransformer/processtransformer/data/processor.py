@@ -6,6 +6,8 @@ import datetime
 from multiprocessing import  Pool
 
 from ..constants import Task
+from pathlib import Path
+import re
 
 class LogsDataProcessor:
     def __init__(self, name, filepath, columns, dir_path = "./datasets/processed", pool = 1):
@@ -26,13 +28,18 @@ class LogsDataProcessor:
         self._dir_path = f"{self._dir_path}/{self._name}/processed"
         self._pool = pool
 
-    def _load_df(self, sort_temporally = False):
-        df = pd.read_csv(self._filepath)
+        self.fold_name = Path(self._filepath).name
+        self.directory_name = Path(self._filepath).parent
+        self.train_fold = "train_" + self.fold_name
+        self.val_fold = "val_" + self.fold_name
+        self.test_fold = "test_" + self.fold_name
+        self.full_log = re.sub("fold\\d_variation\\d_", "", self.fold_name)
+
+    def _load_df(self, filepath, sort_temporally = False):
+        df = pd.read_csv(filepath)
         df = df[self._org_columns]
         df.columns = ["case:concept:name", 
             "concept:name", "time:timestamp"]
-        df["concept:name"] = df["concept:name"].str.lower()
-        df["concept:name"] = df["concept:name"].str.replace(" ", "-")
         df["time:timestamp"] = df["time:timestamp"].str.replace("/", "-")
         df["time:timestamp"]= pd.to_datetime(df["time:timestamp"],  
             dayfirst=True).map(lambda x: x.strftime("%Y-%m-%d %H:%M:%S"))
@@ -50,6 +57,7 @@ class LogsDataProcessor:
         code_activity_normal = dict({"y_word_dict": dict(zip(activities, range(len(activities))))})
 
         coded_activity.update(code_activity_normal)
+        print("Coded activity: ", coded_activity)
         coded_json = json.dumps(coded_activity)
         with open(f"{self._dir_path}/metadata.json", "w") as metadata_file:
             metadata_file.write(coded_json)
@@ -72,14 +80,16 @@ class LogsDataProcessor:
                 idx = idx + 1
         return processed_df
 
-    def _process_next_activity(self, df, train_list, test_list):
+    def _process_next_activity(self, df, train_list, test_list, val_list):
         df_split = np.array_split(df, self._pool)
         with Pool(processes=self._pool) as pool:
             processed_df = pd.concat(pool.imap_unordered(self._next_activity_helper_func, df_split))
         train_df = processed_df[processed_df["case_id"].isin(train_list)]
         test_df = processed_df[processed_df["case_id"].isin(test_list)]
-        train_df.to_csv(f"{self._dir_path}/{Task.NEXT_ACTIVITY.value}_train.csv", index = False)
-        test_df.to_csv(f"{self._dir_path}/{Task.NEXT_ACTIVITY.value}_test.csv", index = False)
+        val_df = processed_df[processed_df["case_id"].isin(val_list)]
+        train_df.to_csv(f"{self._dir_path}/{Task.NEXT_ACTIVITY.value}_train.csv", index=False)
+        test_df.to_csv(f"{self._dir_path}/{Task.NEXT_ACTIVITY.value}_test.csv", index=False)
+        val_df.to_csv(f"{self._dir_path}/{Task.NEXT_ACTIVITY.value}_val.csv", index=False)
 
     def _next_time_helper_func(self, df):
         case_id = "case:concept:name"
@@ -190,16 +200,19 @@ class LogsDataProcessor:
     def process_logs(self, task, 
         sort_temporally = False, 
         train_test_ratio = 0.80):
-        df = self._load_df(sort_temporally)
-        self._extract_logs_metadata(df)
-        train_test_ratio = int(abs(df["case:concept:name"].nunique()*train_test_ratio))
-        train_list = df["case:concept:name"].unique()[:train_test_ratio]
-        test_list = df["case:concept:name"].unique()[train_test_ratio:]
+        full_df = self._load_df(os.path.join(self.directory_name, self.full_log), False)
+        train_df = self._load_df(os.path.join(self.directory_name, self.train_fold), False)
+        test_df = self._load_df(os.path.join(self.directory_name, self.test_fold), False)
+        val_df = self._load_df(os.path.join(self.directory_name, self.val_fold), False)
+        self._extract_logs_metadata(full_df)
+        train_list = train_df["case:concept:name"].unique()
+        test_list = test_df["case:concept:name"].unique()
+        val_list = val_df["case:concept:name"].unique()
         if task == Task.NEXT_ACTIVITY:
-            self._process_next_activity(df, train_list, test_list)
+            self._process_next_activity(full_df, train_list, test_list, val_list)
         elif task == Task.NEXT_TIME:
-            self._process_next_time(df, train_list, test_list)
+            self._process_next_time(full_df, train_list, test_list, val_list)
         elif task == Task.REMAINING_TIME:
-            self._process_remaining_time(df, train_list, test_list)
+            self._process_remaining_time(full_df, train_list, test_list, val_list)
         else:
             raise ValueError("Invalid task.")

@@ -381,8 +381,17 @@ To execute the approach run as follows (note that we do not specify the folder):
 
 ### Zarahah
 
-Use the anaconda environment tf_2.0_ppm
+Create the environment as follows:
+
+	conda create -n "zarahah" python=3.9
+	conda activate zarahah
+	conda install -c anaconda tensorflow-gpu=2.4.1
+	python -m pip install pandas==1.3.4 scikit-learn==1.0.1
 
 Run the preprocessing steps using a commands such as follows:
 	
 	python data_processing.py --raw_log_file ./datasets/BPI_Challenge_2012_A/fold0_variation0_BPI_Challenge_2012_A.csv --task next_activity --dir_path ./datasets/BPI_Challenge_2012_A/ --dataset BPI_Challenge_2012_A
+
+Run the experimentation as follows
+
+	python next_activity.py --dataset fold0_variation0_BPI_Challenge_2012_A --epoch 100 --learning_rate 0.001

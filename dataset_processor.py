@@ -134,7 +134,7 @@ if arguments.net:
             # Tax already performs the augmentation in their script
             # so there is no need to perform it here
             # TODO: verify this
-            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+            csv_file, csv_path = augment_xes_end_activity_to_csv(xes, "./tmp")
             output_columns = {
                 XES_Fields.CASE_COLUMN: "Case ID",
                 XES_Fields.ACTIVITY_COLUMN: "Activity",
@@ -147,6 +147,10 @@ if arguments.net:
                 timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
                 output_columns=output_columns, categorize=False
             )
+            # The approach splits using the "SPACE" so remove them
+            pd_csv = pd.read_csv(csv_path)
+            pd_csv["Activity"] = pd_csv["Activity"].str.replace(" ", "_")
+            pd_csv.to_csv(csv_path, index=False)
 
             csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp",
                                                                                 "Case ID")

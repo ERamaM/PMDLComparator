@@ -8,6 +8,7 @@ from sklearn import utils
 from sklearn import preprocessing 
 
 from ..constants import Task
+import re
 
 class LogsDataLoader:
     def __init__(self, name, dir_path = "./datasets"):
@@ -17,7 +18,8 @@ class LogsDataLoader:
             name: str: name of the dataset as used during processing raw logs
             dir_path: str: Path to dataset directory
         """
-        self._dir_path = f"{dir_path}/{name}/processed"
+        log_name = re.sub("fold\\d_variation\\d_", "", name)
+        self._dir_path = f"{dir_path}/{log_name}/{name}/processed"
 
     def prepare_data_next_activity(self, df, 
         x_word_dict, y_word_dict, 
@@ -25,6 +27,9 @@ class LogsDataLoader:
         
         x = df["prefix"].values
         y = df["next_act"].values
+
+        print("POSSIBLE X: ", set(list(x)))
+
         if shuffle:
             x, y = utils.shuffle(x, y)
 
@@ -140,6 +145,7 @@ class LogsDataLoader:
             raise ValueError("Invalid task.")
 
         train_df = pd.read_csv(f"{self._dir_path}/{task.value}_train.csv")
+        val_df = pd.read_csv(f"{self._dir_path}/{task.value}_val.csv")
         test_df = pd.read_csv(f"{self._dir_path}/{task.value}_test.csv")
 
         with open(f"{self._dir_path}/metadata.json", "r") as json_file:
@@ -151,7 +157,7 @@ class LogsDataLoader:
         vocab_size = len(x_word_dict) 
         total_classes = len(y_word_dict)
 
-        return (train_df, test_df, 
+        return (train_df, test_df, val_df,
             x_word_dict, y_word_dict, 
             max_case_length, vocab_size, 
             total_classes)
