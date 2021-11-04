@@ -157,6 +157,8 @@ if arguments.net:
 
             filename = Path(xes).name.replace(".xes.gz", "")
             make_dir_if_not_exists("processtransformer/datasets/" + filename)
+            make_dir_if_not_exists("processtransformer/models")
+            make_dir_if_not_exists("processtransformer/results")
             files_to_move = [csv_path] + train_paths + val_paths + test_paths
             move_files(files_to_move, "processtransformer/datasets/" + filename)
     elif arguments.net == "evermann":
