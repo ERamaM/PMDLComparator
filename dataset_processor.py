@@ -2,7 +2,8 @@ import argparse
 from pathlib import Path
 from utils import *
 
-current_approaches = ["pasquadibisceglie", "tax", "mauro", "venugopal", "evermann", "thai", "theis", "navarin", "camargo", "francescomarino", "hinkka"]
+current_approaches = ["pasquadibisceglie", "tax", "mauro", "venugopal", "evermann", "thai",
+                      "theis", "navarin", "camargo", "francescomarino", "hinkka", "zarahah"]
 
 parser = argparse.ArgumentParser(description="Prepare datasets for multiple SOTA DL-PPM studies")
 action = parser.add_mutually_exclusive_group(required=True)
@@ -127,6 +128,33 @@ if arguments.net:
             make_dir_if_not_exists("GCN-ProcessPrediction/models")
             files_to_move = [csv_path] + train_paths + val_paths + test_paths
             move_files(files_to_move, "GCN-ProcessPrediction/data")
+
+    elif arguments.net == "zarahah":
+        for xes in dataset_list:
+            # Tax already performs the augmentation in their script
+            # so there is no need to perform it here
+            # TODO: verify this
+            csv_file, csv_path = convert_xes_to_csv(xes, "./tmp")
+            output_columns = {
+                XES_Fields.CASE_COLUMN: "Case ID",
+                XES_Fields.ACTIVITY_COLUMN: "Activity",
+                XES_Fields.TIMESTAMP_COLUMN: "Complete Timestamp"
+            }
+            select_columns(
+                csv_path,
+                input_columns=[XES_Fields.CASE_COLUMN, XES_Fields.ACTIVITY_COLUMN, XES_Fields.TIMESTAMP_COLUMN],
+                category_columns=[XES_Fields.ACTIVITY_COLUMN],
+                timestamp_format=Timestamp_Formats.TIMESTAMP_FORMAT_YMDHMS_DASH,
+                output_columns=output_columns, categorize=False
+            )
+
+            csv_path, train_paths, val_paths, test_paths = split_train_val_test(csv_path, "./tmp",
+                                                                                "Case ID")
+
+            filename = Path(xes).name.replace(".xes.gz", "")
+            make_dir_if_not_exists("processtransformer/datasets/" + filename)
+            files_to_move = [csv_path] + train_paths + val_paths + test_paths
+            move_files(files_to_move, "processtransformer/datasets/" + filename)
     elif arguments.net == "evermann":
         for xes in dataset_list:
             print("Process: ", xes)

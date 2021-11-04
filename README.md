@@ -371,3 +371,18 @@ You'll need to install pytorch and pm4py.
 	conda activate venugopal
 	conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
 	python -m pip install pm4py==2.2.15 pandas
+
+**THERE IS A BUG THAT PREVENTS THE APPROACH FROM EXECUTING ON THE NASA LOG. DUE TO THE TIMESTAMPS BEING ALL EQUAL 
+THE ACCURACY WILL BE 100%**
+
+To execute the approach run as follows (note that we do not specify the folder):
+
+	python main.py --dataset fold0_variation0_BPI_Challenge_2012_A.csv 
+
+### Zarahah
+
+Use the anaconda environment tf_2.0_ppm
+
+Run the preprocessing steps using a commands such as follows:
+	
+	python data_processing.py --raw_log_file ./datasets/BPI_Challenge_2012_A/fold0_variation0_BPI_Challenge_2012_A.csv --task next_activity --dir_path ./datasets/BPI_Challenge_2012_A/ --dataset BPI_Challenge_2012_A
