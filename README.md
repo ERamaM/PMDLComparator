@@ -394,4 +394,4 @@ Run the preprocessing steps using a commands such as follows:
 
 Run the experimentation as follows
 
-	python next_activity.py --dataset fold0_variation0_BPI_Challenge_2012_A --epoch 100 --learning_rate 0.001
+	python next_activity.py --dataset fold0_variation0_BPI_Challenge_2012_A.csv --epoch 100 --learning_rate 0.001
