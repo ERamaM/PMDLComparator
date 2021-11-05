@@ -19,6 +19,7 @@ class LogsDataLoader:
             dir_path: str: Path to dataset directory
         """
         log_name = re.sub("fold\\d_variation\\d_", "", name)
+        log_name = log_name.replace(".csv", "")
         self._dir_path = f"{dir_path}/{log_name}/{name}/processed"
 
     def prepare_data_next_activity(self, df, 
