@@ -18,6 +18,6 @@ fi
 for i in $(ls ./datasets | grep -v "nasa"); do
   for j in $(ls ./datasets/$i/ | grep "train" ); do
     real_fold=${j/"train_"/}
-	  TMPDIR=$DUMP_DIR TS_SOCKET=/tmp/zarahah_preprocess $TS_EXECUTABLE python data_processing.py --raw_log_file ./datasets/$i/$real_fold --task next_activity --dir_path ./datasets/$i/ --dataset $i
+	  TMPDIR=$DUMP_DIR TS_SOCKET=/tmp/zarahah_preprocess $TS_EXECUTABLE python data_processing.py --raw_log_file ./datasets/$i/$real_fold --task next_activity --dir_path ./datasets/$i/ --dataset $real_fold
   done
 done
