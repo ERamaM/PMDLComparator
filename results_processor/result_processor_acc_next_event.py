@@ -22,7 +22,8 @@ dir_to_approach = {
     "PyDREAM-NAP" : "theis",
     "GenerativeLSTM" : "camargo",
     "MAED-TaxIntegration" : "khan",
-    "GCN-ProcessPrediction" : "venugopal"
+    "GCN-ProcessPrediction" : "venugopal",
+    "processtransformer" : "zarahah"
 }
 directories = [
     "../tax/code/results",
@@ -34,7 +35,8 @@ directories = [
     "../PyDREAM-NAP/results_no_resources",
     "../GenerativeLSTM/output_files/",
     "../MAED-TaxIntegration/busi_task/data",
-    "../GCN-ProcessPrediction/results"
+    "../GCN-ProcessPrediction/results",
+    "../processtransformer/results/"
 ]
 
 # These regexes allow us to find the file that contains the results
@@ -46,7 +48,8 @@ file_approaches_regex = {
     "hinkka" : "results_.*",
     "theis": ".*\.txt$",
     "khan" : "results_.*",
-    "venugopal" : "Accuracy_*"
+    "venugopal" : "Accuracy_*",
+    "zarahah" : ".*.txt"
 }
 
 # These regexes allow us to find the line inside the result file that contains the accuracy
@@ -59,7 +62,8 @@ if metric == "accuracy":
         "hinkka": "Accuracy sklearn: (.*)",
         "theis" : "    \"test_acc\": (.*),",
         "khan" : "Accuracy: (.*)",
-        "venugopal" : "Accuracy: (.*)"
+        "venugopal" : "Accuracy: (.*)",
+        "zarahah" : "Accuracy: (.*)"
     }
 elif metric == "mcc":
     approaches_accuracy_regexes = {
@@ -70,7 +74,8 @@ elif metric == "mcc":
         "theis": "    \"test_mcc\": (.*),",
         "tax"  : "MCC: (.*)",
         "khan" : "MCC: (.*)",
-        "venugopal" : "MCC: (.*)"
+        "venugopal" : "MCC: (.*)",
+        "zarahah" : "MCC: (.*)"
     }
 elif metric == "f1-score":
     approaches_accuracy_regexes = {
@@ -81,7 +86,8 @@ elif metric == "f1-score":
         "theis": "    \"test_fscore_weighted\": (.*),",
         "tax" : "Weighted F1: (.*)",
         "khan": "Weigted f1: (.*)",
-        "venugopal" : "F1: (.*)"
+        "venugopal" : "F1: (.*)",
+        "zarahah" : "F1: (.*)"
     }
 elif metric == "precision":
     approaches_accuracy_regexes = {
@@ -92,7 +98,8 @@ elif metric == "precision":
         "theis": "    \"test_prec_weighted\": (.*),",
         "tax" : "Weighted Precision: (.*)",
         "khan": "Weighted precision: (.*)",
-        "venugopal" : "Precision: (.*)"
+        "venugopal" : "Precision: (.*)",
+        "zarahah" : "Precision: (.*)"
     }
 elif metric == "recall":
     approaches_accuracy_regexes = {
@@ -103,7 +110,8 @@ elif metric == "recall":
         "theis": "    \"test_rec_weighted\": (.*),",
         "tax" : "Weighted Recall: (.*)",
         "khan": "Weighted recall: (.*)",
-        "venugopal" : "Recall: (.*)"
+        "venugopal" : "Recall: (.*)",
+        "zarahah" : "Recall: (.*)"
     }
 elif metric == "brier":
     approaches_accuracy_regexes = {
@@ -114,7 +122,8 @@ elif metric == "brier":
         "theis": "    \"test_brier_score\": (.*),",
         "tax" : "Brier score: (.*)",
         "khan": "Brier score: (.*)",
-        "venugopal" : "Brier score: (.*)"
+        "venugopal" : "Brier score: (.*)",
+        "zarahah" : "Brier score: (.*)"
     }
 else:
     raise ValueError
@@ -128,7 +137,8 @@ approaches_clean_log_regexes = {
     "hinkka" : "results_",
     "theis" : ".xes.gz_results.txt",
     "khan" : "results_",
-    "venugopal" : "Accuracy_|.csv_weighted_0.0001_run0.txt"
+    "venugopal" : "Accuracy_|.csv_weighted_0.0001_run0.txt",
+    "zarahah" : "_results.txt"
 }
 
 approaches_by_csv = ["camargo"]
@@ -251,7 +261,7 @@ accuracy_std_results = {}
 accuracy_fold_results = []
 for approach in results.keys():
     for log in available_logs:
-        if (approach == "camargo" and (log == "nasa" or log == "sepsis")) or approach == "venugopal" and log == "nasa":
+        if (approach == "camargo" and (log == "nasa" or log == "sepsis")) or approach == "venugopal" and log == "nasa" or approach == "zarahah" and log == "nasa":
             continue
         log_values = []
         for fold in results[approach][log].keys():
