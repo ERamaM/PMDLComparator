@@ -33,14 +33,14 @@ library("ggplot2")
 library("here")
 library("plyr")
 
-metric <- "accuracy"
+#metric <- "accuracy"
 #metric <- "recall"
 #metric <- "precision"
 #metric <- "f1-score"
 #metric <- "brier"
 #metric <- "mcc"
 
-#metric <- "dl"
+metric <- "dl"
 #metric <- "rt"
 
 NO_CAMARGO <- FALSE
@@ -54,7 +54,7 @@ if (metric == "dl"){
   colnames(data_acc)[colnames(data_acc) == "Camargo_argmax"] <- "Camargo_arg"
   colnames(data_acc)[colnames(data_acc) == "Camargo_random"] <- "Camargo_ran"
   MINIMIZE <- FALSE
-  ROPE <- c(-0.01, 0.01)
+  ROPE <- c(-0.005, 0.005)
 } else if (metric == "rt"){
   data_acc <- read.csv(paste("../processed_results/csv/remaining_time/results.csv", sep=""), row.names=1)
   colnames(data_acc)[colnames(data_acc) == "Camargo_argmax"] <- "Camargo_arg"
@@ -257,23 +257,34 @@ matrix_1 <- data.matrix(reshaped_1)
 
 print("Raw data acc: ")
 print(raw_data_acc)
-print("Matrix 2: ")
-print(matrix_2)
-print("Matrix 1: ")
-print(matrix_1)
 
 # Plot the pairwise comparisons
 # P1
+if (metric == "dl"){
+  order_vector <- c("dl.0", "dl.1", "dl.2", "dl.3", "dl.4")
+} else if (metric == "rt"){
+  order_vector <- c("rt.0", "rt.1", "rt.2", "rt.3", "rt.4")
+} else {
+  order_vector <- c("accuracy.0", "accuracy.1", "accuracy.2", "accuracy.3", "accuracy.4")
+}
 if (NO_SEPSIS && (grepl("Camargo", names(index[1])) || grepl("Camargo" , names(index[2])))){
   hier_matrix_1 <- matrix_1
   hier_matrix_1 <- hier_matrix_1[!rownames(hier_matrix_1) %in% c("sepsis", "nasa"), ]
+  hier_matrix_1 <- hier_matrix_1[, order_vector]
+  hier_matrix_1 <- hier_matrix_1[sort(rownames(hier_matrix_1)), ]
   hier_matrix_2 <- matrix_2
   hier_matrix_2 <- hier_matrix_2[!rownames(hier_matrix_2) %in% c("sepsis", "nasa"), ]
+  hier_matrix_2 <- hier_matrix_2[, order_vector]
+  hier_matrix_2 <- hier_matrix_2[sort(rownames(hier_matrix_2)), ]
 } else {
   hier_matrix_1 <- matrix_1
   hier_matrix_2 <- matrix_2
 }
-results <- bHierarchicalTest(hier_matrix_1, hier_matrix_2, rho=0.1, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
+print("Matrix 2: ")
+print(hier_matrix_1)
+print("Matrix 1: ")
+print(hier_matrix_2)
+results <- bHierarchicalTest(hier_matrix_1, hier_matrix_2, rho=1/5, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/hierarchical_test_", names(index)[1], "_vs_", names(index)[2], ".png")
 } else if (metric == "rt"){
@@ -283,18 +294,33 @@ if (metric == "dl") {
 }
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[1]), B=names(index[2]), posterior.label=TRUE, alpha=0.5)
+if (metric == "dl") {
+  dataset_file_name <- c("../processed_results/latex/suffix/plots/hierarchical_per_dataset_", names(index)[1], "_vs_", names(index)[2], ".txt")
+} else if (metric == "rt"){
+  dataset_file_name <- c("../processed_results/latex/remaining_time/plots/hierarchical_per_dataset_", names(index)[1], "_vs_", names(index)[2], ".txt")
+} else {
+  dataset_file_name <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_per_dataset_", names(index)[1], "_vs_", names(index)[2], ".txt")
+}
+results_save <- data.frame(results$additional$per.dataset)
+results_save["dataset"] <- rownames(hier_matrix_1)
+write.csv(results_save, paste(dataset_file_name, collapse=""))
 dev.off()
+
 # P2
 if (NO_SEPSIS && (grepl("Camargo", names(index[3])) || grepl("Camargo" , names(index[2])))){
   hier_matrix_3 <- matrix_3
   hier_matrix_3 <- hier_matrix_3[!rownames(hier_matrix_3) %in% c("sepsis", "nasa"), ]
+  hier_matrix_3 <- hier_matrix_3[, order_vector]
+  hier_matrix_3 <- hier_matrix_3[sort(rownames(hier_matrix_3)), ]
   hier_matrix_2 <- matrix_2
   hier_matrix_2 <- hier_matrix_2[!rownames(hier_matrix_2) %in% c("sepsis", "nasa"), ]
+  hier_matrix_2 <- hier_matrix_2[, order_vector]
+  hier_matrix_2 <- hier_matrix_2[sort(rownames(hier_matrix_2)), ]
 } else{
   hier_matrix_3 <- matrix_3
   hier_matrix_2 <- matrix_2
 }
-results <- bHierarchicalTest(hier_matrix_2, hier_matrix_3, rho=0.1, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
+results <- bHierarchicalTest(hier_matrix_2, hier_matrix_3, rho=1/5, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/hierarchical_test_", names(index)[2], "_vs_", names(index)[3], ".png")
 } else if (metric == "rt"){
@@ -304,18 +330,34 @@ if (metric == "dl") {
 }
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[2]), B=names(index[3]), posterior.label=TRUE, alpha=0.5)
+if (metric == "dl") {
+  dataset_file_name <- c("../processed_results/latex/suffix/plots/hierarchical_per_dataset_", names(index)[2], "_vs_", names(index)[3], ".txt")
+} else if (metric == "rt"){
+  dataset_file_name <- c("../processed_results/latex/remaining_time/plots/hierarchical_per_dataset_", names(index)[2], "_vs_", names(index)[3], ".txt")
+} else {
+  dataset_file_name <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_per_dataset_", names(index)[2], "_vs_", names(index)[3], ".txt")
+}
+
+results_save <- data.frame(results$additional$per.dataset)
+results_save["dataset"] <- rownames(hier_matrix_3)
+write.table(results_save, paste(dataset_file_name, collapse=""))
 dev.off()
+
 # P3
 if (NO_SEPSIS && (grepl("Camargo", names(index[3])) || grepl("Camargo" , names(index[1])))){
   hier_matrix_3 <- matrix_3
   hier_matrix_3 <- hier_matrix_3[!rownames(hier_matrix_3) %in% c("sepsis", "nasa"), ]
+  hier_matrix_3 <- hier_matrix_3[, order_vector]
+  hier_matrix_3 <- hier_matrix_3[sort(rownames(hier_matrix_3)), ]
   hier_matrix_1 <- matrix_1
   hier_matrix_1 <- hier_matrix_1[!rownames(hier_matrix_1) %in% c("sepsis", "nasa"), ]
+  hier_matrix_1 <- hier_matrix_1[, order_vector]
+  hier_matrix_1 <- hier_matrix_1[sort(rownames(hier_matrix_1)), ]
 } else {
   hier_matrix_3 <- matrix_3
   hier_matrix_1 <- matrix_1
 }
-results <- bHierarchicalTest(hier_matrix_1, hier_matrix_3, rho=0.1, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
+results <- bHierarchicalTest(hier_matrix_1, hier_matrix_3, rho=1/5, rope=ROPE, nsim=50000, nchains=10, parallel=TRUE, seed=42)
 if (metric == "dl") {
   filename <- c("../processed_results/latex/suffix/plots/hierarchical_test_", names(index)[1], "_vs_", names(index)[3], ".png")
 } else if (metric == "rt"){
@@ -325,10 +367,17 @@ if (metric == "dl") {
 }
 png(paste(filename, collapse=""))
 plotSimplex(results, A=names(index[1]), B=names(index[3]), posterior.label=TRUE, alpha=0.5)
+if (metric == "dl") {
+  dataset_file_name <- c("../processed_results/latex/suffix/plots/hierarchical_per_dataset_", names(index)[1], "_vs_", names(index)[3], ".txt")
+} else if (metric == "rt"){
+  dataset_file_name <- c("../processed_results/latex/remaining_time/plots/hierarchical_per_dataset_", names(index)[1], "_vs_", names(index)[3], ".txt")
+} else {
+  dataset_file_name <- c("../processed_results/latex/next_activity/plots/", subproblem, "/", metric, "_hierarchical_per_dataset_", names(index)[1], "_vs_", names(index)[3], ".txt")
+}
+results <- data.frame(results$additional$per.dataset)
+results["dataset"] <- rownames(hier_matrix_3)
+write.table(results, paste(dataset_file_name, collapse=""))
 dev.off()
-
-# Save results per dataset
-rownames(results$additional$per.dataset) <- rownames(hier_matrix_3)
 if (metric == "dl") {
   write.csv(data.frame(results$additional$per.dataset), paste("../processed_results/csv/suffix/hierarchical_results_per_dataset.csv", sep=""))
 } else if (metric == "rt"){

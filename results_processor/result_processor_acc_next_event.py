@@ -35,8 +35,8 @@ directories = [
     "../PyDREAM-NAP/results_no_resources",
     "../GenerativeLSTM/output_files/",
     "../MAED-TaxIntegration/busi_task/data",
-    "../GCN-ProcessPrediction/results",
-    "../processtransformer/results/"
+    #"../GCN-ProcessPrediction/results",
+    #"../processtransformer/results/"
 ]
 
 # These regexes allow us to find the file that contains the results
