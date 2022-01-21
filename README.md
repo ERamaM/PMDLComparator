@@ -8,6 +8,8 @@ This is the support code of the paper "Deep Learning for Predictive Business Pro
 
 Results of the experimentation are available in [this link](https://nextcloud.citius.usc.es/s/ogLr7cgS9fEjKwy).
 
+Note that the code provided in the compressed file is from a slightly older version than the current one.
+
 ## Implemented approaches
 
 | Author                   | Paper                                                                  | Original Code repository                                                                                                              |
