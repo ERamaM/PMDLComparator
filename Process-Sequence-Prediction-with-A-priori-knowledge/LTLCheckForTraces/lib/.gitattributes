@@ -1,1 +1,0 @@
-*.{xes.gz,json,jar} filter=lfs diff=lfs merge=lfs -text
