@@ -1,8 +1,29 @@
-# Deep Learning for Predictive Busines Process Monitoring: Review and Benchmark
+# Deep Learning for Predictive Business Process Monitoring: Review and Benchmark
+
+# Introduction
+
+This is the support code of the paper "Deep Learning for Predictive Business Process Monitoring: Review and Benchmark."
 
 ## Additional materials
 
-Results of the experimentation are available in [this link](https://nextcloud.citius.usc.es/index.php/s/Ryk7aoSP4JfGXAk)
+Results of the experimentation are available in [this link](https://nextcloud.citius.usc.es/s/ogLr7cgS9fEjKwy).
+
+## Implemented approaches
+
+| Author                   | Paper                                                                  | Original Code repository                                                                                                              |
+|--------------------------|------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
+| Tax et al.               | [Link](https://arxiv.org/abs/1612.02130)                               | [Code](https://github.com/verenich/ProcessSequencePrediction)                                                                         |
+| Evermann et al.          | [Link](https://arxiv.org/abs/1612.04600)                               | [Code](https://joerg.evermann.ca/docs/rnn_process_data_scripts_results.tar.gz)                                                        |
+| Navarin et al.           | [Link](https://arxiv.org/abs/1711.03822)                               | [Code](https://github.com/nickgentoo/DALSTM_PM)                                                                                       |
+| Khan et al.              | [Link](https://arxiv.org/abs/1802.00938v1)                             | [Code](https://github.com/thaihungle/MAED/tree/deep-process)                                                                          |
+| Theis et al.             | [Link](https://arxiv.org/abs/1903.05084)                               | [Code](https://github.com/Julian-Theis/DREAM-NAP) and [Code_2](https://github.com/Julian-Theis/PyDREAM)                               |
+ | Mauro et al.             | [Link](https://openreview.net/forum?id=OxYPkm8nGEq)                    | [Code](https://github.com/nicoladimauro/nnpm)                                                                                         |
+ | Pasquadibisceglie et al. | [Link](https://ieeexplore.ieee.org/document/8786066)                   | [Code](https://github.com/vinspdb/ImagePPMiner)                                                                                       |
+ | Camargo et al            | [Link](https://kodu.ut.ee/~dumas/pubs/bpm2019lstm.pdf)                 | [Code](https://github.com/AdaptiveBProcess/GenerativeLSTM/)                                                                           |
+ | Hinkka et al.            | [Link](https://arxiv.org/abs/1904.06895)                               | [Code](https://github.com/mhinkka/articles/tree/master/Exploiting%20Event%20Log%20Event%20Attributes%20in%20RNN%20Based%20Prediction) |
+ | Francescomarino et al.   | [Link](https://link.springer.com/chapter/10.1007/978-3-319-65000-5_15) | [Code](https://github.com/yesanton/Process-Sequence-Prediction-with-A-priori-knowledge)                                               |
+ | Venugopal et al.         | [Link](https://arxiv.org/abs/2102.07838)                               | [Code](https://github.com/ishwarvenugopal/GCN-ProcessPrediction)                                                                      |
+ | Bukhsh et al.            | [Link](https://arxiv.org/abs/2104.00721)                               | [Code](https://github.com/Zaharah/processtransformer)                                                                                 |
 
 ## Installation
 
@@ -56,6 +77,7 @@ Where AUTHOR is one of above:
 - theis
 - tax
 - venugopal
+- zarahah (Bukhsh et al.)
 
 Examples:
 
@@ -395,3 +417,19 @@ Run the preprocessing steps using a commands such as follows:
 Run the experimentation as follows
 
 	python next_activity.py --dataset fold0_variation0_BPI_Challenge_2012_A.csv --epoch 100 --learning_rate 0.001
+
+# Citation
+
+This work is published in the journal "IEEE Transactions on Services Computing". If you use this code or results in your research projects, we encourage you to please cite our work:
+
+```
+@Article{RamaManeiro2021,
+  author    = {Efren Rama-Maneiro and Juan Vidal and Manuel Lama},
+  journal   = {{IEEE} Transactions on Services Computing},
+  title     = {Deep Learning for Predictive Business Process Monitoring: Review and Benchmark},
+  year      = {2021},
+  pages     = {1--1},
+  doi       = {10.1109/tsc.2021.3139807},
+  publisher = {Institute of Electrical and Electronics Engineers ({IEEE})},
+}
+```
