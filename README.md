@@ -1,5 +1,7 @@
 # Deep Learning for Predictive Busines Process Monitoring: Review and Benchmark
 
+IMPORTANT NOTE: this repository will not be updated in the near future. Please use the following one: https://gitlab.citius.usc.es/efren.rama/pmdlcompararator
+
 # Introduction
 
 This is the support code of the paper "Deep Learning for Predictive Business Process Monitoring: Review and Benchmark."
